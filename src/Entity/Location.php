@@ -63,6 +63,8 @@ class Location
             'timeStart' => $options['start']->format('h:i'),
             'timeEnd' => $options['end']->format('h:i'),
         ];
+
+        return $this;
     }
 
     /**

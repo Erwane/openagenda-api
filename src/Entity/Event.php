@@ -1,9 +1,45 @@
 <?php
 namespace OpenAgenda\Entity;
 
+use Exception;
+
 class Event
 {
     use EntityTrait;
+
+    /**
+     * set global event language
+     * @param string $value property value
+     * @return self
+     */
+    public function setLang($value)
+    {
+        $this->_properties['lang'] = (string)$value;
+
+        return $this;
+    }
+
+    /**
+     * setLang alias
+     * @param string $value property value
+     * @return self
+     */
+    public function setLanguage($value)
+    {
+        return $this->setLang($value);
+    }
+
+    /**
+     * set event title
+     * @param string $value property value
+     * @return self
+     */
+    public function setState($value)
+    {
+        $this->_properties['state'] = (bool)$value;
+
+        return $this;
+    }
 
     /**
      * set event title
@@ -83,8 +119,34 @@ class Event
 
     public function setLocation(Location $location)
     {
-        $this->_properties['locations'] = $location->toArray();
+        $this->_properties['locations'][] = $location->toArray();
 
         return $this;
+    }
+
+    /**
+     * set event picture
+     * @param string $file absolute path
+     * @return self
+     */
+    public function setPicture($file)
+    {
+        if (!file_exists($file)) {
+            throw new Exception("picture file does not exists", 1);
+        }
+
+        $this->_properties['image'] = fopen($file, 'r');
+
+        return $this;
+    }
+
+    /**
+     * set picture alias
+     * @param string $file absolute path
+     * @return self
+     */
+    public function setImage($file)
+    {
+        return $this->setPicture($file);
     }
 }

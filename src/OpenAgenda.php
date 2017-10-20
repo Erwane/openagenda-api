@@ -129,4 +129,47 @@ class OpenAgenda
             return false;
         }
     }
+
+    public function publish(Event $event)
+    {
+        debug($event);
+        exit;
+        /*
+        $options = [
+            'multipart' => [
+                ['name' => 'publish', 'contents' => true],
+                ['name' => 'test', 'contents' => false],
+                ['name' => 'lang', 'contents' => 'fr'],
+                ['name' => 'data', 'contents' => json_encode($eventData)],
+            ],
+        ];
+
+        // picture
+        if (!empty($event['Media'])) {
+            $pic = current($event['Media']);
+            $options['multipart'][] = [
+                'Content-type' => 'multipart/form-data',
+                'name' => 'image',
+                'contents' => fopen(ROOT . DS . APP_DIR . DS . WEBROOT_DIR . $pic['file'], 'r'),
+            ];
+        }
+
+        try {
+            $rawResponse = $this->guzzleClient->request('post', 'https://api.openagenda.com/v1/events', $options);
+
+            $response = json_decode($rawResponse->getBody()->getContents());
+
+            $this->Events->id = $event['Event']['id'];
+            $this->Events->saveField('openagenda', json_encode(['id' => $response->uid]));
+
+            return $response->uid;
+        } catch (\GuzzleHttp\Exception\RequestException $e) {
+            $request = $e->getRequest();
+            $rawResponse = $e->getResponse();
+            if ($e->hasResponse()) {
+                return false;
+            }
+        }
+        */
+    }
 }
