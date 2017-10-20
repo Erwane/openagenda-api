@@ -46,6 +46,10 @@ class Client extends GuzzleClient
                     'name' => 'access_token',
                     'contents' => $this->_accessToken,
                 ];
+                $params['multipart'][] = [
+                    'name' => 'nonce',
+                    'contents' => mt_rand(1000000, 9999999),
+                ];
             }
 
             $rawResponse = $this->request('post', $this->_url . $url, $params);
