@@ -1,9 +1,7 @@
 <?php
 namespace OpenAgenda;
 
-if (!defined('DS')) {
-    define('DS', DIRECTORY_SEPARATOR);
-}
+use OpenAgenda\Cache;
 
 class OpenAgenda
 {
@@ -23,10 +21,21 @@ class OpenAgenda
      * constuctor
      * @param string $apiSecret openagenda api secret
      */
-    public function __construct(string $apiSecret)
+    public function __construct($apiSecret)
     {
         $this->_secret = $apiSecret;
 
         $this->guzzleClient = new \GuzzleHttp\Client;
+
+        $this->_initToken();
+    }
+
+    /**
+     * get access token from API or local cache
+     * @return string api access_token
+     */
+    protected function _initToken()
+    {
+        $cache = Cache::read('openagenda-token');
     }
 }
