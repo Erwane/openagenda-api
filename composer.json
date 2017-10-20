@@ -18,6 +18,7 @@
 	},
 	"require": {
             "php": ">=5.6.0",
+            "symfony/cache": "^3.3",
             "guzzlehttp/guzzle": "^6.0"
 	},
 	"require-dev": {
