@@ -33,10 +33,5 @@
         "psr-4": {
             "OpenAgenda\\Test\\": "tests"
         }
-    },
-    "extra": {
-        "branch-alias": {
-            "dev-master": "v1-dev"
-        }
     }
 }
