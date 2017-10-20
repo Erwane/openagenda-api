@@ -64,4 +64,16 @@ class Location
             'timeEnd' => $options['end']->format('h:i'),
         ];
     }
+
+    /**
+     * export location to array
+     * @return array
+     */
+    public function toArray()
+    {
+        return [
+            'uid' => $this->id,
+            'dates' => $this->dates,
+        ];
+    }
 }

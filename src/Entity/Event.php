@@ -83,8 +83,7 @@ class Event
 
     public function setLocation(Location $location)
     {
-
-        debug($location);
+        $this->_properties['locations'] = $location->toArray();
 
         return $this;
     }
