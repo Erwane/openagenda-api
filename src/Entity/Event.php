@@ -1,9 +1,9 @@
 <?php
-namespace OpenAgenda;
+namespace OpenAgenda\Entity;
 
 class Event
 {
-    protected $_properties = [];
+    use EntityTrait;
 
     /**
      * set event title
@@ -64,7 +64,27 @@ class Event
         // remove unused white spaces
         $text = preg_replace('/[\pZ\pC]+/u', ' ', $text);
 
-        $this->_properties['description'] = mb_substr($text, 0, 196) . ' ...';
+        $this->_properties['description'] = mb_substr($text, 0, 190) . ' ...';
+
+        return $this;
+    }
+
+    /**
+     * set free text
+     * @param string $value property value
+     * @return self
+     */
+    public function setFreeText($text)
+    {
+        $this->_properties['freeText'] = mb_substr($text, 0, 5800);
+
+        return $this;
+    }
+
+    public function setLocation(Location $location)
+    {
+
+        debug($location);
 
         return $this;
     }
