@@ -58,6 +58,7 @@ class Client extends GuzzleClient
             return $response;
         } catch (ClientException $e) {
             $response = json_decode((string)$e->getResponse()->getBody()->getContents());
+            var_dump($response);
             throw new \Exception($response->message, $response->code);
         }
     }
@@ -76,6 +77,8 @@ class Client extends GuzzleClient
                     'name' => $key,
                     'contents' => $value,
                 ];
+            } else {
+                $return[] = $value;
             }
         }
 

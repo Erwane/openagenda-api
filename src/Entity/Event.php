@@ -8,6 +8,27 @@ class Event
     use EntityTrait;
 
     /**
+     * set event uid (or id)
+     * @param int $value property value
+     * @return self
+     */
+    public function setUid($value)
+    {
+        $this->_properties['uid'] = (int)$value;
+
+        return $this;
+    }
+
+    /**
+     * setUid alias
+     * @param int $value property value
+     */
+    public function setId($value)
+    {
+        return $this->setUid($value);
+    }
+
+    /**
      * set global event language
      * @param string $value property value
      * @return self
@@ -31,7 +52,7 @@ class Event
 
     /**
      * set event title
-     * @param string $value property value
+     * @param bool $value property value
      * @return self
      */
     public function setState($value)
@@ -148,5 +169,43 @@ class Event
     public function setImage($file)
     {
         return $this->setPicture($file);
+    }
+
+    public function toArray()
+    {
+        // Tests
+        foreach (['title', 'description', 'freeText', 'locations'] as $key) {
+            if (is_null($this->{$key}) || $this->{$key} == '') {
+                throw new Exception("missing event {$key}", 1);
+            }
+        }
+        // No default language ?
+        if (is_null($this->lang) && !is_array($this->title)) {
+            throw new Exception("missing event global lang", 1);
+        }
+
+        $data = [
+            'title' => $this->title,
+            'description' => $this->description,
+            'freeText' => $this->freeText,
+            'locations' => $this->locations,
+        ];
+
+        $return = [
+            'publish' => $this->state,
+            'data' => json_encode($data),
+        ];
+
+        // lang
+        if (!is_null($this->lang)) {
+            $return['lang'] = $this->lang;
+        }
+
+        // picture
+        if (!is_null($this->image)) {
+            $return[] = ['name' => 'image', 'contents' => $this->image, 'Content-type' => 'multipart/form-data'];
+        }
+
+        return $return;
     }
 }

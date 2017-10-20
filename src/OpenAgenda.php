@@ -3,6 +3,7 @@ namespace OpenAgenda;
 
 use \DateTime;
 use GuzzleHttp\Exception\ClientException;
+use GuzzleHttp\Exception\RequestException;
 use OpenAgenda\Entity\Event;
 use OpenAgenda\Entity\Location;
 
@@ -130,46 +131,30 @@ class OpenAgenda
         }
     }
 
+    /**
+     * public event to openagenda and set uid to entity
+     * @param  Event  $event entity
+     * @return void|bool
+     */
     public function publish(Event $event)
     {
-        debug($event);
-        exit;
-        /*
-        $options = [
-            'multipart' => [
-                ['name' => 'publish', 'contents' => true],
-                ['name' => 'test', 'contents' => false],
-                ['name' => 'lang', 'contents' => 'fr'],
-                ['name' => 'data', 'contents' => json_encode($eventData)],
-            ],
-        ];
-
-        // picture
-        if (!empty($event['Media'])) {
-            $pic = current($event['Media']);
-            $options['multipart'][] = [
-                'Content-type' => 'multipart/form-data',
-                'name' => 'image',
-                'contents' => fopen(ROOT . DS . APP_DIR . DS . WEBROOT_DIR . $pic['file'], 'r'),
-            ];
-        }
 
         try {
-            $rawResponse = $this->guzzleClient->request('post', 'https://api.openagenda.com/v1/events', $options);
+            $response = $this->client->post('/events', $event->toArray());
 
-            $response = json_decode($rawResponse->getBody()->getContents());
-
-            $this->Events->id = $event['Event']['id'];
-            $this->Events->saveField('openagenda', json_encode(['id' => $response->uid]));
-
-            return $response->uid;
-        } catch (\GuzzleHttp\Exception\RequestException $e) {
+            $event->setId($response->uid);
+        } catch (RequestException $e) {
+            var_dump($e);
+            exit;
             $request = $e->getRequest();
             $rawResponse = $e->getResponse();
             if ($e->hasResponse()) {
                 return false;
             }
+        } catch (ClientException $e) {
+            var_dump($e);
+            exit;
+            return false;
         }
-        */
     }
 }
