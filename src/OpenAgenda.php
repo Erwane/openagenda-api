@@ -13,6 +13,12 @@ class OpenAgenda
      * api secret token
      * @var string|null
      */
+    protected $_public = null;
+
+    /**
+     * api secret token
+     * @var string|null
+     */
     protected $_secret = null;
 
     /**
@@ -31,8 +37,10 @@ class OpenAgenda
      * constuctor
      * @param string $apiSecret openagenda api secret
      */
-    public function __construct($apiSecret)
+    public function __construct($apiPublic, $apiSecret)
     {
+        $this->_public = $apiPublic;
+
         $this->_secret = $apiSecret;
 
         $this->client = new Client;
