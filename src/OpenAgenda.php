@@ -1,7 +1,7 @@
 <?php
 namespace OpenAgenda;
 
-use OpenAgenda\Cache;
+use \DateTime;
 
 class OpenAgenda
 {
@@ -12,10 +12,10 @@ class OpenAgenda
     protected $_secret = null;
 
     /**
-     * guzzleClient
-     * @var GuzzleHttp\Client|null
+     * http client
+     * @var OpenAgenda\Client|null
      */
-    public $guzzleClient = null;
+    public $client = null;
 
     /**
      * constuctor
@@ -25,7 +25,7 @@ class OpenAgenda
     {
         $this->_secret = $apiSecret;
 
-        $this->guzzleClient = new \GuzzleHttp\Client;
+        $this->client = new Client;
 
         $this->_initToken();
     }
@@ -36,6 +36,34 @@ class OpenAgenda
      */
     protected function _initToken()
     {
-        $cache = Cache::read('openagenda-token');
+        $accessToken = Cache::read('openagenda-token');
+
+        if (empty($accessToken)) {
+            $options = [
+                'grant_type' => 'authorization_code',
+                'code' => $this->_secret,
+            ];
+
+            try {
+                $response = $this->client->post('/requestAccessToken', $options);
+
+                Cache::write('openagenda-token', $response->access_token, $response->expires_in);
+
+                $accessToken = $response->access_token;
+            } catch (\GuzzleHttp\Exception\RequestException $e) {
+                $request = $e->getRequest();
+                $response = $e->getResponse();
+                if ($e->hasResponse()) {
+                    throw new \Exception($response->getBody()->getContents());
+                }
+            }
+        }
+
+        $this->client->setAccessToken($accessToken);
+    }
+
+    public function newEvent()
+    {
+        return new Event;
     }
 }
