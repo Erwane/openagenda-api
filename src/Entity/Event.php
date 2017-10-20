@@ -74,7 +74,7 @@ class Event extends Entity
             $keywords = array_map('trim', explode(',', $keywords));
         }
 
-        $this->_properties['tags'] = implode(', ', $keywords);
+        $this->_properties['keywords'] = implode(', ', $keywords);
 
         return $this;
     }
@@ -167,6 +167,10 @@ class Event extends Entity
             'freeText' => $this->freeText,
             'locations' => $this->locations,
         ];
+
+        if (!is_null($this->keywords)) {
+            $data['tags'] = $this->keywords;
+        }
 
         $return = [
             'publish' => $this->state,

@@ -54,13 +54,12 @@ class Client extends GuzzleClient
         try {
             $datas['key'] = $this->_public;
 
-            $rawResponse = $this->request('get', $this->_url . $url, $datas);
+            $rawResponse = $this->request('get', $this->_url . $url, ['query' => $datas]);
             $response = json_decode((string)$rawResponse->getBody()->getContents());
 
             return $response;
         } catch (ClientException $e) {
             $response = json_decode((string)$e->getResponse()->getBody()->getContents());
-            var_dump($response);
             throw new \Exception($response->message, $response->code);
         }
     }
@@ -94,9 +93,12 @@ class Client extends GuzzleClient
             $response = json_decode((string)$rawResponse->getBody()->getContents());
 
             return $response;
+        } catch (RequestException $e) {
+            $response = json_decode((string)$e->getResponse()->getBody()->getContents());
+            debug($response);
         } catch (ClientException $e) {
             $response = json_decode((string)$e->getResponse()->getBody()->getContents());
-            var_dump($response);
+            debug($response);
             throw new \Exception($response->message, $response->code);
         }
     }

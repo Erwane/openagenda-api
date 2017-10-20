@@ -149,10 +149,10 @@ class OpenAgenda
             $agendaIds = [];
         }
 
-
         if (empty($agendaIds[$slug])) {
             try {
                 $response = $this->client->get('/agendas/uid/' . $slug);
+                debug($response);
 
                 $agendaIds[$slug] = $response->data->uid;
 
@@ -194,6 +194,25 @@ class OpenAgenda
         } catch (ClientException $e) {
             var_dump($e);
             exit;
+            return false;
+        }
+    }
+
+    public function attachEventToAgenda(Event $event, Agenda $agenda)
+    {
+        $datas = [
+            'data' => json_encode([
+                'event_uid' => $event->uid,
+                'category' => $agenda->category,
+            ]),
+        ];
+
+        try {
+            $response = $this->client->post('/agendas/' . $agenda->uid . '/events', $datas);
+
+            debug($response);
+        } catch (RequestException $e) {
+            debug($e);
             return false;
         }
     }
