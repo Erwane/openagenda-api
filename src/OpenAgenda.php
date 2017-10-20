@@ -4,6 +4,7 @@ namespace OpenAgenda;
 use \DateTime;
 use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Exception\RequestException;
+use OpenAgenda\Entity\Agenda;
 use OpenAgenda\Entity\Event;
 use OpenAgenda\Entity\Location;
 
@@ -44,6 +45,7 @@ class OpenAgenda
         $this->_secret = $apiSecret;
 
         $this->client = new Client;
+        $this->client->setPublicKey($this->_public);
 
         $this->_initToken();
     }
@@ -137,6 +139,36 @@ class OpenAgenda
         } catch (ClientException $e) {
             return false;
         }
+    }
+
+    public function getAgenda($slug)
+    {
+        $agendaIds = Cache::read('openagenda-id');
+
+        if (empty($agendaIds)) {
+            $agendaIds = [];
+        }
+
+
+        if (empty($agendaIds[$slug])) {
+            try {
+                $response = $this->client->get('/agendas/uid/' . $slug);
+
+                $agendaIds[$slug] = $response->data->uid;
+
+                Cache::write('openagenda-id', $agendaIds, 86400 * 365);
+            } catch (RequestException $e) {
+                $request = $e->getRequest();
+                if ($e->hasResponse()) {
+                    $response = $e->getResponse();
+                    throw new \Exception($response->getBody()->getContents());
+                } else {
+                    throw new \Exception($e->getMessage());
+                }
+            }
+        }
+
+        return new Agenda(['uid' => $agendaIds[$slug]]);
     }
 
     /**

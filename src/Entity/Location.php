@@ -4,37 +4,12 @@ namespace OpenAgenda\Entity;
 use DateTime;
 use Exception;
 
-class Location
+class Location extends Entity
 {
-    use EntityTrait;
-
     /**
-     * constructor
-     * @param array $options array of datas
+     * add date with time to location
+     * @param array $options date options
      */
-    public function __construct($datas = [])
-    {
-        if (!empty($datas)) {
-            foreach ($datas as $key => $value) {
-                $method = 'set' . ucfirst($key);
-                if (method_exists($this, $method)) {
-                    $this->{$method}($value);
-                }
-            }
-        }
-    }
-
-    /**
-     * set location id
-     * @param int $value location id
-     */
-    public function setId($value)
-    {
-        $this->_properties['uid'] = (int)$value;
-
-        return $this;
-    }
-
     public function addDate($options)
     {
         if (!isset($options['date'])) {

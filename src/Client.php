@@ -13,10 +13,25 @@ class Client extends GuzzleClient
     protected $_url = 'https://api.openagenda.com/v1';
 
     /**
+     * public key
+     * @var null
+     */
+    protected $_public = null;
+
+    /**
      * api access token
      * @var string|null
      */
     private $_accessToken = null;
+
+    /**
+     * set public key
+     * @param string $key public key
+     */
+    public function setPublicKey($key)
+    {
+        $this->_public = $key;
+    }
 
     /**
      * set access token
@@ -25,6 +40,29 @@ class Client extends GuzzleClient
     public function setAccessToken($token)
     {
         $this->_accessToken = $token;
+    }
+
+    /**
+     * do a post request and return object from json
+     * @param  string  $url         api url ex : /accessToken
+     * @param  array  $datas      data
+     * @param  bool $accessToken    add access token to options
+     * @return StdClass
+     */
+    public function get($url, $datas = [])
+    {
+        try {
+            $datas['key'] = $this->_public;
+
+            $rawResponse = $this->request('get', $this->_url . $url, $datas);
+            $response = json_decode((string)$rawResponse->getBody()->getContents());
+
+            return $response;
+        } catch (ClientException $e) {
+            $response = json_decode((string)$e->getResponse()->getBody()->getContents());
+            var_dump($response);
+            throw new \Exception($response->message, $response->code);
+        }
     }
 
     /**

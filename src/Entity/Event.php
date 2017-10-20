@@ -3,31 +3,8 @@ namespace OpenAgenda\Entity;
 
 use Exception;
 
-class Event
+class Event extends Entity
 {
-    use EntityTrait;
-
-    /**
-     * set event uid (or id)
-     * @param int $value property value
-     * @return self
-     */
-    public function setUid($value)
-    {
-        $this->_properties['uid'] = (int)$value;
-
-        return $this;
-    }
-
-    /**
-     * setUid alias
-     * @param int $value property value
-     */
-    public function setId($value)
-    {
-        return $this->setUid($value);
-    }
-
     /**
      * set global event language
      * @param string $value property value
