@@ -1,5 +1,9 @@
 # OpenAgenda API SDK for PHP
 
+## Warning
+This package is Work In Progress.
+Wait for this warning disappear from README ;)
+
 ## Installation
 use composer
 ```
