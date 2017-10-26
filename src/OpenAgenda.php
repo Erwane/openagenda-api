@@ -178,7 +178,6 @@ class OpenAgenda
      */
     public function publish(Event $event)
     {
-
         try {
             $response = $this->client->post('/events', $event->toArray());
 

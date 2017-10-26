@@ -38,6 +38,7 @@ $locationDatas = [
 // Create location object and add date/time to it
 // You can add multiple dates
 $location = $openAgenda->newLocation($locationDatas)
+    ->setPricing('6€') 
     ->addDate([
         'date' => '2017-10-20',
         'start' => '08:00',
@@ -52,7 +53,6 @@ $location = $openAgenda->newLocation($locationDatas)
 $event = $openAgenda->newEvent()
     ->setLanguage('fr')  // global language
     ->setTitle('My title')
-    ->setPricing('6€') 
     ->setKeywords(['array', 'of', 'keywords'])
     ->setDescription('My event description')
     ->setFreeText('My event free text, can be text or MD format')

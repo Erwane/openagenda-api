@@ -52,18 +52,6 @@ class Event extends Entity
     }
 
     /**
-     * set event pricing infos
-     * @param string $value property value
-     * @return self
-     */
-    public function setPricing($value)
-    {
-        $this->_properties['pricingInfo'] = $value;
-
-        return $this;
-    }
-
-    /**
      * set event keywords (old tags)
      * @param string $value property value
      * @return self

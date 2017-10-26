@@ -43,14 +43,34 @@ class Location extends Entity
     }
 
     /**
+     * set location pricing infos
+     * @param string $value property value
+     * @return self
+     */
+    public function setPricing($value)
+    {
+        $this->_properties['pricingInfo'] = $value;
+
+        return $this;
+    }
+
+    /**
      * export location to array
      * @return array
      */
     public function toArray()
     {
-        return [
+
+        $data = [
             'uid' => $this->id,
             'dates' => $this->dates,
         ];
+
+        if (!is_null($this->pricingInfo)) {
+            $data['pricingInfo'] = $this->pricingInfo;
+        }
+
+
+        return $data;
     }
 }

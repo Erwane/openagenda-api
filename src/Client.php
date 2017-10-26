@@ -95,7 +95,6 @@ class Client extends GuzzleClient
             return $response;
         } catch (RequestException $e) {
             $response = json_decode((string)$e->getResponse()->getBody()->getContents());
-            debug($response);
         } catch (ClientException $e) {
             $response = json_decode((string)$e->getResponse()->getBody()->getContents());
             debug($response);
