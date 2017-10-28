@@ -35,8 +35,8 @@ class Location extends Entity
 
         $this->_properties['dates'][] = [
             'date' => $options['date']->format('Y-m-d'),
-            'timeStart' => $options['start']->format('h:i'),
-            'timeEnd' => $options['end']->format('h:i'),
+            'timeStart' => $options['start']->format('H:i'),
+            'timeEnd' => $options['end']->format('H:i'),
         ];
 
         return $this;
