@@ -103,6 +103,8 @@ class Event extends Entity
     {
         $text = $this->_cleanHtml($text);
 
+        $text = $this->_toMarkDown($text);
+
         $this->_properties['freeText'] = mb_substr($text, 0, 5800);
 
         return $this;
@@ -219,5 +221,16 @@ class Event extends Entity
         $purifier = new HTMLPurifier($config);
 
         return trim($purifier->purify($firstPass));
+    }
+
+    /**
+     * html to markdown converter
+     * @param  string $html html input
+     * @return string
+     */
+    protected function _toMarkDown($html)
+    {
+
+        return $md;
     }
 }
