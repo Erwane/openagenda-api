@@ -2,6 +2,9 @@
 namespace OpenAgenda\Entity;
 
 use Exception;
+use HTMLPurifier;
+use HTMLPurifier_Config;
+use HTMLPurifier_TagTransform_Simple;
 
 class Event extends Entity
 {
@@ -98,6 +101,8 @@ class Event extends Entity
      */
     public function setFreeText($text)
     {
+        $text = $this->_cleanHtml($text);
+
         $this->_properties['freeText'] = mb_substr($text, 0, 5800);
 
         return $this;
@@ -176,5 +181,43 @@ class Event extends Entity
         }
 
         return $return;
+    }
+
+    /**
+     * clean description html tags
+     * @param html $value worse html ever
+     */
+    protected function _cleanHtml($value)
+    {
+        $config = HTMLPurifier_Config::createDefault();
+
+        $config->set('Cache.DefinitionImpl', null);
+        $config->set('HTML.AllowedElements', ['a', 'b', 'strong', 'i', 'em', 'u', 'p', 'img', 'hr', 'ul', 'ol', 'li', 'span', 'h1', 'h2', 'h3', 'h4', 'h5']);
+        $config->set('HTML.AllowedAttributes', ['a.href', 'a.target', 'img.src', 'img.alt', 'img.width', 'img.height']);
+        $config->set('Attr.AllowedFrameTargets', ['_blank', '_self']);
+        $config->set('Attr.AllowedRel', []);
+        $config->set('AutoFormat.RemoveEmpty', true);
+        $config->set('AutoFormat.RemoveSpansWithoutAttributes', true);
+        $config->set('URI.AllowedSchemes', ['http', 'https']);
+
+        // tag transformation
+        $def = $config->getHTMLDefinition(true);
+        $def->info_tag_transform['h1'] = new HTMLPurifier_TagTransform_Simple('h3');
+        $def->info_tag_transform['h2'] = new HTMLPurifier_TagTransform_Simple('h3');
+
+        $purifier = new HTMLPurifier($config);
+        $firstPass = trim($purifier->purify($value));
+
+        if ($this->baseUrl === null) {
+            return $firstPass;
+        }
+
+        // second pass with url
+        $config = HTMLPurifier_Config::createDefault();
+        $config->set('URI.Base', $this->baseUrl);
+        $config->set('HTML.TargetBlank', true);
+        $purifier = new HTMLPurifier($config);
+
+        return trim($purifier->purify($firstPass));
     }
 }

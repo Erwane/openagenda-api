@@ -34,6 +34,8 @@ class OpenAgenda
      */
     protected $_locations = [];
 
+    protected $_baseUrl = null;
+
     /**
      * constuctor
      * @param string $apiSecret openagenda api secret
@@ -82,9 +84,28 @@ class OpenAgenda
         $this->client->setAccessToken($accessToken);
     }
 
+    /**
+     * base url for relative links
+     * @param string $url base url
+     */
+    public function setBaseUrl($url)
+    {
+        if (!substr($url, -1, 1) !== '/') {
+            $url .= '/';
+        }
+
+        $this->_baseUrl = $url;
+
+        return $this;
+    }
+
     public function newEvent()
     {
-        return new Event;
+        $event = new Event;
+
+        $event->baseUrl = $this->_baseUrl;
+
+        return $event;
     }
 
     /**
@@ -152,7 +173,6 @@ class OpenAgenda
         if (empty($agendaIds[$slug])) {
             try {
                 $response = $this->client->get('/agendas/uid/' . $slug);
-                debug($response);
 
                 $agendaIds[$slug] = $response->data->uid;
 
@@ -208,10 +228,7 @@ class OpenAgenda
 
         try {
             $response = $this->client->post('/agendas/' . $agenda->uid . '/events', $datas);
-
-            debug($response);
         } catch (RequestException $e) {
-            debug($e);
             return false;
         }
     }
