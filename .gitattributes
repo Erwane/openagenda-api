@@ -1,0 +1,39 @@
+* text=auto
+* text eol=lf
+
+*.php text
+*.default text
+*.ctp text
+*.sql text
+*.md text
+*.po text
+*.js text
+*.css text
+*.ini text
+*.properties text
+*.txt text
+*.xml text
+*.yml text
+.htaccess text
+
+*.png binary
+*.jpg binary
+*.gif binary
+*.ico binary
+*.mo binary
+*.pdf binary
+*.phar binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.otf binary
+*.eot binary
+*.doc binary
+*.docx binary
+*.xlsx binary
+*.mmdb binary
+*.zip binary
+*.tar binary
+*.tar.gz binary
+*.tgz binary
+*.z binary
