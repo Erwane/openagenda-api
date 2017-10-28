@@ -5,6 +5,7 @@ use Exception;
 use HTMLPurifier;
 use HTMLPurifier_Config;
 use HTMLPurifier_TagTransform_Simple;
+use League\HTMLToMarkdown\HtmlConverter;
 
 class Event extends Entity
 {
@@ -230,7 +231,8 @@ class Event extends Entity
      */
     protected function _toMarkDown($html)
     {
+        $converter = new HtmlConverter(['strip_tags' => true]);
 
-        return $md;
+        return $converter->convert($html);
     }
 }

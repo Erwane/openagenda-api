@@ -131,7 +131,6 @@ trait EntityTrait
                 $value = $this->{$setter}($value);
             }
             $this->_properties[$p] = $value;
-            debug($value);
         }
 
         return $this;
