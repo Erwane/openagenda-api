@@ -134,7 +134,11 @@ class Event extends Entity
         // remove unused white spaces
         $text = preg_replace('/[\pZ\pC]+/u', ' ', $text);
 
-        $this->_properties['description'][$this->_getLang($lang)] = mb_substr($text, 0, 190) . ' ...';
+        if (mb_strlen($text) > 194) {
+            $text = mb_substr($text, 0, 190) . ' ...';
+        }
+
+        $this->_properties['description'][$this->_getLang($lang)] = $text;
 
         return $this;
     }
