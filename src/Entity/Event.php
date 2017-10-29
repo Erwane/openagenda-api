@@ -16,7 +16,11 @@ class Event extends Entity
      */
     public function setLang($value)
     {
-        $this->_properties['lang'] = (string)$value;
+        $value = (string)$value;
+
+        if ($this->_isValidLanguage($value)) {
+            $this->_properties['lang'] = $value;
+        }
 
         return $this;
     }
@@ -29,6 +33,43 @@ class Event extends Entity
     public function setLanguage($value)
     {
         return $this->setLang($value);
+    }
+
+    /**
+     * return true if valide language code
+     * @param  string  $lang code
+     * @return bool
+     * @throws Exception if invalid
+     */
+    protected function _isValidLanguage($lang)
+    {
+        if (!preg_match('/^(en|fr|es|de|it|ne|pt|ar|is)$/', $lang)) {
+            throw new Exception("invalid language code", 1);
+        }
+
+        return true;
+    }
+
+    /**
+     * return lang $lang or default
+     * @param string $lang lang information
+     * @return string lang
+     * @throws Exception
+     */
+    protected function _getLang($lang)
+    {
+        // Throw exception if no lang set
+        if (is_null($lang) && is_null($this->lang)) {
+            throw new Exception("default lang not set. Use setLang()", 1);
+        }
+
+        // chech if lang is valid
+        if (!is_null($lang)) {
+            $this->_isValidLanguage($lang);
+        }
+
+        // return right lang
+        return is_null($lang) ? $this->lang : (string)$lang;
     }
 
     /**
@@ -46,11 +87,12 @@ class Event extends Entity
     /**
      * set event title
      * @param string $value property value
+     * @param string $lang lang information
      * @return self
      */
-    public function setTitle($value)
+    public function setTitle($value, $lang = null)
     {
-        $this->_properties['title'] = $value;
+        $this->_properties['title'][$this->_getLang($lang)] = $value;
 
         return $this;
     }
@@ -58,15 +100,16 @@ class Event extends Entity
     /**
      * set event keywords (old tags)
      * @param string $value property value
+     * @param string $lang lang information
      * @return self
      */
-    public function setKeywords($keywords)
+    public function setKeywords($keywords, $lang = null)
     {
         if (!is_array($keywords)) {
             $keywords = array_map('trim', explode(',', $keywords));
         }
 
-        $this->_properties['keywords'] = implode(', ', $keywords);
+        $this->_properties['keywords'][$this->_getLang($lang)] = implode(', ', $keywords);
 
         return $this;
     }
@@ -74,9 +117,10 @@ class Event extends Entity
     /**
      * set event description. 200 max length and no html
      * @param string $value property value
+     * @param string $lang lang information
      * @return self
      */
-    public function setDescription($value)
+    public function setDescription($value, $lang = null)
     {
         // remove tags
         $text = strip_tags($value);
@@ -90,23 +134,24 @@ class Event extends Entity
         // remove unused white spaces
         $text = preg_replace('/[\pZ\pC]+/u', ' ', $text);
 
-        $this->_properties['description'] = mb_substr($text, 0, 190) . ' ...';
+        $this->_properties['description'][$this->_getLang($lang)] = mb_substr($text, 0, 190) . ' ...';
 
         return $this;
     }
 
     /**
      * set free text
-     * @param string $value property value
+     * @param string $text property value
+     * @param string $lang lang information
      * @return self
      */
-    public function setFreeText($text)
+    public function setFreeText($text, $lang = null)
     {
         $text = $this->_cleanHtml($text);
 
         $text = $this->_toMarkDown($text);
 
-        $this->_properties['freeText'] = mb_substr($text, 0, 5800);
+        $this->_properties['freeText'][$this->_getLang($lang)] = mb_substr($text, 0, 5800);
 
         return $this;
     }
@@ -172,11 +217,6 @@ class Event extends Entity
             'publish' => $this->state,
             'data' => json_encode($data),
         ];
-
-        // lang
-        if (!is_null($this->lang)) {
-            $return['lang'] = $this->lang;
-        }
 
         // picture
         if (!is_null($this->image)) {

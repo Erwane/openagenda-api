@@ -30,7 +30,7 @@ $locationDatas = 123;
 // Or a data array
 $locationDatas = [
     'address' => '221B Baker Street, London, England'
-    'latitude' => 51.523797, 
+    'latitude' => 51.523797,
     'longitude' => -0.158320,
     'placename' => 'Elementary'
 ];
@@ -38,7 +38,7 @@ $locationDatas = [
 // Create location object and add date/time to it
 // You can add multiple dates
 $location = $openAgenda->newLocation($locationDatas)
-    ->setPricing('6€') 
+    ->setPricing('6€')
     ->addDate([
         'date' => '2017-10-20',
         'start' => '08:00',
@@ -51,7 +51,7 @@ $location = $openAgenda->newLocation($locationDatas)
  * create event object and set informations
  */
 $event = $openAgenda->newEvent()
-    ->setLanguage('fr')  // global language
+    ->setLanguage('en')  // global language
     ->setTitle('My title')
     ->setKeywords(['array', 'of', 'keywords'])
     ->setDescription('My event description')
@@ -60,6 +60,10 @@ $event = $openAgenda->newEvent()
     ->setState(1) // 1 is published, 0 is not
     ->setPicture('/absolute/path/to/picture')
 ;
+
+// You can specify language for fields
+// title, keywords, description and freeText
+$event->setKeywords(['tableau', 'de', 'motclé'], 'fr');
 
 // publish event to openagenda and set uid in $event->uid
 $openAgenda->publish($event);
@@ -71,9 +75,6 @@ $agenda = $openAgenda->getAgenda('agenda-slug')->setCategory('Fun');
 // Attach event to agenda
 $openAgenda->attachEventToAgenda($event, $agenda);
 ```
-
-### known bugs
-setPricing not working.
 
 ## Performance
 A small cache is used for accessToken and agenda slugs id. OpenAgenda API is not requested when not necessary
