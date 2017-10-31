@@ -232,4 +232,23 @@ class OpenAgenda
             return false;
         }
     }
+
+    public function getEvent($eventId)
+    {
+        if (!is_numeric($eventId)) {
+            throw new Exception("event id should be integer", 1);
+        }
+
+        $result = $this->client->get('/events/' . (int)$eventId);
+
+        $datas = $result->data;
+        // unset picture
+        debug($datas);
+
+        $event = new Event($result->data);
+
+        debug($event);
+        debug($result->data);
+
+    }
 }
