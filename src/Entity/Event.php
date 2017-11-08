@@ -106,9 +106,21 @@ class Event extends Entity
      * set free text
      * @param string $text property value
      * @param string $lang lang information
+     * @deprecated 1.1 use setLongDescription
      * @return self
      */
     public function setFreeText($text, $lang = null)
+    {
+        return $this->setLongDescription($text, $lang);
+    }
+
+    /**
+     * set event long description (mark down)
+     * @param string $text text or html or markdown
+     * @param string $lang lang information
+     * @return self
+     */
+    public function setLongDescription($text, $lang = null)
     {
         $lang = $this->_getLang($lang);
 
@@ -120,11 +132,11 @@ class Event extends Entity
 
             $value = $this->_toMarkDown($value);
 
-            if (!isset($this->_properties['freeText'][$lang]) || $value !== $this->_properties['freeText'][$lang]) {
-                $this->setDirty('freeText.' . $lang, true);
+            if (!isset($this->_properties['longDescription'][$lang]) || $value !== $this->_properties['longDescription'][$lang]) {
+                $this->setDirty('longDescription.' . $lang, true);
             }
 
-            $this->_properties['freeText'][$this->_getLang($lang)] = mb_substr($value, 0, 5800);
+            $this->_properties['longDescription'][$this->_getLang($lang)] = mb_substr($value, 0, 5800);
         }
 
         return $this;
