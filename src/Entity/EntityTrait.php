@@ -254,6 +254,17 @@ trait EntityTrait
     }
 
     /**
+     * mark the entity as not dirty at all
+     * @return void
+     */
+    public function markAsNotDirty()
+    {
+        foreach ($this->getDirty() as $key) {
+            $this->setDirty($key, false);
+        }
+    }
+
+    /**
      * Gets the dirty properties with values
      *
      * @return array
@@ -276,23 +287,22 @@ trait EntityTrait
     }
 
     /**
-     * Returns an array with the requested properties
-     * stored in this entity, indexed by property name
+     * Returns whether or not this entity has already been persisted.
+     * This method can return null in the case there is no prior information on
+     * the status of this entity.
      *
-     * @param array $properties list of properties to be returned
-     * @param bool $onlyDirty Return the requested property only if it is dirty
-     * @return array
+     * @param bool|null $new true if it is known this instance was not yet persisted
+     * @return bool Whether or not the entity has been persisted.
      */
-    public function extract(array $properties, $onlyDirty = false)
+    public function isNew($new = null)
     {
-        $result = [];
-        foreach ($properties as $property) {
-            if (!$onlyDirty || $this->isDirty($property)) {
-                $result[$property] = $this->get($property);
-            }
+        if ($new === null) {
+            return $this->_new;
         }
 
-        return $result;
+        $new = (bool)$new;
+
+        return $this->_new = $new;
     }
 
     /**
