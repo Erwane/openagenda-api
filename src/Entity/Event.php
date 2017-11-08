@@ -186,6 +186,30 @@ class Event extends Entity
         return $this;
     }
 
+
+    /**
+     * @inheritDoc
+     */
+    public function toDatas()
+    {
+        $keys = ['title', 'keywords', 'description', 'longDescription', 'locationUid', 'image'];
+        $dirties = $this->getDirtyArray();
+
+        $datas = array_intersect_key($dirties, array_flip($keys));
+
+        $return = [
+            'publish' => $this->state,
+            'data' => json_encode($datas),
+        ];
+
+        // picture
+        if (!is_null($this->image)) {
+            $return[] = ['name' => 'image', 'contents' => $this->image, 'Content-type' => 'multipart/form-data'];
+        }
+
+        return $return;
+    }
+
     public function toArray()
     {
         $datas = $this->getDirtyArray();
