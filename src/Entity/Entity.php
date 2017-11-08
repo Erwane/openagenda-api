@@ -37,20 +37,22 @@ class Entity
      * @param int $value property value
      * @return self
      */
-    public function setUid($value)
+    protected function _setUid($value)
     {
-        $this->_properties['uid'] = (int)$value;
+        $this->_properties['id'] = (int)$value;
 
-        return $this;
+        return $this->_properties['id'];
     }
 
     /**
      * setUid alias
      * @param int $value property value
      */
-    public function setId($value)
+    protected function _setId($value)
     {
-        return $this->setUid($value);
+        $this->_properties['uid'] = (int)$value;
+
+        return $this->_properties['uid'];
     }
 
     /**
