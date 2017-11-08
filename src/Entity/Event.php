@@ -142,11 +142,15 @@ class Event extends Entity
         return $this;
     }
 
+    /**
+     * attach the location object to event and set locationUid
+     * @param Location $location entity
+     */
     public function setLocation(Location $location)
     {
-        $this->_properties['location'] = $location;
+        $this->locationUid = $location->uid;
 
-        $this->setDirty('location', true);
+        $this->_properties['location'] = $location;
 
         return $this;
     }
@@ -154,31 +158,32 @@ class Event extends Entity
     /**
      * set event picture
      * @param string $file absolute path
+     * @deprecated 1.1 use setImage
      * @return self
      */
     public function setPicture($file)
+    {
+        return $this->setImage($file);
+    }
+
+    /**
+     * set event image
+     * @param string $file absolute path
+     * @return self
+     */
+    public function setImage($file)
     {
         if (empty($file)) {
             return;
         }
 
         if (!file_exists($file)) {
-            throw new Exception("picture file does not exists", 1);
+            throw new Exception("image file does not exists", 1);
         }
 
         $this->_properties['image'] = fopen($file, 'r');
 
         return $this;
-    }
-
-    /**
-     * set picture alias
-     * @param string $file absolute path
-     * @return self
-     */
-    public function setImage($file)
-    {
-        return $this->setPicture($file);
     }
 
     public function toArray()
