@@ -1,6 +1,7 @@
 <?php
 namespace OpenAgenda\Entity;
 
+use DateTime;
 use Exception;
 use HTMLPurifier;
 use HTMLPurifier_Config;
@@ -155,6 +156,44 @@ class Event extends Entity
         return $this;
     }
 
+    public function addTiming($datas)
+    {
+        if (!isset($this->_properties['timings'])) {
+            $this->_properties['timings'] = [];
+        }
+
+        if (!isset($datas['date'])) {
+            throw new Exception("missing date field", 1);
+        }
+        if (!isset($datas['begin'])) {
+            throw new Exception("missing begin field", 1);
+        }
+        if (!isset($datas['end'])) {
+            throw new Exception("missing end field", 1);
+        }
+
+        // use instance of DateTime only
+        if (!($datas['date'] instanceof DateTime)) {
+            $datas['date'] = new DateTime($datas['date']);
+        }
+        if (!($datas['begin'] instanceof DateTime)) {
+            $datas['begin'] = new DateTime($datas['begin']);
+        }
+        if (!($datas['end'] instanceof DateTime)) {
+            $datas['end'] = new DateTime($datas['end']);
+        }
+
+        $this->_properties['timings'][] = [
+            'date' => $datas['date']->format('Y-m-d'),
+            'begin' => $datas['begin']->format('H:i'),
+            'end' => $datas['end']->format('H:i'),
+        ];
+
+        $this->setDirty('timings', true);
+
+        return $this;
+    }
+
     /**
      * set event picture
      * @param string $file absolute path
@@ -186,13 +225,12 @@ class Event extends Entity
         return $this;
     }
 
-
     /**
      * @inheritDoc
      */
     public function toDatas()
     {
-        $keys = ['title', 'keywords', 'description', 'longDescription', 'locationUid', 'image'];
+        $keys = ['title', 'keywords', 'description', 'longDescription', 'locationUid', 'image', 'timings'];
         $dirties = $this->getDirtyArray();
 
         $datas = array_intersect_key($dirties, array_flip($keys));
