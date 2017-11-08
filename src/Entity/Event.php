@@ -46,8 +46,10 @@ class Event extends Entity
     public function setKeywords($keywords, $lang = null)
     {
         if (is_string($keywords)) {
-            $keywords = implode(', ', array_map('trim', explode(',', $keywords)));
+            $keywords = array_map('trim', explode(',', $keywords));
         }
+
+        $keywords = implode(', ', $keywords);
 
         $value = $this->_i18nValue($keywords, $lang);
 
@@ -69,6 +71,8 @@ class Event extends Entity
      */
     public function setDescription($value, $lang = null)
     {
+        $lang = $this->_getLang($lang);
+
         $values = $this->_i18nValue($value, $lang);
 
         foreach ($values as $lang => $value) {
@@ -88,6 +92,10 @@ class Event extends Entity
                 $text = mb_substr($text, 0, 190) . ' ...';
             }
 
+            if (!isset($this->_properties['description'][$lang]) || $value !== $this->_properties['description'][$lang]) {
+                $this->setDirty('description.' . $lang, true);
+            }
+
             $this->_properties['description'][$this->_getLang($lang)] = $text;
         }
 
@@ -102,6 +110,8 @@ class Event extends Entity
      */
     public function setFreeText($text, $lang = null)
     {
+        $lang = $this->_getLang($lang);
+
         $values = $this->_i18nValue($text, $lang);
 
         foreach ($values as $lang => $value) {
@@ -109,6 +119,10 @@ class Event extends Entity
             $value = $this->_cleanHtml($value);
 
             $value = $this->_toMarkDown($value);
+
+            if (!isset($this->_properties['freeText'][$lang]) || $value !== $this->_properties['freeText'][$lang]) {
+                $this->setDirty('freeText.' . $lang, true);
+            }
 
             $this->_properties['freeText'][$this->_getLang($lang)] = mb_substr($value, 0, 5800);
         }
@@ -118,7 +132,9 @@ class Event extends Entity
 
     public function setLocation(Location $location)
     {
-        $this->_properties['locations'][] = $location->toArray();
+        $this->_properties['location'] = $location;
+
+        $this->setDirty('location', true);
 
         return $this;
     }
@@ -155,12 +171,30 @@ class Event extends Entity
 
     public function toArray()
     {
+        $datas = $this->getDirtyArray();
+
+        $return = [
+            'data' => json_encode($datas),
+        ];
+
+        // picture
+        if (!is_null($this->image)) {
+            $return[] = ['name' => 'image', 'contents' => $this->image, 'Content-type' => 'multipart/form-data'];
+        }
+
+        return $return;
+
+        debug($datas);
+
+        return parent::toArray();
+
         // Tests
         foreach (['title', 'description', 'freeText', 'locations'] as $key) {
-            if (is_null($this->{$key}) || $this->{$key} == '') {
+            if (empty($this->uid) && (is_null($this->{$key}) || $this->{$key} == '')) {
                 throw new Exception("missing event {$key}", 1);
             }
         }
+
         // No default language ?
         if (is_null($this->lang) && !is_array($this->title)) {
             throw new Exception("missing event global lang", 1);

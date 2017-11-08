@@ -6,6 +6,30 @@ use Exception;
 
 class Location extends Entity
 {
+    public function import($locationData)
+    {
+        $eventLocationDate = $locationData['dates'][0];
+
+        $this->uid = $locationData['uid'];
+        $this->latitude = $locationData['latitude'];
+        $this->longitude = $locationData['longitude'];
+
+        // Pricing
+        if (isset($locationData['pricingInfo'])) {
+            $this->pricing = $locationData['pricingInfo'];
+        }
+
+        $this->addDate([
+            'date' => $eventLocationDate['date'],
+            'start' => $eventLocationDate['timeStart'],
+            'end' => $eventLocationDate['timeEnd'],
+        ]);
+
+        // remove dirty state
+        foreach ($this->getDirty() as $key) {
+            $this->setDirty($key, false);
+        }
+    }
     /**
      * add date with time to location
      * @param array $options date options
@@ -39,6 +63,8 @@ class Location extends Entity
             'timeEnd' => $options['end']->format('H:i'),
         ];
 
+        $this->setDirty('dates', true);
+
         return $this;
     }
 
@@ -47,11 +73,23 @@ class Location extends Entity
      * @param string $value property value
      * @return self
      */
-    public function setPricing($value)
+    public function setPricing($value, $lang = null)
     {
-        $this->_properties['pricingInfo'] = $value;
+        $value = $this->_i18nValue($value, $lang);
+
+        $this->setI18nProperty('pricingInfo', $value);
 
         return $this;
+    }
+
+    protected function _setLatitude($value)
+    {
+        return (float)$value;
+    }
+
+    protected function _setLongitude($value)
+    {
+        return (float)$value;
     }
 
     /**
@@ -60,7 +98,6 @@ class Location extends Entity
      */
     public function toArray()
     {
-
         $data = [
             'uid' => $this->id,
             'dates' => $this->dates,
@@ -69,7 +106,6 @@ class Location extends Entity
         if (!is_null($this->pricingInfo)) {
             $data['pricingInfo'] = $this->pricingInfo;
         }
-
 
         return $data;
     }

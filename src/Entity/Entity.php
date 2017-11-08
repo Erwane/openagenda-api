@@ -103,7 +103,7 @@ class Entity
     protected function _getLang($lang)
     {
         // Throw exception if no lang set
-        if (is_null($lang) && is_null($this->lang)) {
+        if (is_null($lang) && is_null($this->_properties['lang'])) {
             throw new Exception("default lang not set. Use setLang()", 1);
         }
 
@@ -113,17 +113,19 @@ class Entity
         }
 
         // return right lang
-        return is_null($lang) ? $this->lang : (string)$lang;
+        return is_null($lang) ? $this->_properties['lang'] : (string)$lang;
     }
 
-    protected function _i18nValue($value, $lang = null)
+    protected function _i18nValue($data, $lang = null)
     {
-        if (is_array($value)) {
-            $value = json_decode(json_encode($value));
-        } elseif (is_string($value) && $this->_isValidLanguage($lang)) {
-            $value = json_decode(json_encode([
-                $lang => $value
-            ]));
+        if (is_string($data)) {
+            $ary = [
+                $this->_getLang($lang) => $data
+            ];
+
+            $value = json_decode(json_encode($ary));
+        } else {
+            $value = $data;
         }
 
         return $value;

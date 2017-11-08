@@ -125,13 +125,14 @@ trait EntityTrait
             $options = (array)$value;
         }
 
-
         if (!is_array($property)) {
             throw new InvalidArgumentException('Cannot set an empty property');
         }
         $options += ['setter' => true];
 
         foreach ($property as $p => $value) {
+            $this->setDirty($p, true);
+
             if (!$options['setter']) {
                 $this->_properties[$p] = $value;
 
@@ -141,10 +142,6 @@ trait EntityTrait
             $setter = static::_accessor($p, 'set');
             if ($setter) {
                 $value = $this->{$setter}($value);
-            }
-
-            if ($value !== $this->_properties[$p]) {
-                $this->setDirty($p, true);
             }
 
             $this->_properties[$p] = $value;
@@ -247,6 +244,58 @@ trait EntityTrait
     }
 
     /**
+     * Gets the dirty properties keys
+     *
+     * @return array
+     */
+    public function getDirty()
+    {
+        return array_keys($this->_dirty);
+    }
+
+    /**
+     * Gets the dirty properties with values
+     *
+     * @return array
+     */
+    public function getDirtyArray()
+    {
+        $result = [];
+
+        foreach ($this->getDirty() as $key) {
+            if (strpos($key, '.')) {
+                $path = explode('.', $key);
+            } else {
+                $path = [$key];
+            }
+
+            $result[$path[0]] = $this->_properties[$path[0]];
+        }
+
+        return $result;
+    }
+
+    /**
+     * Returns an array with the requested properties
+     * stored in this entity, indexed by property name
+     *
+     * @param array $properties list of properties to be returned
+     * @param bool $onlyDirty Return the requested property only if it is dirty
+     * @return array
+     */
+    public function extract(array $properties, $onlyDirty = false)
+    {
+        $result = [];
+        foreach ($properties as $property) {
+            if (!$onlyDirty || $this->isDirty($property)) {
+                $result[$property] = $this->get($property);
+            }
+        }
+
+        return $result;
+    }
+
+    /**
      * set property with i18n datas
      * @param string $name   property name
      * @param object $object property value by lang
@@ -255,7 +304,7 @@ trait EntityTrait
      */
     public function setI18nProperty($name, $object)
     {
-        if (!is_object($object)) {
+        if (!is_object($object) && !is_array($object)) {
             throw new Exception("invalid property object");
         }
 
@@ -266,12 +315,45 @@ trait EntityTrait
             }
 
             if ($value !== $this->_properties[$name][$this->_getLang($lang)]) {
-                $this->setDirty($name . '_' . $lang, true);
+                $this->setDirty($name . '.' . $lang, true);
             }
 
             $this->_properties[$name][$this->_getLang($lang)] = $value;
         }
 
         return $this;
+    }
+
+    /**
+     * Returns an array with all the properties that have been set
+     * to this entity
+     *
+     * This method will recursively transform entities assigned to properties
+     * into arrays as well.
+     *
+     * @return array
+     */
+    public function toArray()
+    {
+        $result = [];
+        foreach (array_keys($this->_properties) as $property) {
+            $value = $this->get($property);
+            if (is_array($value)) {
+                $result[$property] = [];
+                foreach ($value as $k => $entity) {
+                    if ($entity instanceof EntityInterface) {
+                        $result[$property][$k] = $entity->toArray();
+                    } else {
+                        $result[$property][$k] = $entity;
+                    }
+                }
+            } elseif ($value instanceof EntityInterface) {
+                $result[$property] = $value->toArray();
+            } else {
+                $result[$property] = $value;
+            }
+        }
+
+        return $result;
     }
 }

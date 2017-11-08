@@ -1,7 +1,8 @@
 <?php
 namespace OpenAgenda;
 
-use \DateTime;
+use DateTime;
+use Exception;
 use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Exception\RequestException;
 use OpenAgenda\Entity\Agenda;
@@ -76,7 +77,7 @@ class OpenAgenda
                 $request = $e->getRequest();
                 $response = $e->getResponse();
                 if ($e->hasResponse()) {
-                    throw new \Exception($response->getBody()->getContents());
+                    throw new Exception($response->getBody()->getContents());
                 }
             }
         }
@@ -181,9 +182,9 @@ class OpenAgenda
                 $request = $e->getRequest();
                 if ($e->hasResponse()) {
                     $response = $e->getResponse();
-                    throw new \Exception($response->getBody()->getContents());
+                    throw new Exception($response->getBody()->getContents());
                 } else {
-                    throw new \Exception($e->getMessage());
+                    throw new Exception($e->getMessage());
                 }
             }
         }
@@ -213,6 +214,36 @@ class OpenAgenda
         } catch (ClientException $e) {
             var_dump($e);
             exit;
+            return false;
+        }
+    }
+
+
+    /**
+     * public event to openagenda and set uid to entity
+     * @param  Event  $event entity
+     * @return void|bool
+     */
+    public function update(Event $event)
+    {
+        if (is_null($event->uid) || $event->uid <= 0) {
+            throw new Exception("event has no uid");
+        }
+
+        try {
+            // get
+            $datas = $event->getDirtyArray();
+
+            if (empty($event->getDirtyArray())) {
+                return true;
+            }
+
+            debug($event->toArray());
+            exit;
+            $response = $this->client->post('/events/' . $event->uid, $event->toArray());
+
+            return true;
+        } catch (Exception $e) {
             return false;
         }
     }
@@ -253,13 +284,14 @@ class OpenAgenda
         $arrayDatas['keywords'] = $arrayDatas['tags'];
 
         // location
-        $location = $arrayDatas['locations'];
-
-        // unset unused keys
-        unset($arrayDatas['locations'], $arrayDatas['tags']);
+        $location = new Location;
+        $location->import($arrayDatas['locations'][0]);
 
         // create event entity
         $event = new Event($arrayDatas, ['useSetters' => false, 'markClean' => true]);
+        $event->setUid($arrayDatas['uid']);
+        $event->setLocation($location);
+        $event->setDirty('location', false);
 
         return $event;
     }
