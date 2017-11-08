@@ -3,7 +3,7 @@ namespace OpenAgenda\Entity;
 
 use Exception;
 
-class Entity
+abstract class Entity
 {
     use EntityTrait;
 
@@ -31,6 +31,12 @@ class Entity
             ]);
         }
     }
+
+    /**
+     * get entity datas for API
+     * @return array
+     */
+    public abstract function toDatas();
 
     /**
      * set event uid (or id)

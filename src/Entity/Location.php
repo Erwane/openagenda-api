@@ -82,14 +82,32 @@ class Location extends Entity
         return $this;
     }
 
+    /**
+     * mutator for latitude
+     * @param string|float $value coordinate
+     */
     protected function _setLatitude($value)
     {
         return (float)$value;
     }
 
+    /**
+     * mutator for longitude
+     * @param string|float $value coordinate
+     */
     protected function _setLongitude($value)
     {
         return (float)$value;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function toDatas()
+    {
+        $datas = [];
+
+        return $datas;
     }
 
     /**
