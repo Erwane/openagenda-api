@@ -233,6 +233,11 @@ class OpenAgenda
         }
     }
 
+    /**
+     * get event from openagenda and return Entity
+     * @param  int $eventId openagenda event id
+     * @return \OpenAgenda\Entity\Event
+     */
     public function getEvent($eventId)
     {
         if (!is_numeric($eventId)) {
@@ -241,14 +246,21 @@ class OpenAgenda
 
         $result = $this->client->get('/events/' . (int)$eventId);
 
-        $datas = $result->data;
-        // unset picture
-        debug($datas);
+        // transform object to array
+        $arrayDatas = json_decode(json_encode($result->data), true);
 
-        $event = new Event($result->data);
+        // tags as keywords
+        $arrayDatas['keywords'] = $arrayDatas['tags'];
 
-        debug($event);
-        debug($result->data);
+        // location
+        $location = $arrayDatas['locations'];
 
+        // unset unused keys
+        unset($arrayDatas['locations'], $arrayDatas['tags']);
+
+        // create event entity
+        $event = new Event($arrayDatas, ['useSetters' => false, 'markClean' => true]);
+
+        return $event;
     }
 }

@@ -1,6 +1,8 @@
 <?php
 namespace OpenAgenda\Entity;
 
+use Exception;
+
 trait EntityTrait
 {
     /**
@@ -9,6 +11,14 @@ trait EntityTrait
      * @var array
      */
     protected $_properties = [];
+
+    /**
+     * Holds a list of the properties that were modified or added after this object
+     * was originally created.
+     *
+     * @var array
+     */
+    protected $_dirty = [];
 
     /**
      * Holds a cached list of getters/setters per class
@@ -115,6 +125,7 @@ trait EntityTrait
             $options = (array)$value;
         }
 
+
         if (!is_array($property)) {
             throw new InvalidArgumentException('Cannot set an empty property');
         }
@@ -123,6 +134,7 @@ trait EntityTrait
         foreach ($property as $p => $value) {
             if (!$options['setter']) {
                 $this->_properties[$p] = $value;
+
                 continue;
             }
 
@@ -130,6 +142,11 @@ trait EntityTrait
             if ($setter) {
                 $value = $this->{$setter}($value);
             }
+
+            if ($value !== $this->_properties[$p]) {
+                $this->setDirty($p, true);
+            }
+
             $this->_properties[$p] = $value;
         }
 
@@ -206,5 +223,55 @@ trait EntityTrait
         }
 
         return static::$_accessors[$class][$type][$property];
+    }
+
+    /**
+     * Sets the dirty status of a single property.
+     *
+     * @param string $property the field to set or check status for
+     * @param bool $isDirty true means the property was changed, false means
+     * it was not changed
+     * @return $this
+     */
+    public function setDirty($property, $isDirty)
+    {
+        if ($isDirty === false) {
+            unset($this->_dirty[$property]);
+
+            return $this;
+        }
+
+        $this->_dirty[$property] = true;
+
+        return $this;
+    }
+
+    /**
+     * set property with i18n datas
+     * @param string $name   property name
+     * @param object $object property value by lang
+     * @throws Exception
+     * @return self
+     */
+    public function setI18nProperty($name, $object)
+    {
+        if (!is_object($object)) {
+            throw new Exception("invalid property object");
+        }
+
+        foreach ($object as $lang => $value) {
+            // create i18n array
+            if (!isset($this->_properties[$name][$this->_getLang($lang)])) {
+                $this->_properties[$name] = [$lang => null];
+            }
+
+            if ($value !== $this->_properties[$name][$this->_getLang($lang)]) {
+                $this->setDirty($name . '_' . $lang, true);
+            }
+
+            $this->_properties[$name][$this->_getLang($lang)] = $value;
+        }
+
+        return $this;
     }
 }

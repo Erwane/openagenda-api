@@ -9,68 +9,6 @@ use League\HTMLToMarkdown\HtmlConverter;
 
 class Event extends Entity
 {
-    /**
-     * set global event language
-     * @param string $value property value
-     * @return self
-     */
-    public function setLang($value)
-    {
-        $value = (string)$value;
-
-        if ($this->_isValidLanguage($value)) {
-            $this->_properties['lang'] = $value;
-        }
-
-        return $this;
-    }
-
-    /**
-     * setLang alias
-     * @param string $value property value
-     * @return self
-     */
-    public function setLanguage($value)
-    {
-        return $this->setLang($value);
-    }
-
-    /**
-     * return true if valide language code
-     * @param  string  $lang code
-     * @return bool
-     * @throws Exception if invalid
-     */
-    protected function _isValidLanguage($lang)
-    {
-        if (!preg_match('/^(en|fr|es|de|it|ne|pt|ar|is)$/', $lang)) {
-            throw new Exception("invalid language code", 1);
-        }
-
-        return true;
-    }
-
-    /**
-     * return lang $lang or default
-     * @param string $lang lang information
-     * @return string lang
-     * @throws Exception
-     */
-    protected function _getLang($lang)
-    {
-        // Throw exception if no lang set
-        if (is_null($lang) && is_null($this->lang)) {
-            throw new Exception("default lang not set. Use setLang()", 1);
-        }
-
-        // chech if lang is valid
-        if (!is_null($lang)) {
-            $this->_isValidLanguage($lang);
-        }
-
-        // return right lang
-        return is_null($lang) ? $this->lang : (string)$lang;
-    }
 
     /**
      * set event title
@@ -92,7 +30,9 @@ class Event extends Entity
      */
     public function setTitle($value, $lang = null)
     {
-        $this->_properties['title'][$this->_getLang($lang)] = $value;
+        $value = $this->_i18nValue($value, $lang);
+
+        $this->setI18nProperty('title', $value);
 
         return $this;
     }
@@ -105,13 +45,20 @@ class Event extends Entity
      */
     public function setKeywords($keywords, $lang = null)
     {
-        if (!is_array($keywords)) {
-            $keywords = array_map('trim', explode(',', $keywords));
+        if (is_string($keywords)) {
+            $keywords = implode(', ', array_map('trim', explode(',', $keywords)));
         }
 
-        $this->_properties['keywords'][$this->_getLang($lang)] = implode(', ', $keywords);
+        $value = $this->_i18nValue($keywords, $lang);
+
+        $this->setI18nProperty('keywords', $value);
 
         return $this;
+    }
+
+    public function setTags($keywords, $lang = null)
+    {
+        return $this->setKeywords($keywords, $lang);
     }
 
     /**
@@ -122,23 +69,27 @@ class Event extends Entity
      */
     public function setDescription($value, $lang = null)
     {
-        // remove tags
-        $text = strip_tags($value);
+        $values = $this->_i18nValue($value, $lang);
 
-        // decode html
-        $text = html_entity_decode($text, ENT_QUOTES);
+        foreach ($values as $lang => $value) {
+            // remove tags
+            $text = strip_tags($value);
 
-        // remove new lines
-        $text = preg_replace(['/\\r?\\n/', '/^\\r?\\n$/', '/^$/'], ' ', $text);
+            // decode html
+            $text = html_entity_decode($text, ENT_QUOTES);
 
-        // remove unused white spaces
-        $text = preg_replace('/[\pZ\pC]+/u', ' ', $text);
+            // remove new lines
+            $text = preg_replace(['/\\r?\\n/', '/^\\r?\\n$/', '/^$/'], ' ', $text);
 
-        if (mb_strlen($text) > 194) {
-            $text = mb_substr($text, 0, 190) . ' ...';
+            // remove unused white spaces
+            $text = preg_replace('/[\pZ\pC]+/u', ' ', $text);
+
+            if (mb_strlen($text) > 194) {
+                $text = mb_substr($text, 0, 190) . ' ...';
+            }
+
+            $this->_properties['description'][$this->_getLang($lang)] = $text;
         }
-
-        $this->_properties['description'][$this->_getLang($lang)] = $text;
 
         return $this;
     }
@@ -151,11 +102,16 @@ class Event extends Entity
      */
     public function setFreeText($text, $lang = null)
     {
-        $text = $this->_cleanHtml($text);
+        $values = $this->_i18nValue($text, $lang);
 
-        $text = $this->_toMarkDown($text);
+        foreach ($values as $lang => $value) {
 
-        $this->_properties['freeText'][$this->_getLang($lang)] = mb_substr($text, 0, 5800);
+            $value = $this->_cleanHtml($value);
+
+            $value = $this->_toMarkDown($value);
+
+            $this->_properties['freeText'][$this->_getLang($lang)] = mb_substr($value, 0, 5800);
+        }
 
         return $this;
     }
@@ -174,6 +130,10 @@ class Event extends Entity
      */
     public function setPicture($file)
     {
+        if (empty($file)) {
+            return;
+        }
+
         if (!file_exists($file)) {
             throw new Exception("picture file does not exists", 1);
         }
@@ -275,6 +235,10 @@ class Event extends Entity
      */
     protected function _toMarkDown($html)
     {
+        if ($html === strip_tags($html)) {
+            return $html;
+        }
+
         $converter = new HtmlConverter(['strip_tags' => true]);
 
         return $converter->convert($html);
