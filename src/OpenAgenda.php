@@ -114,7 +114,7 @@ class OpenAgenda
      * @param  array|int $datas location id or datas
      * @return Location object
      */
-    public function newLocation($datas)
+    public function getLocation($datas)
     {
         // create location
         $location = new Location;
