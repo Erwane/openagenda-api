@@ -126,7 +126,7 @@ class OpenAgenda
         }
 
         if (!isset($datas['id'])) {
-            $datas['id'] = $this->getLocationId($datas);
+            $datas['id'] = $this->createLocation($datas);
             $location->isNew(true);
         }
 
@@ -148,11 +148,11 @@ class OpenAgenda
     }
 
     /**
-     * create and get location id from API
+     * create location
      * @param  array $options   location options
      * @return int              location id
      */
-    public function getLocationId($options)
+    public function createLocation($options)
     {
         if (!isset($options['placename'])) {
             throw new Exception("missing placename field", 1);
