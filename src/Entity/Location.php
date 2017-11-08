@@ -23,20 +23,6 @@ class Location extends Entity
     }
 
     /**
-     * set location pricing infos
-     * @param string $value property value
-     * @return self
-     */
-    public function setPricing($value, $lang = null)
-    {
-        $value = $this->_i18nValue($value, $lang);
-
-        $this->setI18nProperty('pricingInfo', $value);
-
-        return $this;
-    }
-
-    /**
      * mutator for latitude
      * @param string|float $value coordinate
      */

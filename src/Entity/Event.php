@@ -226,11 +226,25 @@ class Event extends Entity
     }
 
     /**
+     * set pricing infos
+     * @param string $value property value
+     * @return self
+     */
+    public function setPricing($value, $lang = null)
+    {
+        $value = $this->_i18nValue($value, $lang);
+
+        $this->setI18nProperty('pricingInfo', $value);
+
+        return $this;
+    }
+
+    /**
      * @inheritDoc
      */
     public function toDatas()
     {
-        $keys = ['title', 'keywords', 'description', 'longDescription', 'locationUid', 'image', 'timings'];
+        $keys = ['title', 'keywords', 'description', 'longDescription', 'locationUid', 'image', 'timings', 'pricingInfo'];
         $dirties = $this->getDirtyArray();
 
         $datas = array_intersect_key($dirties, array_flip($keys));

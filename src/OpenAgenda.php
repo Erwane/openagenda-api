@@ -217,7 +217,7 @@ class OpenAgenda
     public function publish(Event $event)
     {
         try {
-            $response = $this->client->post('/events', $event->toArray());
+            $response = $this->client->post('/events', $event->toDatas());
 
             $event->setId($response->uid);
         } catch (RequestException $e) {
