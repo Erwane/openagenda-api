@@ -111,23 +111,40 @@ class OpenAgenda
 
     /**
      * get Location object with uid
-     * @param  array|int $options location id or params
+     * @param  array|int $datas location id or datas
      * @return Location object
      */
-    public function newLocation($options)
+    public function newLocation($datas)
     {
-        if (is_numeric($options) || !empty($options['id'])) {
-            // have location id, create from it
-            $locationId = is_numeric($options) ? (int)$options : (int)$options['id'];
-        } elseif (is_array($options)) {
-            $locationId = $this->getLocationId($options);
+        // create location
+        $location = new Location;
+
+        if (is_numeric($datas)) {
+            $datas = ['id' => $datas];
+        } elseif (!is_array($datas)) {
+            throw new Exception("invalid location data", 1);
         }
 
-        if (empty($this->_locations[$locationId])) {
-            $this->_locations[$locationId] = new Location(['id' => $locationId]);
+        if (!isset($datas['id'])) {
+            $datas['id'] = $this->getLocationId($datas);
+            $location->isNew(true);
         }
 
-        return $this->_locations[$locationId];
+        // set Id
+        $location->id = $datas['id'];
+
+        // set latitude if exists
+        if (isset($datas['latitude'])) {
+            $location->latitude = $datas['latitude'];
+        }
+        // set longitude if exists
+        if (isset($datas['longitude'])) {
+            $location->longitude = $datas['longitude'];
+        }
+        // mark as not dirty
+        $location->markAsNotDirty();
+
+        return $location;
     }
 
     /**
