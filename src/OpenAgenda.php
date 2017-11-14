@@ -268,10 +268,7 @@ class OpenAgenda
     public function attachEventToAgenda(Event $event, Agenda $agenda)
     {
         $datas = [
-            'data' => json_encode([
-                'event_uid' => $event->uid,
-                'category' => $agenda->category,
-            ]),
+            'data' => json_encode(['event_uid' => $event->uid]),
         ];
 
         try {

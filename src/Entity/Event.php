@@ -276,45 +276,6 @@ class Event extends Entity
         }
 
         return $return;
-
-        debug($datas);
-
-        return parent::toArray();
-
-        // Tests
-        foreach (['title', 'description', 'freeText', 'locations'] as $key) {
-            if (empty($this->uid) && (is_null($this->{$key}) || $this->{$key} == '')) {
-                throw new Exception("missing event {$key}", 1);
-            }
-        }
-
-        // No default language ?
-        if (is_null($this->lang) && !is_array($this->title)) {
-            throw new Exception("missing event global lang", 1);
-        }
-
-        $data = [
-            'title' => $this->title,
-            'description' => $this->description,
-            'freeText' => $this->freeText,
-            'locations' => $this->locations,
-        ];
-
-        if (!is_null($this->keywords)) {
-            $data['tags'] = $this->keywords;
-        }
-
-        $return = [
-            'publish' => $this->state,
-            'data' => json_encode($data),
-        ];
-
-        // picture
-        if (!is_null($this->image)) {
-            $return[] = ['name' => 'image', 'contents' => $this->image, 'Content-type' => 'multipart/form-data'];
-        }
-
-        return $return;
     }
 
     /**
