@@ -219,7 +219,7 @@ class OpenAgenda
         try {
             $response = $this->client->post('/events', $event->toDatas());
 
-            $event->setId($response->uid);
+            $event->id = $response->uid;
         } catch (RequestException $e) {
             var_dump($e);
             exit;
