@@ -248,16 +248,11 @@ class OpenAgenda
         }
 
         try {
-            // get
-            $datas = $event->getDirtyArray();
-
-            if (empty($event->getDirtyArray())) {
+            if (empty($event->getDirty())) {
                 return true;
             }
 
-            debug($event->toArray());
-            exit;
-            $response = $this->client->post('/events/' . $event->uid, $event->toArray());
+            $response = $this->client->post('/events/' . $event->uid, $event->toDatas());
 
             return true;
         } catch (Exception $e) {
@@ -303,9 +298,8 @@ class OpenAgenda
 
         // create event entity
         $event = new Event($arrayDatas, ['useSetters' => false, 'markClean' => true]);
-        $event->setUid($arrayDatas['uid']);
-        $event->setLocation($location);
-        $event->setDirty('location', false);
+        $event->id = $arrayDatas['uid'];
+        $event->setLocation($location)->setDirty('location', false);
 
         return $event;
     }
