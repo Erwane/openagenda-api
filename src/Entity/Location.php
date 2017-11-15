@@ -16,6 +16,18 @@ class Location extends Entity
             $this->pricing = $locationData['pricingInfo'];
         }
 
+        // Dates
+        if (!empty($locationData['dates']) && is_array($locationData['dates'])) {
+            $this->dates = [];
+            foreach ($locationData['dates'] as $date) {
+                $this->dates[] = [
+                    'date' => $date['date'],
+                    'begin' => $date['timeStart'],
+                    'end' => $date['timeEnd'],
+                ];
+            }
+        }
+
         // remove dirty state
         foreach ($this->getDirty() as $key) {
             $this->setDirty($key, false);

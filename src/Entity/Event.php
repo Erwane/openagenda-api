@@ -153,9 +153,20 @@ class Event extends Entity
 
         $this->_properties['location'] = $location;
 
+        if (is_array($location->dates)) {
+            foreach ($location->dates as $date) {
+                $this->addTiming($date);
+            }
+        }
+
         return $this;
     }
 
+    /**
+     * add timing to event, only if don't exists
+     * @param array $datas timings : ['date' => '2017-11-15', 'begin' => '08:30', 'end' => '19:00']
+     * @return self
+     */
     public function addTiming($datas)
     {
         if (!isset($this->_properties['timings'])) {
@@ -183,11 +194,27 @@ class Event extends Entity
             $datas['end'] = new DateTime($datas['end']);
         }
 
-        $this->_properties['timings'][] = [
+        $timing = [
             'date' => $datas['date']->format('Y-m-d'),
             'begin' => $datas['begin']->format('H:i'),
             'end' => $datas['end']->format('H:i'),
         ];
+
+        // check if timing exists
+        $exists = false;
+        foreach ($this->_properties['timings'] as $t) {
+            if ($timing['date'] == $t['date']
+                && $timing['begin'] == $t['begin']
+                && $timing['end'] == $t['end']
+            ) {
+                $exists = true;
+                break;
+            }
+        }
+
+        if (!$exists) {
+            $this->_properties['timings'][] = $timing;
+        }
 
         $this->setDirty('timings', true);
 
