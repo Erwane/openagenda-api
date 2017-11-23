@@ -112,9 +112,10 @@ class OpenAgenda
     /**
      * get Location object with uid
      * @param  array|int $datas location id or datas
+     * @param int|string|null $agendaSlug   location agenda slug or id
      * @return Location object
      */
-    public function getLocation($datas)
+    public function getLocation($datas, $agendaSlug = null)
     {
         // create location
         $location = new Location;
@@ -126,7 +127,7 @@ class OpenAgenda
         }
 
         if (!isset($datas['id'])) {
-            $datas['id'] = $this->createLocation($datas);
+            $datas['id'] = $this->createLocation($datas, $agendaSlug);
             $location->isNew(true);
         }
 
@@ -149,10 +150,11 @@ class OpenAgenda
 
     /**
      * create location
-     * @param  array $options   location options
-     * @return int              location id
+     * @param  array $options               location options
+     * @param int|string|null $agendaSlug   location agenda slug or id
+     * @return int                          location id
      */
-    public function createLocation($options)
+    public function createLocation($options, $agendaSlug = null)
     {
         if (!isset($options['placename'])) {
             throw new Exception("missing placename field", 1);
@@ -170,6 +172,12 @@ class OpenAgenda
         // format
         $options['latitude'] = (float)$options['latitude'];
         $options['longitude'] = (float)$options['longitude'];
+
+        // Agenda uid
+        if (!is_null($agendaSlug)) {
+            $agenda = $this->getAgenda($agendaSlug);
+            $options['agenda_uid'] = $agenda->uid;
+        }
 
         try {
             $response = $this->client->post('/locations', ['data' => json_encode($options)]);
