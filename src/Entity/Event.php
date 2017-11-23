@@ -222,6 +222,26 @@ class Event extends Entity
     }
 
     /**
+     * remove all timings and set to $timings
+     * @param array $timings array of timing
+     */
+    public function setTimings($timings = [])
+    {
+        $this->_properties['timings'] = [];
+
+        if (isset($timings['date'])) {
+            $timings = [$timings];
+        }
+
+        foreach ((array)$timings as $timing) {
+            $this->addTiming($timing);
+        }
+
+        return $this;
+    }
+
+
+    /**
      * set event picture
      * @param string $file absolute path
      * @deprecated 1.1 use setImage
