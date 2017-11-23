@@ -214,37 +214,33 @@ class OpenAgenda
     }
 
     /**
-     * public event to openagenda and set uid to entity
+     * publish event to openagenda and set uid to entity
      * @param  Event  $event entity
      * @return void|bool
      */
-    public function publish(Event $event)
+    public function publishEvent(Event $event)
     {
         try {
             $response = $this->client->post('/events', $event->toDatas());
 
             $event->id = $response->uid;
         } catch (RequestException $e) {
-            var_dump($e);
-            exit;
             $request = $e->getRequest();
             $rawResponse = $e->getResponse();
             if ($e->hasResponse()) {
                 return false;
             }
         } catch (ClientException $e) {
-            var_dump($e);
-            exit;
             return false;
         }
     }
 
     /**
-     * public event to openagenda and set uid to entity
+     * update event to openagenda
      * @param  Event  $event entity
-     * @return void|bool
+     * @return bool
      */
-    public function update(Event $event)
+    public function updateEvent(Event $event)
     {
         if (is_null($event->uid) || $event->uid <= 0) {
             throw new Exception("event has no uid");
