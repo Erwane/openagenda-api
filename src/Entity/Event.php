@@ -273,17 +273,29 @@ class Event extends Entity
     }
 
     /**
-     * set pricing infos
+     * set event entrance conditions
      * @param string $value property value
+     * @param string|null $lang  language
+     * @return self
+     */
+    public function setConditions($value, $lang = null)
+    {
+        $value = $this->_i18nValue($value, $lang);
+
+        $this->setI18nProperty('conditions', $value);
+
+        return $this;
+    }
+
+    /**
+     * setConditions alias
+     * @param string $value property value
+     * @param string|null $lang  language
      * @return self
      */
     public function setPricing($value, $lang = null)
     {
-        $value = $this->_i18nValue($value, $lang);
-
-        $this->setI18nProperty('pricingInfo', $value);
-
-        return $this;
+        return $this->setConditions($value, $lang);
     }
 
     /**
@@ -291,7 +303,7 @@ class Event extends Entity
      */
     public function toDatas()
     {
-        $keys = ['title', 'keywords', 'description', 'longDescription', 'locationUid', 'image', 'timings', 'pricingInfo'];
+        $keys = ['title', 'keywords', 'description', 'longDescription', 'locationUid', 'image', 'timings', 'conditions'];
         $dirties = $this->getDirtyArray();
 
         $datas = array_intersect_key($dirties, array_flip($keys));
