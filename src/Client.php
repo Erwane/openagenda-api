@@ -1,6 +1,7 @@
 <?php
 namespace OpenAgenda;
 
+use Exception;
 use GuzzleHttp\Client as GuzzleClient;
 use GuzzleHttp\Exception\ClientException;
 
@@ -60,7 +61,7 @@ class Client extends GuzzleClient
             return $response;
         } catch (ClientException $e) {
             $response = json_decode((string)$e->getResponse()->getBody()->getContents());
-            throw new \Exception($response->message, $response->code);
+            throw new Exception($response->message, $response->code);
         }
     }
 
@@ -97,8 +98,50 @@ class Client extends GuzzleClient
             $response = json_decode((string)$e->getResponse()->getBody()->getContents());
         } catch (ClientException $e) {
             $response = json_decode((string)$e->getResponse()->getBody()->getContents());
+            throw new Exception($response->message, $response->code);
+        }
+    }
+
+
+    /**
+     * do a delete request and return object from json
+     * @param  string  $url         api url ex : /accessToken
+     * @param  bool $accessToken    add access token to options
+     * @return StdClass
+     */
+    public function delete($url, $accessToken = true)
+    {
+        try {
+            // use curl for DELETE request
+            $conf = [
+                CURLOPT_URL => $this->_url . $url,
+                CURLOPT_POSTFIELDS => [
+                    'access_token' => $this->_accessToken,
+                    'nonce' => mt_rand(1000000, 9999999),
+                ],
+                CURLOPT_CUSTOMREQUEST => 'DELETE',
+                CURLOPT_RETURNTRANSFER => 1,
+                CURLOPT_CONNECTTIMEOUT => 10,
+            ];
+
+            $ch = curl_init();
+            curl_setopt_array($ch, $conf);
+
+            $rawResponse = curl_exec($ch);
+
+            $response = json_decode($rawResponse);
+            $response->code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+
+            curl_close($ch);
+
+            return $response;
+        } catch (RequestException $e) {
+            $response = json_decode((string)$e->getResponse()->getBody()->getContents());
+            throw new Exception($response->message, $response->code);
+        } catch (ClientException $e) {
+            $response = json_decode((string)$e->getResponse()->getBody()->getContents());
             debug($response);
-            throw new \Exception($response->message, $response->code);
+            throw new Exception($response->error_description, $e->getResponse()->getStatusCode());
         }
     }
 

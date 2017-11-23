@@ -358,4 +358,9 @@ class Event extends Entity
 
         return $converter->convert($html);
     }
+
+    protected function _setAgendaUid($value)
+    {
+        return (int)$value;
+    }
 }

@@ -47,7 +47,7 @@ class OpenAgenda
 
         $this->_secret = $apiSecret;
 
-        $this->client = new Client;
+        $this->client = new Client();
         $this->client->setPublicKey($this->_public);
 
         $this->_initToken();
@@ -182,6 +182,10 @@ class OpenAgenda
 
     public function getAgenda($slug)
     {
+        if (is_numeric($slug)) {
+            return new Agenda(['uid' => $slug]);
+        }
+
         $agendaIds = Cache::read('openagenda-id');
 
         if (empty($agendaIds)) {
@@ -235,7 +239,6 @@ class OpenAgenda
         }
     }
 
-
     /**
      * public event to openagenda and set uid to entity
      * @param  Event  $event entity
@@ -274,6 +277,92 @@ class OpenAgenda
     }
 
     /**
+     * detach event from agenda
+     * @param  Event|int $event         id or object
+     * @param  Agenda|string $agenda    name or object
+     * @return bool
+     */
+    public function detachEventFromAgenda($event, $agenda)
+    {
+        if (is_numeric($event)) {
+            $event = $this->getEvent((int)$event);
+        }
+
+        if (is_numeric($agenda) || is_string($agenda)) {
+            $agenda = $this->getAgenda($agenda);
+        }
+
+        // not an event
+        if (is_null($event->uid) || $event->uid <= 0) {
+            throw new Exception("require valid event");
+        }
+
+        // not an agenda
+        if (is_null($agenda->uid) || $agenda->uid <= 0) {
+            throw new Exception("require valid agenda");
+        }
+
+        try {
+            $response = $this->client->delete('/agendas/' . $agenda->uid . '/events/' . $event->uid);
+
+            if ($response->code === 200) {
+                return $response;
+            }
+
+            switch ($response->error) {
+                case 'TO DEFINE':
+                    throw new Exception("can't detach", 1);
+
+                default:
+                    return $response;
+            }
+
+        } catch (Exception $e) {
+            throw $e;
+        }
+    }
+
+    /**
+     * delete event from open agenda.
+     * Detach from agenda if attached
+     * @param  int|Event $event entity or uid
+     * @return Object           json response
+     */
+    public function deleteEvent($event)
+    {
+        if (is_numeric($event)) {
+            $event = $this->getEvent((int)$event);
+        }
+
+        // not an event
+        if (is_null($event->uid) || $event->uid <= 0) {
+            throw new Exception("require valid event");
+        }
+
+        try {
+            if (is_numeric($event->agendaUid)) {
+                $this->detachEventFromAgenda($event, $event->agendaUid);
+            }
+
+            $response = $this->client->delete('/events/' . $event->uid);
+
+            if ($response->code === 200) {
+                return $response;
+            }
+
+            switch ($response->error) {
+                case 'TO DEFINE':
+                    throw new Exception("can't detach", 1);
+
+                default:
+                    return $response;
+            }
+        } catch (Exception $e) {
+            throw $e;
+        }
+    }
+
+    /**
      * get event from openagenda and return Entity
      * @param  int $eventId openagenda event id
      * @return \OpenAgenda\Entity\Event
@@ -286,6 +375,10 @@ class OpenAgenda
 
         $result = $this->client->get('/events/' . (int)$eventId);
 
+        if ($result->data === false) {
+            throw new Exception("event don't exists", 1);
+        }
+
         // transform object to array
         $arrayDatas = json_decode(json_encode($result->data), true);
 
@@ -294,7 +387,9 @@ class OpenAgenda
 
         // location
         $location = new Location;
-        $location->import($arrayDatas['locations'][0]);
+        if (!empty($arrayDatas['locations'][0])) {
+            $location->import($arrayDatas['locations'][0]);
+        }
 
         // create event entity
         $event = new Event($arrayDatas, ['useSetters' => false, 'markClean' => true]);
