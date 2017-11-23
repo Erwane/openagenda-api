@@ -18,4 +18,13 @@ class Agenda extends Entity
 
         return $this;
     }
+
+
+    /**
+     * @inheritDoc
+     */
+    public function toDatas()
+    {
+        return [];
+    }
 }

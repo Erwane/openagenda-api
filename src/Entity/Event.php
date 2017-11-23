@@ -1,6 +1,7 @@
 <?php
 namespace OpenAgenda\Entity;
 
+use DateTime;
 use Exception;
 use HTMLPurifier;
 use HTMLPurifier_Config;
@@ -9,68 +10,6 @@ use League\HTMLToMarkdown\HtmlConverter;
 
 class Event extends Entity
 {
-    /**
-     * set global event language
-     * @param string $value property value
-     * @return self
-     */
-    public function setLang($value)
-    {
-        $value = (string)$value;
-
-        if ($this->_isValidLanguage($value)) {
-            $this->_properties['lang'] = $value;
-        }
-
-        return $this;
-    }
-
-    /**
-     * setLang alias
-     * @param string $value property value
-     * @return self
-     */
-    public function setLanguage($value)
-    {
-        return $this->setLang($value);
-    }
-
-    /**
-     * return true if valide language code
-     * @param  string  $lang code
-     * @return bool
-     * @throws Exception if invalid
-     */
-    protected function _isValidLanguage($lang)
-    {
-        if (!preg_match('/^(en|fr|es|de|it|ne|pt|ar|is)$/', $lang)) {
-            throw new Exception("invalid language code", 1);
-        }
-
-        return true;
-    }
-
-    /**
-     * return lang $lang or default
-     * @param string $lang lang information
-     * @return string lang
-     * @throws Exception
-     */
-    protected function _getLang($lang)
-    {
-        // Throw exception if no lang set
-        if (is_null($lang) && is_null($this->lang)) {
-            throw new Exception("default lang not set. Use setLang()", 1);
-        }
-
-        // chech if lang is valid
-        if (!is_null($lang)) {
-            $this->_isValidLanguage($lang);
-        }
-
-        // return right lang
-        return is_null($lang) ? $this->lang : (string)$lang;
-    }
 
     /**
      * set event title
@@ -92,7 +31,9 @@ class Event extends Entity
      */
     public function setTitle($value, $lang = null)
     {
-        $this->_properties['title'][$this->_getLang($lang)] = $value;
+        $value = $this->_i18nValue($value, $lang);
+
+        $this->setI18nProperty('title', $value);
 
         return $this;
     }
@@ -105,13 +46,22 @@ class Event extends Entity
      */
     public function setKeywords($keywords, $lang = null)
     {
-        if (!is_array($keywords)) {
+        if (is_string($keywords)) {
             $keywords = array_map('trim', explode(',', $keywords));
         }
 
-        $this->_properties['keywords'][$this->_getLang($lang)] = implode(', ', $keywords);
+        $keywords = implode(', ', $keywords);
+
+        $value = $this->_i18nValue($keywords, $lang);
+
+        $this->setI18nProperty('keywords', $value);
 
         return $this;
+    }
+
+    public function setTags($keywords, $lang = null)
+    {
+        return $this->setKeywords($keywords, $lang);
     }
 
     /**
@@ -122,23 +72,33 @@ class Event extends Entity
      */
     public function setDescription($value, $lang = null)
     {
-        // remove tags
-        $text = strip_tags($value);
+        $lang = $this->_getLang($lang);
 
-        // decode html
-        $text = html_entity_decode($text, ENT_QUOTES);
+        $values = $this->_i18nValue($value, $lang);
 
-        // remove new lines
-        $text = preg_replace(['/\\r?\\n/', '/^\\r?\\n$/', '/^$/'], ' ', $text);
+        foreach ($values as $lang => $value) {
+            // remove tags
+            $text = strip_tags($value);
 
-        // remove unused white spaces
-        $text = preg_replace('/[\pZ\pC]+/u', ' ', $text);
+            // decode html
+            $text = html_entity_decode($text, ENT_QUOTES);
 
-        if (mb_strlen($text) > 194) {
-            $text = mb_substr($text, 0, 190) . ' ...';
+            // remove new lines
+            $text = preg_replace(['/\\r?\\n/', '/^\\r?\\n$/', '/^$/'], ' ', $text);
+
+            // remove unused white spaces
+            $text = preg_replace('/[\pZ\pC]+/u', ' ', $text);
+
+            if (mb_strlen($text) > 194) {
+                $text = mb_substr($text, 0, 190) . ' ...';
+            }
+
+            if (!isset($this->_properties['description'][$lang]) || $value !== $this->_properties['description'][$lang]) {
+                $this->setDirty('description.' . $lang, true);
+            }
+
+            $this->_properties['description'][$this->_getLang($lang)] = $text;
         }
-
-        $this->_properties['description'][$this->_getLang($lang)] = $text;
 
         return $this;
     }
@@ -147,22 +107,135 @@ class Event extends Entity
      * set free text
      * @param string $text property value
      * @param string $lang lang information
+     * @deprecated 1.1 use setLongDescription
      * @return self
      */
     public function setFreeText($text, $lang = null)
     {
-        $text = $this->_cleanHtml($text);
+        return $this->setLongDescription($text, $lang);
+    }
 
-        $text = $this->_toMarkDown($text);
+    /**
+     * set event long description (mark down)
+     * @param string $text text or html or markdown
+     * @param string $lang lang information
+     * @return self
+     */
+    public function setLongDescription($text, $lang = null)
+    {
+        $lang = $this->_getLang($lang);
 
-        $this->_properties['freeText'][$this->_getLang($lang)] = mb_substr($text, 0, 5800);
+        $values = $this->_i18nValue($text, $lang);
+
+        foreach ($values as $lang => $value) {
+
+            $value = $this->_cleanHtml($value);
+
+            $value = $this->_toMarkDown($value);
+
+            if (!isset($this->_properties['longDescription'][$lang]) || $value !== $this->_properties['longDescription'][$lang]) {
+                $this->setDirty('longDescription.' . $lang, true);
+            }
+
+            $this->_properties['longDescription'][$this->_getLang($lang)] = mb_substr($value, 0, 5800);
+        }
 
         return $this;
     }
 
+    /**
+     * attach the location object to event and set locationUid
+     * @param Location $location entity
+     */
     public function setLocation(Location $location)
     {
-        $this->_properties['locations'][] = $location->toArray();
+        $this->locationUid = $location->uid;
+
+        $this->_properties['location'] = $location;
+
+        if (is_array($location->dates)) {
+            foreach ($location->dates as $date) {
+                $this->addTiming($date);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * add timing to event, only if don't exists
+     * @param array $datas timings : ['date' => '2017-11-15', 'begin' => '08:30', 'end' => '19:00']
+     * @return self
+     */
+    public function addTiming($datas)
+    {
+        if (!isset($this->_properties['timings'])) {
+            $this->_properties['timings'] = [];
+        }
+
+        if (!isset($datas['date'])) {
+            throw new Exception("missing date field", 1);
+        }
+        if (!isset($datas['begin'])) {
+            throw new Exception("missing begin field", 1);
+        }
+        if (!isset($datas['end'])) {
+            throw new Exception("missing end field", 1);
+        }
+
+        // use instance of DateTime only
+        if (!($datas['date'] instanceof DateTime)) {
+            $datas['date'] = new DateTime($datas['date']);
+        }
+        if (!($datas['begin'] instanceof DateTime)) {
+            $datas['begin'] = new DateTime($datas['begin']);
+        }
+        if (!($datas['end'] instanceof DateTime)) {
+            $datas['end'] = new DateTime($datas['end']);
+        }
+
+        $timing = [
+            'date' => $datas['date']->format('Y-m-d'),
+            'begin' => $datas['begin']->format('H:i'),
+            'end' => $datas['end']->format('H:i'),
+        ];
+
+        // check if timing exists
+        $exists = false;
+        foreach ($this->_properties['timings'] as $t) {
+            if ($timing['date'] == $t['date']
+                && $timing['begin'] == $t['begin']
+                && $timing['end'] == $t['end']
+            ) {
+                $exists = true;
+                break;
+            }
+        }
+
+        if (!$exists) {
+            $this->_properties['timings'][] = $timing;
+        }
+
+        $this->setDirty('timings', true);
+
+        return $this;
+    }
+
+    /**
+     * remove all timings and set to $timings
+     * @param array $timings array of timing
+     */
+    public function setTimings($timings = [])
+    {
+        $this->_properties['timings'] = [];
+
+        if (isset($timings['date'])) {
+            $timings = [$timings];
+        }
+
+        foreach ((array)$timings as $timing) {
+            $this->addTiming($timing);
+        }
 
         return $this;
     }
@@ -170,12 +243,27 @@ class Event extends Entity
     /**
      * set event picture
      * @param string $file absolute path
+     * @deprecated 1.1 use setImage
      * @return self
      */
     public function setPicture($file)
     {
+        return $this->setImage($file);
+    }
+
+    /**
+     * set event image
+     * @param string $file absolute path
+     * @return self
+     */
+    public function setImage($file)
+    {
+        if (empty($file)) {
+            return;
+        }
+
         if (!file_exists($file)) {
-            throw new Exception("picture file does not exists", 1);
+            throw new Exception("image file does not exists", 1);
         }
 
         $this->_properties['image'] = fopen($file, 'r');
@@ -184,42 +272,60 @@ class Event extends Entity
     }
 
     /**
-     * set picture alias
-     * @param string $file absolute path
+     * set event entrance conditions
+     * @param string $value property value
+     * @param string|null $lang  language
      * @return self
      */
-    public function setImage($file)
+    public function setConditions($value, $lang = null)
     {
-        return $this->setPicture($file);
+        $value = $this->_i18nValue($value, $lang);
+
+        $this->setI18nProperty('conditions', $value);
+
+        return $this;
+    }
+
+    /**
+     * setConditions alias
+     * @param string $value property value
+     * @param string|null $lang  language
+     * @return self
+     */
+    public function setPricing($value, $lang = null)
+    {
+        return $this->setConditions($value, $lang);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function toDatas()
+    {
+        $keys = ['title', 'keywords', 'description', 'longDescription', 'locationUid', 'image', 'timings', 'conditions', 'age'];
+        $dirties = $this->getDirtyArray();
+
+        $datas = array_intersect_key($dirties, array_flip($keys));
+
+        $return = [
+            'publish' => $this->state,
+            'data' => json_encode($datas),
+        ];
+
+        // picture
+        if (!is_null($this->image)) {
+            $return[] = ['name' => 'image', 'contents' => $this->image, 'Content-type' => 'multipart/form-data'];
+        }
+
+        return $return;
     }
 
     public function toArray()
     {
-        // Tests
-        foreach (['title', 'description', 'freeText', 'locations'] as $key) {
-            if (is_null($this->{$key}) || $this->{$key} == '') {
-                throw new Exception("missing event {$key}", 1);
-            }
-        }
-        // No default language ?
-        if (is_null($this->lang) && !is_array($this->title)) {
-            throw new Exception("missing event global lang", 1);
-        }
-
-        $data = [
-            'title' => $this->title,
-            'description' => $this->description,
-            'freeText' => $this->freeText,
-            'locations' => $this->locations,
-        ];
-
-        if (!is_null($this->keywords)) {
-            $data['tags'] = $this->keywords;
-        }
+        $datas = $this->getDirtyArray();
 
         $return = [
-            'publish' => $this->state,
-            'data' => json_encode($data),
+            'data' => json_encode($datas),
         ];
 
         // picture
@@ -275,8 +381,35 @@ class Event extends Entity
      */
     protected function _toMarkDown($html)
     {
+        if ($html === strip_tags($html)) {
+            return $html;
+        }
+
         $converter = new HtmlConverter(['strip_tags' => true]);
 
         return $converter->convert($html);
+    }
+
+    protected function _setAgendaUid($value)
+    {
+        return (int)$value;
+    }
+
+    /**
+     * set event age
+     * @param int $min min age
+     * @param int $max max age
+     * @retur self
+     */
+    public function setAge($min = 0, $max = 120)
+    {
+        $this->_properties['age'] = [
+            'min' => $min,
+            'max' => $max,
+        ];
+
+        $this->setDirty('age', true);
+
+        return $this;
     }
 }

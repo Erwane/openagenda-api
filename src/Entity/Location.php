@@ -1,57 +1,65 @@
 <?php
 namespace OpenAgenda\Entity;
 
-use DateTime;
 use Exception;
 
 class Location extends Entity
 {
-    /**
-     * add date with time to location
-     * @param array $options date options
-     */
-    public function addDate($options)
+    public function import($locationData)
     {
-        if (!isset($options['date'])) {
-            throw new Exception("missing date field", 1);
-        }
-        if (!isset($options['start'])) {
-            throw new Exception("missing start field", 1);
-        }
-        if (!isset($options['end'])) {
-            throw new Exception("missing end field", 1);
+        $this->uid = $locationData['uid'];
+        $this->latitude = $locationData['latitude'];
+        $this->longitude = $locationData['longitude'];
+
+        // Pricing
+        if (isset($locationData['pricingInfo'])) {
+            $this->pricing = $locationData['pricingInfo'];
         }
 
-        // use instance of DateTime only
-        if (!($options['date'] instanceof DateTime)) {
-            $options['date'] = new DateTime($options['date']);
-        }
-        if (!($options['start'] instanceof DateTime)) {
-            $options['start'] = new DateTime($options['start']);
-        }
-        if (!($options['end'] instanceof DateTime)) {
-            $options['end'] = new DateTime($options['end']);
+        // Dates
+        if (!empty($locationData['dates']) && is_array($locationData['dates'])) {
+            $this->dates = [];
+            foreach ($locationData['dates'] as $date) {
+                $this->dates[] = [
+                    'date' => $date['date'],
+                    'begin' => $date['timeStart'],
+                    'end' => $date['timeEnd'],
+                ];
+            }
         }
 
-        $this->_properties['dates'][] = [
-            'date' => $options['date']->format('Y-m-d'),
-            'timeStart' => $options['start']->format('H:i'),
-            'timeEnd' => $options['end']->format('H:i'),
-        ];
-
-        return $this;
+        // remove dirty state
+        foreach ($this->getDirty() as $key) {
+            $this->setDirty($key, false);
+        }
     }
 
     /**
-     * set location pricing infos
-     * @param string $value property value
-     * @return self
+     * mutator for latitude
+     * @param string|float $value coordinate
      */
-    public function setPricing($value)
+    protected function _setLatitude($value)
     {
-        $this->_properties['pricingInfo'] = $value;
+        return (float)$value;
+    }
 
-        return $this;
+    /**
+     * mutator for longitude
+     * @param string|float $value coordinate
+     */
+    protected function _setLongitude($value)
+    {
+        return (float)$value;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function toDatas()
+    {
+        $datas = [];
+
+        return $datas;
     }
 
     /**
@@ -60,16 +68,13 @@ class Location extends Entity
      */
     public function toArray()
     {
-
         $data = [
             'uid' => $this->id,
-            'dates' => $this->dates,
         ];
 
         if (!is_null($this->pricingInfo)) {
             $data['pricingInfo'] = $this->pricingInfo;
         }
-
 
         return $data;
     }

@@ -1,6 +1,8 @@
 <?php
 namespace OpenAgenda\Entity;
 
+use Exception;
+
 trait EntityTrait
 {
     /**
@@ -9,6 +11,14 @@ trait EntityTrait
      * @var array
      */
     protected $_properties = [];
+
+    /**
+     * Holds a list of the properties that were modified or added after this object
+     * was originally created.
+     *
+     * @var array
+     */
+    protected $_dirty = [];
 
     /**
      * Holds a cached list of getters/setters per class
@@ -121,8 +131,11 @@ trait EntityTrait
         $options += ['setter' => true];
 
         foreach ($property as $p => $value) {
+            $this->setDirty($p, true);
+
             if (!$options['setter']) {
                 $this->_properties[$p] = $value;
+
                 continue;
             }
 
@@ -130,6 +143,7 @@ trait EntityTrait
             if ($setter) {
                 $value = $this->{$setter}($value);
             }
+
             $this->_properties[$p] = $value;
         }
 
@@ -206,5 +220,150 @@ trait EntityTrait
         }
 
         return static::$_accessors[$class][$type][$property];
+    }
+
+    /**
+     * Sets the dirty status of a single property.
+     *
+     * @param string $property the field to set or check status for
+     * @param bool $isDirty true means the property was changed, false means
+     * it was not changed
+     * @return $this
+     */
+    public function setDirty($property, $isDirty)
+    {
+        if ($isDirty === false) {
+            unset($this->_dirty[$property]);
+
+            return $this;
+        }
+
+        $this->_dirty[$property] = true;
+
+        return $this;
+    }
+
+    /**
+     * Gets the dirty properties keys
+     *
+     * @return array
+     */
+    public function getDirty()
+    {
+        return array_keys($this->_dirty);
+    }
+
+    /**
+     * mark the entity as not dirty at all
+     * @return void
+     */
+    public function markAsNotDirty()
+    {
+        foreach ($this->getDirty() as $key) {
+            $this->setDirty($key, false);
+        }
+    }
+
+    /**
+     * Gets the dirty properties with values
+     *
+     * @return array
+     */
+    public function getDirtyArray()
+    {
+        $result = [];
+
+        foreach ($this->getDirty() as $key) {
+            if (strpos($key, '.')) {
+                $path = explode('.', $key);
+            } else {
+                $path = [$key];
+            }
+
+            $result[$path[0]] = $this->_properties[$path[0]];
+        }
+
+        return $result;
+    }
+
+    /**
+     * Returns whether or not this entity has already been persisted.
+     * This method can return null in the case there is no prior information on
+     * the status of this entity.
+     *
+     * @param bool|null $new true if it is known this instance was not yet persisted
+     * @return bool Whether or not the entity has been persisted.
+     */
+    public function isNew($new = null)
+    {
+        if ($new === null) {
+            return $this->_new;
+        }
+
+        $new = (bool)$new;
+
+        return $this->_new = $new;
+    }
+
+    /**
+     * set property with i18n datas
+     * @param string $name   property name
+     * @param object $object property value by lang
+     * @throws Exception
+     * @return self
+     */
+    public function setI18nProperty($name, $object)
+    {
+        if (!is_object($object) && !is_array($object)) {
+            throw new Exception("invalid property object");
+        }
+
+        foreach ($object as $lang => $value) {
+            // create i18n array
+            if (!isset($this->_properties[$name][$this->_getLang($lang)])) {
+                $this->_properties[$name] = [$lang => null];
+            }
+
+            if ($value !== $this->_properties[$name][$this->_getLang($lang)]) {
+                $this->setDirty($name . '.' . $lang, true);
+            }
+
+            $this->_properties[$name][$this->_getLang($lang)] = $value;
+        }
+
+        return $this;
+    }
+
+    /**
+     * Returns an array with all the properties that have been set
+     * to this entity
+     *
+     * This method will recursively transform entities assigned to properties
+     * into arrays as well.
+     *
+     * @return array
+     */
+    public function toArray()
+    {
+        $result = [];
+        foreach (array_keys($this->_properties) as $property) {
+            $value = $this->get($property);
+            if (is_array($value)) {
+                $result[$property] = [];
+                foreach ($value as $k => $entity) {
+                    if ($entity instanceof EntityInterface) {
+                        $result[$property][$k] = $entity->toArray();
+                    } else {
+                        $result[$property][$k] = $entity;
+                    }
+                }
+            } elseif ($value instanceof EntityInterface) {
+                $result[$property] = $value->toArray();
+            } else {
+                $result[$property] = $value;
+            }
+        }
+
+        return $result;
     }
 }

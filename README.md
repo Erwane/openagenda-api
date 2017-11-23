@@ -1,9 +1,5 @@
 # OpenAgenda API SDK for PHP
 
-## Warning
-This package is Work In Progress.
-Wait for this warning disappear from README ;)
-
 ## Installation
 use composer
 ```
@@ -11,6 +7,8 @@ composer require openagenda/api-sdk
 ```
 
 ## Usage
+
+### Creation and Authentication
 ```php
 use OpenAgenda\OpenAgenda;
 
@@ -22,6 +20,17 @@ use OpenAgenda\OpenAgenda;
 $openAgenda = new OpenAgenda('public-key', 'private-key');
 
 /*
+ * you can set baseUrl of your website, this will
+ * transform all relatives links in longDescription
+ * as absolute links to your website
+ * You can also use $event->baseUrl before $event->setLongDescription()
+ */
+$openAgenda->setBaseUrl('example.com');
+```
+
+### Publish event
+```php
+/*
  * create Location object
  */
 // locationDatas can be an integer (previous location stored in database)
@@ -29,23 +38,14 @@ $locationDatas = 123;
 
 // Or a data array
 $locationDatas = [
-    'address' => '221B Baker Street, London, England'
+    'placename' => 'Elementary',
+    'address' => '221B Baker Street, London, England',
     'latitude' => 51.523797,
     'longitude' => -0.158320,
-    'placename' => 'Elementary'
 ];
 
-// Create location object and add date/time to it
-// You can add multiple dates
-$location = $openAgenda->newLocation($locationDatas)
-    ->setPricing('6€')
-    ->addDate([
-        'date' => '2017-10-20',
-        'start' => '08:00',
-        'end' => '23:00',
-    ]);
-
-// Location is requested and $location->uid contain uid
+// Create location object with uid property
+$location = $openAgenda->getLocation($locationDatas);
 
 /*
  * create event object and set informations
@@ -53,28 +53,51 @@ $location = $openAgenda->newLocation($locationDatas)
 $event = $openAgenda->newEvent()
     ->setLanguage('en')  // global language
     ->setTitle('My title')
-    ->setKeywords(['array', 'of', 'keywords'])
     ->setDescription('My event description')
-    ->setFreeText('My event free text, can be text or MD format')
+    ->setLongDescription('My event free text, can be text or MD format')
+    ->setKeywords(['array', 'of', 'keywords'])
+    ->setConditions('6€ / 8€')
     ->setLocation($location)
+    ->setTimings([
+        'date' => '2017-10-20 08:00:00',    // auto converted to 2017-10-20
+        'begin' => '2017-10-20 08:00:00',   // auto converted to 08:00
+        'end' => '2017-10-20 23:00:00',     // auto converted to 23:00
+    ])
+    ->setAge(0, 110) // (min, max)
     ->setState(1) // 1 is published, 0 is not
     ->setPicture('/absolute/path/to/picture')
 ;
 
 // You can specify language for fields
-// title, keywords, description and freeText
+// title, description, longDescription, keywords,  conditions
 $event->setKeywords(['tableau', 'de', 'motclé'], 'fr');
 
 // publish event to openagenda and set uid in $event->uid
-$openAgenda->publish($event);
+$openAgenda->publishEvent($event);
 
 // get agenda object from slug
-// and set category
-$agenda = $openAgenda->getAgenda('agenda-slug')->setCategory('Fun');
+$agenda = $openAgenda->getAgenda('agenda-slug');
 
 // Attach event to agenda
 $openAgenda->attachEventToAgenda($event, $agenda);
 ```
 
+### Update event
+```php
+$event = $openAgenda->getEvent(0123456789);
+
+$event->setTitle('Mon titre', 'fr');
+
+$openAgenda->updateEvent($event);
+```
+
+### Delete event
+```php
+$openAgenda->deleteEvent(0123456789, 'openagenda-slug-or-id');
+```
+
+
 ## Performance
 A small cache is used for accessToken and agenda slugs id. OpenAgenda API is not requested when not necessary
+
+For event update, only the "dirty" fields are sents to API
