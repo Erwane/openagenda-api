@@ -240,7 +240,6 @@ class Event extends Entity
         return $this;
     }
 
-
     /**
      * set event picture
      * @param string $file absolute path
@@ -303,7 +302,7 @@ class Event extends Entity
      */
     public function toDatas()
     {
-        $keys = ['title', 'keywords', 'description', 'longDescription', 'locationUid', 'image', 'timings', 'conditions'];
+        $keys = ['title', 'keywords', 'description', 'longDescription', 'locationUid', 'image', 'timings', 'conditions', 'age'];
         $dirties = $this->getDirtyArray();
 
         $datas = array_intersect_key($dirties, array_flip($keys));
@@ -394,5 +393,23 @@ class Event extends Entity
     protected function _setAgendaUid($value)
     {
         return (int)$value;
+    }
+
+    /**
+     * set event age
+     * @param int $min min age
+     * @param int $max max age
+     * @retur self
+     */
+    public function setAge($min = 0, $max = 120)
+    {
+        $this->_properties['age'] = [
+            'min' => $min,
+            'max' => $max,
+        ];
+
+        $this->setDirty('age', true);
+
+        return $this;
     }
 }

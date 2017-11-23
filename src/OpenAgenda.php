@@ -263,6 +263,12 @@ class OpenAgenda
         }
     }
 
+    /**
+     * attach event to agenda
+     * @param  Event  $event  entity
+     * @param  Agenda $agenda entity
+     * @return Object|false
+     */
     public function attachEventToAgenda(Event $event, Agenda $agenda)
     {
         $datas = [
