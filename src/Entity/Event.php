@@ -254,6 +254,7 @@ class Event extends Entity
             throw new Exception("image file does not exists", 1);
         }
 
+        // set properties, not image to skip auto setDirty
         $this->_properties['image'] = fopen($file, 'r');
 
         return $this;
@@ -290,30 +291,18 @@ class Event extends Entity
      */
     public function toDatas()
     {
+        $requiredKeys = ['title', 'description', 'locationUid', 'timings'];
+        $requiredDatas = array_intersect_key($this->toArray(), array_flip($requiredKeys));
+
+        $datas = array_merge($requiredDatas, $this->getDirtyArray());
+
         // $keys = ['title', 'keywords', 'description', 'longDescription', 'locationUid', 'image', 'timings', 'conditions', 'age'];
         // $dirties = $this->getDirtyArray();
-
 
         // $datas = array_intersect_key($dirties, array_flip($keys));
 
         $return = [
             'publish' => $this->state,
-            'data' => json_encode($this->getDirtyArray()),
-        ];
-
-        // picture
-        if (!is_null($this->image)) {
-            $return[] = ['name' => 'image', 'contents' => $this->image, 'Content-type' => 'multipart/form-data'];
-        }
-
-        return $return;
-    }
-
-    public function toArray()
-    {
-        $datas = $this->getDirtyArray();
-
-        $return = [
             'data' => json_encode($datas),
         ];
 

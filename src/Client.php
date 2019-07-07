@@ -11,7 +11,7 @@ class Client extends GuzzleClient
      * api base url
      * @var url
      */
-    protected $_url = 'https://api.openagenda.com/v2';
+    protected $_url = 'https://api.openagenda.com';
 
     /**
      * public key
@@ -61,6 +61,7 @@ class Client extends GuzzleClient
             return $response;
         } catch (ClientException $e) {
             $response = json_decode((string)$e->getResponse()->getBody()->getContents());
+
             throw new Exception($response->message, $response->code);
         }
     }
@@ -111,6 +112,28 @@ class Client extends GuzzleClient
     public function delete($url, $accessToken = true)
     {
         try {
+            $params = [
+                'multipart' => [],
+            ];
+
+            if ($accessToken) {
+                $params['multipart'][] = [
+                    'name' => 'access_token',
+                    'contents' => $this->_accessToken,
+                ];
+                $params['multipart'][] = [
+                    'name' => 'nonce',
+                    'contents' => mt_rand(10000, 99999),
+                ];
+            }
+
+            $rawResponse = $this->request('delete', $this->_url . $url, $params);
+            $response = json_decode((string)$rawResponse->getBody()->getContents());
+
+            return $response;
+
+            /*
+            old curl version
             // use curl for DELETE request
             $conf = [
                 CURLOPT_URL => $this->_url . $url,
@@ -134,17 +157,17 @@ class Client extends GuzzleClient
             curl_close($ch);
 
             return $response;
+            */
         } catch (RequestException $e) {
             $response = json_decode((string)$e->getResponse()->getBody()->getContents());
             throw new Exception($response->message, $response->code);
         } catch (ClientException $e) {
-            $response = json_decode((string)$e->getResponse()->getBody()->getContents());
-            throw new Exception($response->error_description, $e->getResponse()->getStatusCode());
+            throw new Exception($e->getMessage());
         }
     }
 
     /**
-     * transform a $array options to multipard array
+     * transform a $array options to multipart array
      * @param  array  $array options and datas
      * @return array
      */

@@ -74,23 +74,18 @@ class OpenAgenda
             ];
 
             try {
-                // use raw request to v1
-                $response = $this->client->request(
-                    'post',
-                    'https://api.openagenda.com/v1/requestAccessToken',
-                    ['form_params' => $datas]
-                );
-                $json = json_decode($response->getBody());
+                $response = $this->client->post('/v1/requestAccessToken', $datas, false);
+                $accessToken = $response->access_token;
 
-                Cache::write('openagenda-token', $json->access_token, $json->expires_in);
-
-                $accessToken = $json->access_token;
+                Cache::write('openagenda-token', $response->access_token, $response->expires_in);
             } catch (RequestException $e) {
                 $request = $e->getRequest();
                 $response = $e->getResponse();
                 if ($e->hasResponse()) {
                     throw new Exception($response->getBody()->getContents());
                 }
+            } catch (Exception $e) {
+                throw $e;
             }
         }
 
@@ -145,10 +140,9 @@ class OpenAgenda
     /**
      * get Location object with uid
      * @param  array|int $datas location id or datas
-     * @param int|string|null $agendaSlug   location agenda slug or id
      * @return Location object
      */
-    public function getLocation($datas, $agendaSlug = null)
+    public function getLocation($datas)
     {
         // create location
         $location = new Location;
@@ -160,7 +154,7 @@ class OpenAgenda
         }
 
         if (!isset($datas['id'])) {
-            $datas['id'] = $this->createLocation($datas, $agendaSlug);
+            $datas['id'] = $this->createLocation($datas);
             $location->isNew(true);
         }
 
@@ -184,10 +178,9 @@ class OpenAgenda
     /**
      * create location
      * @param  array $options               location options
-     * @param int|string|null $agendaSlug   location agenda slug or id
      * @return int                          location id
      */
-    public function createLocation($options, $agendaSlug = null)
+    public function createLocation($options)
     {
         if (!isset($options['placename'])) {
             throw new Exception("missing placename field", 1);
@@ -207,13 +200,10 @@ class OpenAgenda
         $options['longitude'] = (float)$options['longitude'];
 
         // Agenda uid
-        if (!is_null($agendaSlug)) {
-            $agenda = $this->getAgenda($agendaSlug);
-            $options['agenda_uid'] = $agenda->uid;
-        }
+        $options['agenda_uid'] = $this->_uid;
 
         try {
-            $response = $this->client->post('/locations', ['data' => json_encode($options)]);
+            $response = $this->client->post('/v1/locations', ['data' => json_encode($options)]);
 
             return (int)$response->uid;
         } catch (ClientException $e) {
@@ -235,7 +225,7 @@ class OpenAgenda
 
         if (empty($agendaIds[$slug])) {
             try {
-                $response = $this->client->get('/agendas/uid/' . $slug);
+                $response = $this->client->get('/v1/agendas/uid/' . $slug);
 
                 $agendaIds[$slug] = $response->data->uid;
 
@@ -257,7 +247,7 @@ class OpenAgenda
     public function getAgendaSettings()
     {
         try {
-            $response = $this->client->get('/agendas/' . $this->_uid . '/settings');
+            $response = $this->client->get('/v2/agendas/' . $this->_uid . '/settings');
 
             return $response->form;
         } catch (Exception $e) {
@@ -273,7 +263,7 @@ class OpenAgenda
     public function publishEvent(Event $event)
     {
         try {
-            $response = $this->client->post('/agendas/' . $this->_uid . '/events', $event->toDatas());
+            $response = $this->client->post('/v2/agendas/' . $this->_uid . '/events', $event->toDatas());
 
             $event->id = $event->uid = $response->event->uid;
         } catch (RequestException $e) {
@@ -303,7 +293,7 @@ class OpenAgenda
                 return true;
             }
 
-            $response = $this->client->post('/events/' . $event->uid, $event->toDatas());
+            $response = $this->client->post('/v2/agendas/' . $this->_uid . '/events/' . $event->uid, $event->toDatas());
 
             return true;
         } catch (Exception $e) {
@@ -324,7 +314,7 @@ class OpenAgenda
         ];
 
         try {
-            $response = $this->client->post('/agendas/' . $agenda->uid . '/events', $datas);
+            $response = $this->client->post('/v1/agendas/' . $agenda->uid . '/events', $datas);
         } catch (RequestException $e) {
             return false;
         }
@@ -357,7 +347,7 @@ class OpenAgenda
         }
 
         try {
-            $response = $this->client->delete('/agendas/' . $agenda->uid . '/events/' . $event->uid);
+            $response = $this->client->delete('/v1/agendas/' . $agenda->uid . '/events/' . $event->uid);
 
             if ($response->code === 200) {
                 return $response;
@@ -394,11 +384,11 @@ class OpenAgenda
         }
 
         try {
-            if (is_numeric($event->agendaUid)) {
-                $this->detachEventFromAgenda($event, $event->agendaUid);
-            }
+            // if (is_numeric($event->agendaUid)) {
+            //     $this->detachEventFromAgenda($event, $event->agendaUid);
+            // }
 
-            $response = $this->client->delete('/events/' . $event->uid);
+            $response = $this->client->delete('/v2/agendas/' . $this->_uid . '/events/' . $event->uid);
 
             if ($response->code === 200) {
                 return $response;
@@ -427,7 +417,7 @@ class OpenAgenda
             throw new Exception("event id should be integer", 1);
         }
 
-        $result = $this->client->get('/events/' . (int)$eventId);
+        $result = $this->client->get('/v1/events/' . (int)$eventId);
 
         if ($result->data === false) {
             throw new Exception("event don't exists", 1);
