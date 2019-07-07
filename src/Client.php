@@ -11,7 +11,7 @@ class Client extends GuzzleClient
      * api base url
      * @var url
      */
-    protected $_url = 'https://api.openagenda.com/v1';
+    protected $_url = 'https://api.openagenda.com/v2';
 
     /**
      * public key
@@ -97,8 +97,7 @@ class Client extends GuzzleClient
         } catch (RequestException $e) {
             $response = json_decode((string)$e->getResponse()->getBody()->getContents());
         } catch (ClientException $e) {
-            $response = json_decode((string)$e->getResponse()->getBody()->getContents());
-            throw new Exception($response->message, $response->code);
+            throw new Exception($e->getMessage());
         }
     }
 
@@ -140,7 +139,6 @@ class Client extends GuzzleClient
             throw new Exception($response->message, $response->code);
         } catch (ClientException $e) {
             $response = json_decode((string)$e->getResponse()->getBody()->getContents());
-            debug($response);
             throw new Exception($response->error_description, $e->getResponse()->getStatusCode());
         }
     }

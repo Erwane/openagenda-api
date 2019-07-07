@@ -172,10 +172,6 @@ class Event extends Entity
         if (!isset($this->_properties['timings'])) {
             $this->_properties['timings'] = [];
         }
-
-        if (!isset($datas['date'])) {
-            throw new Exception("missing date field", 1);
-        }
         if (!isset($datas['begin'])) {
             throw new Exception("missing begin field", 1);
         }
@@ -184,9 +180,6 @@ class Event extends Entity
         }
 
         // use instance of DateTime only
-        if (!($datas['date'] instanceof DateTime)) {
-            $datas['date'] = new DateTime($datas['date']);
-        }
         if (!($datas['begin'] instanceof DateTime)) {
             $datas['begin'] = new DateTime($datas['begin']);
         }
@@ -195,9 +188,8 @@ class Event extends Entity
         }
 
         $timing = [
-            'date' => $datas['date']->format('Y-m-d'),
-            'begin' => $datas['begin']->format('H:i'),
-            'end' => $datas['end']->format('H:i'),
+            'begin' => $datas['begin']->format('c'),
+            'end' => $datas['end']->format('c'),
         ];
 
         // check if timing exists
@@ -228,10 +220,6 @@ class Event extends Entity
     public function setTimings($timings = [])
     {
         $this->_properties['timings'] = [];
-
-        if (isset($timings['date'])) {
-            $timings = [$timings];
-        }
 
         foreach ((array)$timings as $timing) {
             $this->addTiming($timing);
@@ -302,14 +290,15 @@ class Event extends Entity
      */
     public function toDatas()
     {
-        $keys = ['title', 'keywords', 'description', 'longDescription', 'locationUid', 'image', 'timings', 'conditions', 'age'];
-        $dirties = $this->getDirtyArray();
+        // $keys = ['title', 'keywords', 'description', 'longDescription', 'locationUid', 'image', 'timings', 'conditions', 'age'];
+        // $dirties = $this->getDirtyArray();
 
-        $datas = array_intersect_key($dirties, array_flip($keys));
+
+        // $datas = array_intersect_key($dirties, array_flip($keys));
 
         $return = [
             'publish' => $this->state,
-            'data' => json_encode($datas),
+            'data' => json_encode($this->getDirtyArray()),
         ];
 
         // picture

@@ -1,32 +1,32 @@
 {
-	"name": "openagenda/api-sdk",
-	"description": "OpenAgenda SDK for PHP",
-	"type": "library",
-	"keywords": ["openagenda", "api"],
-	"homepage": "https://openagenda.com",
-	"license": "MIT",
-	"authors": [
-		{
-			"name": "Erwane Breton",
-			"homepage": "https://phea.fr/",
-			"email": "erwane@phea.fr"
-		}
-	],
-	"support": {
-		"issues": "https://github.com/erwane/openagenda-api/issues",
-		"source": "https://github.com/erwane/openagenda-api"
-	},
-	"require": {
-            "php": ">=5.6.0",
-            "symfony/cache": "^3.3",
-            "guzzlehttp/guzzle": "^6.0",
-		"ezyang/htmlpurifier": "^4.9",
-		"league/html-to-markdown": "^4.6"
-	},
-	"require-dev": {
-		"phpunit/phpunit": "^6"
-	},
-	"autoload": {
+    "name": "openagenda/api-sdk",
+    "description": "OpenAgenda SDK for PHP",
+    "type": "library",
+    "keywords": ["openagenda", "api"],
+    "homepage": "https://openagenda.com",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Erwane Breton",
+            "homepage": "https://erwane-breton.fr/",
+            "email": "erwane@phea.fr"
+        }
+    ],
+    "support": {
+        "issues": "https://github.com/erwane/openagenda-api/issues",
+        "source": "https://github.com/erwane/openagenda-api"
+    },
+    "require": {
+        "php": ">=5.6.0",
+        "symfony/cache": "^3.3",
+        "guzzlehttp/guzzle": "^6.0",
+        "ezyang/htmlpurifier": "^4.9",
+        "league/html-to-markdown": "^4.6"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^6"
+    },
+    "autoload": {
         "psr-4": {
             "OpenAgenda\\": "src"
         }

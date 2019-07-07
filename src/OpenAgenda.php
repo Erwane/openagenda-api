@@ -38,6 +38,12 @@ class OpenAgenda
     protected $_baseUrl = null;
 
     /**
+     * openagenda uid to publish
+     * @var int|null
+     */
+    protected $_uid = null;
+
+    /**
      * constuctor
      * @param string $apiSecret openagenda api secret
      */
@@ -62,18 +68,24 @@ class OpenAgenda
         $accessToken = Cache::read('openagenda-token');
 
         if (empty($accessToken)) {
-            $options = [
+            $datas = [
                 'grant_type' => 'authorization_code',
                 'code' => $this->_secret,
             ];
 
             try {
-                $response = $this->client->post('/requestAccessToken', $options);
+                // use raw request to v1
+                $response = $this->client->request(
+                    'post',
+                    'https://api.openagenda.com/v1/requestAccessToken',
+                    ['form_params' => $datas]
+                );
+                $json = json_decode($response->getBody());
 
-                Cache::write('openagenda-token', $response->access_token, $response->expires_in);
+                Cache::write('openagenda-token', $json->access_token, $json->expires_in);
 
-                $accessToken = $response->access_token;
-            } catch (\GuzzleHttp\Exception\RequestException $e) {
+                $accessToken = $json->access_token;
+            } catch (RequestException $e) {
                 $request = $e->getRequest();
                 $response = $e->getResponse();
                 if ($e->hasResponse()) {
@@ -96,6 +108,18 @@ class OpenAgenda
         }
 
         $this->_baseUrl = $url;
+
+        return $this;
+    }
+
+    /**
+     * set agenda uid
+     * @param   int $uid agenda uid
+     * @return  self
+     */
+    public function setAgendaUid($uid)
+    {
+        $this->_uid = (int)$uid;
 
         return $this;
     }
@@ -188,7 +212,7 @@ class OpenAgenda
         }
     }
 
-    public function getAgenda($slug)
+    public function getAgendaUid($slug)
     {
         if (is_numeric($slug)) {
             return new Agenda(['uid' => $slug]);
@@ -221,6 +245,17 @@ class OpenAgenda
         return new Agenda(['uid' => $agendaIds[$slug]]);
     }
 
+    public function getAgendaSettings()
+    {
+        try {
+            $response = $this->client->get('/agendas/' . $this->_uid . '/settings');
+
+            return $response->form;
+        } catch (Exception $e) {
+            return false;
+        }
+    }
+
     /**
      * publish event to openagenda and set uid to entity
      * @param  Event  $event entity
@@ -229,9 +264,9 @@ class OpenAgenda
     public function publishEvent(Event $event)
     {
         try {
-            $response = $this->client->post('/events', $event->toDatas());
+            $response = $this->client->post('/agendas/' . $this->_uid . '/events', $event->toDatas());
 
-            $event->id = $response->uid;
+            $event->id = $event->uid = $response->event->uid;
         } catch (RequestException $e) {
             $request = $e->getRequest();
             $rawResponse = $e->getResponse();
