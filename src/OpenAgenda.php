@@ -124,6 +124,15 @@ class OpenAgenda
         return $this;
     }
 
+    /**
+     * get agenda uid
+     * @return  int
+     */
+    public function getAgendaUid()
+    {
+        return (int)$this->_uid;
+    }
+
     public function newEvent()
     {
         $event = new Event;
@@ -212,7 +221,7 @@ class OpenAgenda
         }
     }
 
-    public function getAgendaUid($slug)
+    public function getUidFromSlug($slug)
     {
         if (is_numeric($slug)) {
             return new Agenda(['uid' => $slug]);
