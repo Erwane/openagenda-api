@@ -106,58 +106,23 @@ class Client extends GuzzleClient
     /**
      * do a delete request and return object from json
      * @param  string  $url         api url ex : /accessToken
-     * @param  bool $accessToken    add access token to options
      * @return StdClass
      */
-    public function delete($url, $accessToken = true)
+    public function delete($url)
     {
         try {
-            $params = [
-                'multipart' => [],
-            ];
 
-            if ($accessToken) {
-                $params['multipart'][] = [
-                    'name' => 'access_token',
-                    'contents' => $this->_accessToken,
-                ];
-                $params['multipart'][] = [
-                    'name' => 'nonce',
-                    'contents' => mt_rand(10000, 99999),
-                ];
-            }
-
-            $rawResponse = $this->request('delete', $this->_url . $url, $params);
-            $response = json_decode((string)$rawResponse->getBody()->getContents());
-
-            return $response;
-
-            /*
-            old curl version
-            // use curl for DELETE request
-            $conf = [
-                CURLOPT_URL => $this->_url . $url,
-                CURLOPT_POSTFIELDS => [
-                    'access_token' => $this->_accessToken,
-                    'nonce' => mt_rand(1000000, 9999999),
+            $options = [
+                'headers' => [
+                    'nonce' => mt_rand(10000, 99999),
+                    'access-token' => $this->_accessToken,
                 ],
-                CURLOPT_CUSTOMREQUEST => 'DELETE',
-                CURLOPT_RETURNTRANSFER => 1,
-                CURLOPT_CONNECTTIMEOUT => 10,
             ];
 
-            $ch = curl_init();
-            curl_setopt_array($ch, $conf);
-
-            $rawResponse = curl_exec($ch);
-
-            $response = json_decode($rawResponse);
-            $response->code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-
-            curl_close($ch);
+            $rawResponse = $this->request('delete', $this->_url . $url, $options);
+            $response = json_decode((string)$rawResponse->getBody());
 
             return $response;
-            */
         } catch (RequestException $e) {
             $response = json_decode((string)$e->getResponse()->getBody()->getContents());
             throw new Exception($response->message, $response->code);

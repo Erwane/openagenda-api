@@ -384,23 +384,9 @@ class OpenAgenda
         }
 
         try {
-            // if (is_numeric($event->agendaUid)) {
-            //     $this->detachEventFromAgenda($event, $event->agendaUid);
-            // }
-
             $response = $this->client->delete('/v2/agendas/' . $this->_uid . '/events/' . $event->uid);
 
-            if ($response->code === 200) {
-                return $response;
-            }
-
-            switch ($response->error) {
-                case 'TO DEFINE':
-                    throw new Exception("can't detach", 1);
-
-                default:
-                    return $response;
-            }
+            return $response;
         } catch (Exception $e) {
             throw $e;
         }
