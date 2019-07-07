@@ -2,6 +2,7 @@
 namespace OpenAgenda\Entity;
 
 use Exception;
+use InvalidArgumentException;
 
 trait EntityTrait
 {
