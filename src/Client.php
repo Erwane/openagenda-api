@@ -1,139 +1,164 @@
 <?php
+declare(strict_types=1);
+
 namespace OpenAgenda;
 
 use Exception;
 use GuzzleHttp\Client as GuzzleClient;
-use GuzzleHttp\Exception\ClientException;
+use GuzzleHttp\Exception\GuzzleException;
+use GuzzleHttp\Exception\RequestException;
+use GuzzleHttp\Psr7\Uri;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\UriInterface;
 
 class Client extends GuzzleClient
 {
     /**
      * api base url
-     * @var url
+     *
+     * @var string
      */
-    protected $_url = 'https://api.openagenda.com';
+    protected $_url = 'https://api.openagenda.com/v2';
 
     /**
      * public key
+     *
      * @var null
      */
     protected $_public = null;
 
     /**
      * api access token
+     *
      * @var string|null
      */
     private $_accessToken = null;
 
+    private $_userAgent = 'Openagenda-api/2.1.0';
+
     /**
      * set public key
+     *
      * @param string $key public key
      */
-    public function setPublicKey($key)
+    public function setPublicKey(string $key)
     {
         $this->_public = $key;
     }
 
     /**
      * set access token
+     *
      * @param string $token access token
+     * @return $this
      */
-    public function setAccessToken($token)
+    public function setAccessToken(string $token)
     {
         $this->_accessToken = $token;
+
+        return $this;
     }
 
     /**
      * do a post request and return object from json
-     * @param  string  $url         api url ex : /accessToken
-     * @param  array  $datas      data
-     * @param  bool $accessToken    add access token to options
-     * @return StdClass
+     *
+     * @param string $uri Openagenda endpoint
+     * @param array $options Client options
+     * @return \Psr\Http\Message\ResponseInterface
+     * @throws \OpenAgenda\OpenAgendaException
+     * @noinspection PhpMissingParentCallCommonInspection
      */
-    public function get($url, $datas = [])
+    public function get($uri, array $options = []): ResponseInterface
+    {
+        return $this->doRequest(function ($u, $o) {
+            $query = $o['query'] ?? [];
+
+            $query += ['key' => $this->_public];
+
+            $o['query'] = $query;
+
+            return $this->request('GET', $u, $o);
+        }, $uri, $options);
+    }
+
+    /**
+     * @param callable $callable
+     * @param $uri
+     * @param $options
+     * @return \Psr\Http\Message\ResponseInterface
+     * @throws \OpenAgenda\OpenAgendaException
+     */
+    protected function doRequest(callable $callable, $uri, $options): ResponseInterface
     {
         try {
-            $datas['key'] = $this->_public;
+            if (!($uri instanceof UriInterface)) {
+                $uri = new Uri($this->_url . $uri);
+            }
 
-            $rawResponse = $this->request('get', $this->_url . $url, ['query' => $datas]);
-            $response = json_decode((string)$rawResponse->getBody()->getContents());
+            if (!isset($options['headers'])) {
+                $options['headers'] = [];
+            }
 
-            return $response;
-        } catch (ClientException $e) {
-            $response = json_decode((string)$e->getResponse()->getBody()->getContents());
+            $found = false;
+            foreach (array_keys($options['headers']) as $name) {
+                if (strtolower($name) === 'user-agent') {
+                    $options['headers'][$name] = $this->_userAgent;
+                    $found = true;
 
-            throw new Exception($response->message, $response->code);
+                    break;
+                }
+            }
+            if (!$found) {
+                $options['headers']['User-Agent'] = $this->_userAgent;
+            }
+
+            return $callable($uri, $options);
+        } catch (RequestException $e) {
+            $response = $e->getResponse();
+            $json = json_decode((string)$response->getBody(), true);
+
+            throw new OpenAgendaException($json['message'], $e->getResponse()->getStatusCode());
+        } catch (GuzzleException $e) {
+            throw new OpenAgendaException($e->getMessage(), $e->getCode());
         }
     }
 
     /**
      * do a post request and return object from json
-     * @param  string  $url         api url ex : /accessToken
-     * @param  array  $datas      data
-     * @param  bool $accessToken    add access token to options
-     * @return StdClass
+     *
+     * @param string $uri Openagenda endpoint
+     * @param array $options Client options
+     * @return \Psr\Http\Message\ResponseInterface
+     * @throws \OpenAgenda\OpenAgendaException
+     * @noinspection PhpMissingParentCallCommonInspection
      */
-    public function post($url, $datas, $accessToken = true)
+    public function post($uri, array $options = []): ResponseInterface
     {
-        try {
-            $params = [
-                'multipart' => $this->_optionsToMultipart($datas),
-            ];
+        return $this->doRequest(function ($u, $o) {
+            $formData = $this->_optionsToMultipart($o['data'] ?? []);
+            unset($o['data']);
 
-            if ($accessToken) {
-                $params['multipart'][] = [
+            if ($this->_accessToken) {
+                $formData[] = [
                     'name' => 'access_token',
                     'contents' => $this->_accessToken,
                 ];
-                $params['multipart'][] = [
+                $formData[] = [
                     'name' => 'nonce',
-                    'contents' => mt_rand(1000000, 9999999),
+                    'contents' => $this->nonce(),
                 ];
             }
 
-            $rawResponse = $this->request('post', $this->_url . $url, $params);
-            $response = json_decode((string)$rawResponse->getBody()->getContents());
+            $o['multipart'] = $formData;
 
-            return $response;
-        } catch (RequestException $e) {
-            $response = json_decode((string)$e->getResponse()->getBody()->getContents());
-        } catch (ClientException $e) {
-            throw new Exception($e->getMessage());
-        }
-    }
-
-
-    /**
-     * do a delete request and return object from json
-     * @param  string  $url         api url ex : /accessToken
-     * @return StdClass
-     */
-    public function delete($url)
-    {
-        try {
-
-            $options = [
-                'headers' => [
-                    'nonce' => mt_rand(10000, 99999),
-                    'access-token' => $this->_accessToken,
-                ],
-            ];
-
-            $rawResponse = $this->request('delete', $this->_url . $url, $options);
-            $response = json_decode((string)$rawResponse->getBody());
-
-            return $response;
-        } catch (RequestException $e) {
-            $response = json_decode((string)$e->getResponse()->getBody()->getContents());
-            throw new Exception($response->message, $response->code);
-        } catch (ClientException $e) {
-            throw new Exception($e->getMessage());
-        }
+            return $this->request('POST', $u, $o);
+        }, $uri, $options);
     }
 
     /**
      * transform a $array options to multipart array
-     * @param  array  $array options and datas
+     *
+     * @param array $array options and datas
      * @return array
      */
     private function _optionsToMultipart(array $array)
@@ -151,5 +176,45 @@ class Client extends GuzzleClient
         }
 
         return $return;
+    }
+
+    /**
+     * Generate random int
+     *
+     * @return int
+     * @codeCoverageIgnore
+     */
+    public function nonce()
+    {
+        try {
+            return random_int(1000000, 9999999);
+        } catch (Exception $e) {
+            return mt_rand(1000000, 9999999);
+        }
+    }
+
+    /**
+     * do a delete request and return object from json
+     *
+     * @param string $uri Openagenda endpoint
+     * @param array $options Client options
+     * @return \Psr\Http\Message\ResponseInterface
+     * @throws \OpenAgenda\OpenAgendaException
+     * @noinspection PhpMissingParentCallCommonInspection
+     */
+    public function delete($uri, array $options = []): ResponseInterface
+    {
+        return $this->doRequest(function ($u, $o) {
+            $headers = $o['headers'] ?? [];
+
+            $headers += [
+                'nonce' => $this->nonce(),
+                'access-token' => $this->_accessToken,
+            ];
+
+            $o['headers'] = $headers;
+
+            return $this->request('POST', $u, $o);
+        }, $uri, $options);
     }
 }
