@@ -1,33 +1,84 @@
 <?php
+declare(strict_types=1);
+
 namespace OpenAgenda;
 
-use Symfony\Component\Cache\Simple\FilesystemCache;
+use Psr\SimpleCache\InvalidArgumentException;
+use Symfony\Component\Cache\Adapter\FilesystemAdapter;
+use Symfony\Component\Cache\Psr16Cache;
 
 class Cache
 {
-    /**
-     * read cache value
-     * @param  string $key cache key
-     * @return mixed
-     */
-    public static function read($key)
-    {
-        $cache = new FilesystemCache();
+    protected static $_cache;
 
-        return $cache->get($key);
+    protected static function cache(): Psr16Cache
+    {
+        if (!static::$_cache) {
+            static::$_cache = new Psr16Cache(new FilesystemAdapter());
+        }
+
+        return static::$_cache;
+    }
+
+    /**
+     * Read cache value
+     *
+     * @param string $key cache key
+     * @return mixed|null
+     * @deprecated 2.1.0
+     * @codeCoverageIgnore
+     */
+    public static function read(string $key)
+    {
+        return static::get($key);
     }
 
     /**
      * write cache value
-     * @param  string $key  cache key
-     * @param  mixed $value cache value
-     * @param  int $ttl     ttl cache lifetime
-     * @return
+     *
+     * @param string $key cache key
+     * @param mixed $value cache value
+     * @param int $ttl ttl cache lifetime
+     * @return mixed
+     * @deprecated 2.1.0
+     * @codeCoverageIgnore
      */
-    public static function write($key, $value, $ttl = null)
+    public static function write(string $key, $value, $ttl = null)
     {
-        $cache = new FilesystemCache();
+        return static::set($key, $value, $ttl);
+    }
 
-        return $cache->set($key, $value, $ttl);
+    /**
+     * Get cache value
+     *
+     * @param string $key Cache key name
+     * @return mixed|null
+     */
+    public static function get(string $key)
+    {
+        $value = null;
+        try {
+            $value = static::cache()->get($key);
+        } catch (InvalidArgumentException $e) {
+        }
+
+        return $value;
+    }
+
+    /**
+     * Set cache value
+     *
+     * @param string $key Cache key name
+     * @param mixed $value Value
+     * @param int|string|null $ttl
+     * @return bool
+     */
+    public static function set(string $key, $value, $ttl = null): bool
+    {
+        try {
+            return static::cache()->set($key, $value, $ttl);
+        } catch (InvalidArgumentException $e) {
+            return false;
+        }
     }
 }
