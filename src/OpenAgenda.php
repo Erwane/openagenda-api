@@ -71,7 +71,7 @@ class OpenAgenda
      * set agenda uid
      *
      * @param int $uid agenda uid
-     * @return self
+     * @return $this
      */
     public function setAgendaUid(int $uid)
     {
@@ -376,25 +376,25 @@ class OpenAgenda
             if ($response->getStatusCode() !== 200) {
                 return null;
             }
+
+            $decoded = json_decode($response->getBody()->getContents(), true);
+
+            $data = $decoded['event'];
+
+            // location
+            $location = new Location();
+            if (!empty($data['location'])) {
+                $location->import($data['location']);
+            }
+
+            // create event entity
+            $event = new Event($data, ['useSetters' => false, 'markClean' => true]);
+            $event->set(['id' => $data['uid'], 'baseUrl' => $this->baseUrl])
+                ->setLocation($location)
+                ->setDirty('location', false);
         } catch (OpenAgendaException $e) {
             return null;
         }
-
-        $decoded = json_decode($response->getBody()->getContents(), true);
-
-        $data = $decoded['event'];
-
-        // location
-        $location = new Location();
-        if (!empty($data['location'])) {
-            $location->import($data['location']);
-        }
-
-        // create event entity
-        $event = new Event($data, ['useSetters' => false, 'markClean' => true]);
-        $event->set(['id' => $data['uid'], 'baseUrl' => $this->baseUrl])
-            ->setLocation($location)
-            ->setDirty('location', false);
 
         return $event;
     }

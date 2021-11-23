@@ -46,6 +46,7 @@ class Location extends Entity
 
     /**
      * mutator for latitude
+     *
      * @param string|float $value coordinate
      */
     protected function _setLatitude($value)
@@ -55,6 +56,7 @@ class Location extends Entity
 
     /**
      * mutator for longitude
+     *
      * @param string|float $value coordinate
      */
     protected function _setLongitude($value)
@@ -72,7 +74,9 @@ class Location extends Entity
 
     /**
      * export location to array
+     *
      * @return array
+     * @noinspection PhpMissingParentCallCommonInspection
      */
     public function toArray()
     {

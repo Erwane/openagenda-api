@@ -1,12 +1,14 @@
 <?php
+declare(strict_types=1);
+
 namespace OpenAgenda\Entity;
 
 use DateTime;
-use Exception;
 use HTMLPurifier;
 use HTMLPurifier_Config;
 use HTMLPurifier_TagTransform_Simple;
 use League\HTMLToMarkdown\HtmlConverter;
+use OpenAgenda\OpenAgendaException;
 
 /**
  * @property int $id
@@ -22,8 +24,9 @@ class Event extends Entity
 
     /**
      * set event title
+     *
      * @param bool $value property value
-     * @return self
+     * @return $this
      */
     public function setState(bool $value)
     {
@@ -34,11 +37,13 @@ class Event extends Entity
 
     /**
      * set event title
+     *
      * @param string $value property value
      * @param string|null $lang lang information
-     * @return self
+     * @return $this
+     * @throws \OpenAgenda\OpenAgendaException
      */
-    public function setTitle(string $value, ?string $lang = null)
+    public function setTitle(string $value, string $lang = null)
     {
         $value = $this->_i18nValue($value, $lang);
 
@@ -49,9 +54,11 @@ class Event extends Entity
 
     /**
      * set event keywords (old tags)
-     * @param string $value property value
-     * @param string $lang lang information
-     * @return self
+     *
+     * @param $keywords
+     * @param null $lang lang information
+     * @return $this
+     * @throws \OpenAgenda\OpenAgendaException
      */
     public function setKeywords($keywords, $lang = null)
     {
@@ -68,6 +75,12 @@ class Event extends Entity
         return $this;
     }
 
+    /**
+     * @param $keywords
+     * @param null $lang
+     * @return \OpenAgenda\Entity\Event
+     * @throws \OpenAgenda\OpenAgendaException
+     */
     public function setTags($keywords, $lang = null)
     {
         return $this->setKeywords($keywords, $lang);
@@ -75,11 +88,13 @@ class Event extends Entity
 
     /**
      * set event description. 200 max length and no html
+     *
      * @param string $value property value
-     * @param string $lang lang information
-     * @return self
+     * @param null $lang lang information
+     * @return $this
+     * @throws \OpenAgenda\OpenAgendaException
      */
-    public function setDescription($value, $lang = null)
+    public function setDescription(string $value, $lang = null)
     {
         $lang = $this->_getLang($lang);
 
@@ -114,30 +129,33 @@ class Event extends Entity
 
     /**
      * set free text
+     *
      * @param string $text property value
-     * @param string $lang lang information
+     * @param null $lang lang information
+     * @return $this
+     * @throws \OpenAgenda\OpenAgendaException
      * @deprecated 1.1 use setLongDescription
-     * @return self
      */
-    public function setFreeText($text, $lang = null)
+    public function setFreeText(string $text, $lang = null)
     {
         return $this->setLongDescription($text, $lang);
     }
 
     /**
      * set event long description (mark down)
+     *
      * @param string $text text or html or markdown
-     * @param string $lang lang information
-     * @return self
+     * @param null $lang lang information
+     * @return $this
+     * @throws \OpenAgenda\OpenAgendaException
      */
-    public function setLongDescription($text, $lang = null)
+    public function setLongDescription(string $text, $lang = null)
     {
         $lang = $this->_getLang($lang);
 
         $values = $this->_i18nValue($text, $lang);
 
         foreach ($values as $lang => $value) {
-
             $value = $this->_cleanHtml($value);
 
             $value = $this->_toMarkDown($value);
@@ -154,7 +172,10 @@ class Event extends Entity
 
     /**
      * attach the location object to event and set locationUid
+     *
      * @param Location $location entity
+     * @return \OpenAgenda\Entity\Event
+     * @throws \OpenAgenda\OpenAgendaException
      */
     public function setLocation(Location $location)
     {
@@ -173,19 +194,22 @@ class Event extends Entity
 
     /**
      * add timing to event, only if don't exists
+     *
      * @param array $datas timings : ['date' => '2017-11-15', 'begin' => '08:30', 'end' => '19:00']
-     * @return self
+     * @return $this
+     * @throws \OpenAgenda\OpenAgendaException
+     * @throws \Exception
      */
-    public function addTiming($datas)
+    public function addTiming(array $datas)
     {
         if (!isset($this->_properties['timings'])) {
             $this->_properties['timings'] = [];
         }
         if (!isset($datas['begin'])) {
-            throw new Exception("missing begin field", 1);
+            throw new OpenAgendaException('missing begin field', 1);
         }
         if (!isset($datas['end'])) {
-            throw new Exception("missing end field", 1);
+            throw new OpenAgendaException('missing end field', 1);
         }
 
         // use instance of DateTime only
@@ -224,13 +248,16 @@ class Event extends Entity
 
     /**
      * remove all timings and set to $timings
+     *
      * @param array $timings array of timing
+     * @return \OpenAgenda\Entity\Event
+     * @throws \OpenAgenda\OpenAgendaException
      */
-    public function setTimings($timings = [])
+    public function setTimings(array $timings = [])
     {
         $this->_properties['timings'] = [];
 
-        foreach ((array)$timings as $timing) {
+        foreach ($timings as $timing) {
             $this->addTiming($timing);
         }
 
@@ -239,28 +266,32 @@ class Event extends Entity
 
     /**
      * set event picture
+     *
      * @param string $file absolute path
+     * @return $this
+     * @throws \OpenAgenda\OpenAgendaException
      * @deprecated 1.1 use setImage
-     * @return self
      */
-    public function setPicture($file)
+    public function setPicture(string $file)
     {
         return $this->setImage($file);
     }
 
     /**
      * set event image
-     * @param string $file absolute path
-     * @return self
+     *
+     * @param string $file Absolute path
+     * @return $this
+     * @throws \OpenAgenda\OpenAgendaException
      */
-    public function setImage($file)
+    public function setImage(string $file)
     {
         if (empty($file)) {
-            return;
+            return $this;
         }
 
         if (!file_exists($file)) {
-            throw new Exception("image file does not exists", 1);
+            throw new OpenAgendaException('image file does not exists', 1);
         }
 
         // set properties, not image to skip auto setDirty
@@ -271,11 +302,13 @@ class Event extends Entity
 
     /**
      * set event entrance conditions
+     *
      * @param string $value property value
-     * @param string|null $lang  language
-     * @return self
+     * @param string|null $lang language
+     * @return $this
+     * @throws \OpenAgenda\OpenAgendaException
      */
-    public function setConditions($value, $lang = null)
+    public function setConditions(string $value, ?string $lang = null)
     {
         $value = $this->_i18nValue($value, $lang);
 
@@ -286,11 +319,13 @@ class Event extends Entity
 
     /**
      * setConditions alias
+     *
      * @param string $value property value
-     * @param string|null $lang  language
-     * @return self
+     * @param string|null $lang language
+     * @return $this
+     * @throws \OpenAgenda\OpenAgendaException
      */
-    public function setPricing($value, $lang = null)
+    public function setPricing(string $value, ?string $lang = null)
     {
         return $this->setConditions($value, $lang);
     }
@@ -325,9 +360,10 @@ class Event extends Entity
 
     /**
      * clean description html tags
-     * @param html $value worse html ever
+     *
+     * @param string $value worse html ever
      */
-    protected function _cleanHtml($value)
+    protected function _cleanHtml(string $value)
     {
         $config = HTMLPurifier_Config::createDefault();
 
@@ -363,10 +399,11 @@ class Event extends Entity
 
     /**
      * html to markdown converter
-     * @param  string $html html input
+     *
+     * @param string $html html input
      * @return string
      */
-    protected function _toMarkDown($html)
+    protected function _toMarkDown(string $html)
     {
         if ($html === strip_tags($html)) {
             return $html;
@@ -377,6 +414,10 @@ class Event extends Entity
         return $converter->convert($html);
     }
 
+    /**
+     * @param int|string $value
+     * @return int
+     */
     protected function _setAgendaUid($value)
     {
         return (int)$value;
@@ -384,11 +425,12 @@ class Event extends Entity
 
     /**
      * set event age
+     *
      * @param int $min min age
      * @param int $max max age
      * @retur self
      */
-    public function setAge($min = 0, $max = 120)
+    public function setAge(int $min = 0, int $max = 120)
     {
         $this->_properties['age'] = [
             'min' => $min,

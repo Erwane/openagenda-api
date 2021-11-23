@@ -10,8 +10,9 @@ class Agenda extends Entity
 {
     /**
      * set event keywords (old tags)
-     * @param string $value property value
-     * @return self
+     *
+     * @param $category
+     * @return $this
      */
     public function setCategory($category)
     {
@@ -23,7 +24,6 @@ class Agenda extends Entity
 
         return $this;
     }
-
 
     /**
      * @inheritDoc

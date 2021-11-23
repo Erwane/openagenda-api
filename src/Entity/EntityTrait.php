@@ -1,8 +1,10 @@
 <?php
+declare(strict_types=1);
+
 namespace OpenAgenda\Entity;
 
-use Exception;
 use InvalidArgumentException;
+use OpenAgenda\OpenAgendaException;
 
 trait EntityTrait
 {
@@ -34,7 +36,7 @@ trait EntityTrait
      * @param string $property Name of the property to access
      * @return mixed
      */
-    public function &__get($property)
+    public function &__get(string $property)
     {
         return $this->get($property);
     }
@@ -46,7 +48,7 @@ trait EntityTrait
      * @param mixed $value The value to set to the property
      * @return void
      */
-    public function __set($property, $value)
+    public function __set(string $property, $value)
     {
         $this->set($property, $value);
     }
@@ -64,44 +66,33 @@ trait EntityTrait
 
     /**
      * Sets a single property inside this entity.
-     *
      * ### Example:
-     *
      * ```
      * $entity->set('name', 'Andrew');
      * ```
-     *
      * It is also possible to mass-assign multiple properties to this entity
      * with one call by passing a hashed array as properties in the form of
      * property => value pairs
-     *
      * ### Example:
-     *
      * ```
      * $entity->set(['name' => 'andrew', 'id' => 1]);
      * echo $entity->name // prints andrew
      * echo $entity->id // prints 1
      * ```
-     *
      * Some times it is handy to bypass setter functions in this entity when assigning
      * properties. You can achieve this by disabling the `setter` option using the
      * `$options` parameter:
-     *
      * ```
      * $entity->set('name', 'Andrew', ['setter' => false]);
      * $entity->set(['name' => 'Andrew', 'id' => 1], ['setter' => false]);
      * ```
-     *
      * Mass assignment should be treated carefully when accepting user input, by default
      * entities will guard all fields when properties are assigned in bulk. You can disable
      * the guarding for a single set call with the `guard` option:
-     *
      * ```
      * $entity->set(['name' => 'Andrew', 'id' => 1], ['guard' => true]);
      * ```
-     *
      * You do not need to use the guard option when assigning properties individually:
-     *
      * ```
      * // No need to use the guard option.
      * $entity->set('name', 'Andrew');
@@ -119,10 +110,8 @@ trait EntityTrait
     public function set($property, $value = null, array $options = [])
     {
         if (is_string($property) && $property !== '') {
-            $guard = false;
             $property = [$property => $value];
         } else {
-            $guard = true;
             $options = (array)$value;
         }
 
@@ -158,9 +147,9 @@ trait EntityTrait
      * @return mixed
      * @throws \InvalidArgumentException if an empty property name is passed
      */
-    public function &get($property)
+    public function &get(string $property)
     {
-        if (!strlen((string)$property)) {
+        if (!strlen($property)) {
             throw new InvalidArgumentException('Cannot get an empty property');
         }
 
@@ -172,9 +161,7 @@ trait EntityTrait
         }
 
         if ($method) {
-            $result = $this->{$method}($value);
-
-            return $result;
+            $value = $this->{$method}($value);
         }
 
         return $value;
@@ -188,7 +175,7 @@ trait EntityTrait
      * @param string $type the accessor type ('get' or 'set')
      * @return string method name or empty string (no method available)
      */
-    protected static function _accessor($property, $type)
+    protected static function _accessor(string $property, string $type): string
     {
         $class = static::class;
 
@@ -231,7 +218,7 @@ trait EntityTrait
      * it was not changed
      * @return $this
      */
-    public function setDirty($property, $isDirty)
+    public function setDirty(string $property, bool $isDirty)
     {
         if ($isDirty === false) {
             unset($this->_dirty[$property]);
@@ -256,6 +243,7 @@ trait EntityTrait
 
     /**
      * mark the entity as not dirty at all
+     *
      * @return void
      */
     public function markAsNotDirty()
@@ -295,28 +283,27 @@ trait EntityTrait
      * @param bool|null $new true if it is known this instance was not yet persisted
      * @return bool Whether or not the entity has been persisted.
      */
-    public function isNew($new = null)
+    public function isNew(?bool $new = null)
     {
         if ($new === null) {
             return $this->_new;
         }
-
-        $new = (bool)$new;
 
         return $this->_new = $new;
     }
 
     /**
      * set property with i18n datas
-     * @param string $name   property name
-     * @param object $object property value by lang
-     * @throws Exception
-     * @return self
+     *
+     * @param string $name property name
+     * @param array|\Traversable $object property value by lang
+     * @return $this
+     * @throws \OpenAgenda\OpenAgendaException
      */
-    public function setI18nProperty($name, $object)
+    public function setI18nProperty(string $name, $object)
     {
         if (!is_object($object) && !is_array($object)) {
-            throw new Exception("invalid property object");
+            throw new OpenAgendaException('invalid property object');
         }
 
         foreach ($object as $lang => $value) {
@@ -338,7 +325,6 @@ trait EntityTrait
     /**
      * Returns an array with all the properties that have been set
      * to this entity
-     *
      * This method will recursively transform entities assigned to properties
      * into arrays as well.
      *
@@ -352,14 +338,8 @@ trait EntityTrait
             if (is_array($value)) {
                 $result[$property] = [];
                 foreach ($value as $k => $entity) {
-                    if ($entity instanceof EntityInterface) {
-                        $result[$property][$k] = $entity->toArray();
-                    } else {
-                        $result[$property][$k] = $entity;
-                    }
+                    $result[$property][$k] = $entity;
                 }
-            } elseif ($value instanceof EntityInterface) {
-                $result[$property] = $value->toArray();
             } else {
                 $result[$property] = $value;
             }

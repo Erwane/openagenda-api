@@ -38,7 +38,7 @@ class Cache
      *
      * @param string $key cache key
      * @param mixed $value cache value
-     * @param int $ttl ttl cache lifetime
+     * @param int|\DateInterval|null $ttl
      * @return mixed
      * @deprecated 2.1.0
      * @codeCoverageIgnore
@@ -70,7 +70,7 @@ class Cache
      *
      * @param string $key Cache key name
      * @param mixed $value Value
-     * @param int|string|null $ttl
+     * @param int|\DateInterval|null $ttl
      * @return bool
      */
     public static function set(string $key, $value, $ttl = null): bool

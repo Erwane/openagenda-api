@@ -1,18 +1,26 @@
 <?php
+declare(strict_types=1);
+
 namespace OpenAgenda\Entity;
 
-use Exception;
+use OpenAgenda\OpenAgendaException;
 
 abstract class Entity
 {
     use EntityTrait;
 
     /**
+     * @var bool
+     */
+    protected $_new = false;
+
+    /**
      * constructor
-     * @param array $options array of datas
+     *
+     * @param array $properties
      * @param array $options list of options to use when creating this entity
      */
-    public function __construct($properties = [], $options = [])
+    public function __construct(array $properties = [], array $options = [])
     {
         $options += [
             'useSetters' => true,
@@ -34,42 +42,45 @@ abstract class Entity
 
     /**
      * get entity datas for API
+     *
      * @return array
      */
-    public abstract function toDatas();
+    abstract public function toDatas();
 
     /**
      * set event uid (or id)
+     *
      * @param int $value property value
-     * @return self
+     * @return $this
      */
-    protected function _setUid($value)
+    protected function _setUid(int $value)
     {
-        $this->_properties['id'] = (int)$value;
+        $this->_properties['id'] = $value;
 
         return $this->_properties['id'];
     }
 
     /**
      * setUid alias
+     *
      * @param int $value property value
      */
-    protected function _setId($value)
+    protected function _setId(int $value)
     {
-        $this->_properties['uid'] = (int)$value;
+        $this->_properties['uid'] = $value;
 
         return $this->_properties['uid'];
     }
 
     /**
      * set global event language
+     *
      * @param string $value property value
-     * @return self
+     * @return $this
+     * @throws \OpenAgenda\OpenAgendaException
      */
-    public function setLang($value)
+    public function setLang(string $value)
     {
-        $value = (string)$value;
-
         if ($this->_isValidLanguage($value)) {
             $this->_properties['lang'] = $value;
         }
@@ -79,24 +90,27 @@ abstract class Entity
 
     /**
      * setLang alias
+     *
      * @param string $value property value
-     * @return self
+     * @return $this
+     * @throws \OpenAgenda\OpenAgendaException
      */
-    public function setLanguage($value)
+    public function setLanguage(string $value)
     {
         return $this->setLang($value);
     }
 
     /**
      * return true if valide language code
-     * @param  string  $lang code
+     *
+     * @param string $lang code
      * @return bool
-     * @throws Exception if invalid
+     * @throws \OpenAgenda\OpenAgendaException
      */
-    protected function _isValidLanguage($lang)
+    protected function _isValidLanguage(string $lang)
     {
         if (!preg_match('/^(en|fr|es|de|it|ne|pt|ar|is)$/', $lang)) {
-            throw new Exception("invalid language code", 1);
+            throw new OpenAgendaException('invalid language code', 1);
         }
 
         return true;
@@ -104,31 +118,38 @@ abstract class Entity
 
     /**
      * return lang $lang or default
-     * @param string $lang lang information
+     *
+     * @param string|null $lang lang information
      * @return string lang
-     * @throws Exception
+     * @throws \OpenAgenda\OpenAgendaException
      */
-    protected function _getLang($lang)
+    protected function _getLang(?string $lang = null): string
     {
         // Throw exception if no lang set
-        if (is_null($lang) && is_null($this->_properties['lang'])) {
-            throw new Exception("default lang not set. Use setLang()", 1);
+        if ($lang === null && !isset($this->_properties['lang'])) {
+            throw new OpenAgendaException('default lang not set. Use setLang()', 1);
         }
 
         // chech if lang is valid
-        if (!is_null($lang)) {
+        if ($lang !== null) {
             $this->_isValidLanguage($lang);
         }
 
         // return right lang
-        return is_null($lang) ? $this->_properties['lang'] : (string)$lang;
+        return $lang === null ? $this->_properties['lang'] : $lang;
     }
 
-    protected function _i18nValue($data, $lang = null)
+    /**
+     * @param string|mixed $data
+     * @param string|null $lang
+     * @return object|array|false
+     * @throws \OpenAgenda\OpenAgendaException
+     */
+    protected function _i18nValue($data, string $lang = null)
     {
         if (is_string($data)) {
             $ary = [
-                $this->_getLang($lang) => $data
+                $this->_getLang($lang) => $data,
             ];
 
             $value = json_decode(json_encode($ary));
