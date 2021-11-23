@@ -1,5 +1,10 @@
-vendor
+vendor/
 composer.lock
+composer.phar
+.DS_Store
+testing/
+tests/log
+build
 
 # OS generated files #
 ######################
@@ -11,3 +16,27 @@ composer.lock
 Icon?
 ehthumbs.db
 Thumbs.db
+
+# Tool specific files #
+#######################
+# vim
+*~
+*.swp
+*.swo
+# sublime text & textmate
+*.sublime-*
+*.stTheme.cache
+*.tmlanguage.cache
+*.tmPreferences.cache
+# Eclipse
+.settings/*
+# JetBrains, aka PHPStorm, IntelliJ IDEA
+.idea/*
+# NetBeans
+nbproject/*
+# Visual Studio Code
+.vscode
+# Sass preprocessor
+.sass-cache/
+.phpstorm.meta.php
+.phpunit.result.cache

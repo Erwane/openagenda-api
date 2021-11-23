@@ -1,13 +1,23 @@
 <?php
+declare(strict_types=1);
+
 namespace OpenAgenda\Entity;
 
-use Exception;
-
+/**
+ * @property int $id
+ * @property int $uid
+ * @property float $latitude
+ * @property float $longitude
+ * @property string $pricing
+ * @property string $pricingInfo
+ * @property array $dates
+ */
 class Location extends Entity
 {
     public function import($locationData)
     {
-        $this->uid = $locationData['uid'];
+        $this->id = $locationData['uid'];
+        $this->uid = $this->id;
         $this->latitude = $locationData['latitude'];
         $this->longitude = $locationData['longitude'];
 
@@ -57,9 +67,7 @@ class Location extends Entity
      */
     public function toDatas()
     {
-        $datas = [];
-
-        return $datas;
+        return [];
     }
 
     /**

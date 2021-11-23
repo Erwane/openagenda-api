@@ -1,5 +1,6 @@
 <?php
 /**
+ * @noinspection PhpParamsInspection
  * @noinspection PhpUnhandledExceptionInspection
  */
 declare(strict_types=1);
@@ -10,6 +11,7 @@ use GuzzleHttp\Exception\InvalidArgumentException;
 use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Response;
+use GuzzleHttp\Psr7\Uri;
 use OpenAgenda\Client;
 use OpenAgenda\OpenAgendaException;
 use PHPUnit\Framework\TestCase;
@@ -170,8 +172,8 @@ class ClientTest extends TestCase
         $client->expects(self::once())
             ->method('request')
             ->with(
-                'POST',
-                'https://api.openagenda.com/v2/agendas/1/event/1',
+                'DELETE',
+                new Uri('https://api.openagenda.com/v2/agendas/1/events/1'),
                 [
                     'headers' => [
                         'Content-Type' => 'text/plain',
@@ -184,7 +186,7 @@ class ClientTest extends TestCase
             ->willReturn(new Response(200, [], '{"json":"object"}'));
 
         $client->setAccessToken('testing');
-        $response = $client->delete('/agendas/1/event/1', ['headers' => ['Content-Type' => 'text/plain']]);
+        $response = $client->delete('/agendas/1/events/1', ['headers' => ['Content-Type' => 'text/plain']]);
 
         $this->assertInstanceOf(ResponseInterface::class, $response);
     }

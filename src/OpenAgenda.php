@@ -1,10 +1,9 @@
 <?php
+declare(strict_types=1);
+
 namespace OpenAgenda;
 
-use DateTime;
 use Exception;
-use GuzzleHttp\Exception\ClientException;
-use GuzzleHttp\Exception\RequestException;
 use OpenAgenda\Entity\Agenda;
 use OpenAgenda\Entity\Event;
 use OpenAgenda\Entity\Location;
@@ -12,150 +11,152 @@ use OpenAgenda\Entity\Location;
 class OpenAgenda
 {
     /**
-     * api secret token
-     * @var string|null
-     */
-    protected $_public = null;
-
-    /**
-     * api secret token
-     * @var string|null
-     */
-    protected $_secret = null;
-
-    /**
      * http client
-     * @var OpenAgenda\Client|null
+     *
+     * @var \OpenAgenda\Client|null
      */
-    public $client = null;
+    protected $client = null;
 
     /**
-     * locations instances
-     * @var array
+     * Api public key
      */
-    protected $_locations = [];
+    protected $public;
 
-    protected $_baseUrl = null;
+    /**
+     * api secret token
+     *
+     * @var string|null
+     */
+    protected $secret = null;
+
+    protected $baseUrl = null;
 
     /**
      * openagenda uid to publish
+     *
      * @var int|null
      */
     protected $_uid = null;
 
     /**
      * constuctor
+     *
+     * @param string $apiPublic
      * @param string $apiSecret openagenda api secret
      */
-    public function __construct($apiPublic, $apiSecret)
+    public function __construct(string $apiPublic, string $apiSecret)
     {
-        $this->_public = $apiPublic;
-
-        $this->_secret = $apiSecret;
-
-        $this->client = new Client();
-        $this->client->setPublicKey($this->_public);
-
-        $this->_initToken();
-    }
-
-    /**
-     * get access token from API or local cache
-     * @return string api access_token
-     */
-    protected function _initToken()
-    {
-        $accessToken = Cache::read('openagenda-token');
-
-        if (empty($accessToken)) {
-            $datas = [
-                'grant_type' => 'authorization_code',
-                'code' => $this->_secret,
-            ];
-
-            try {
-                $response = $this->client->post('/v1/requestAccessToken', $datas, false);
-                $accessToken = $response->access_token;
-
-                Cache::write('openagenda-token', $response->access_token, $response->expires_in);
-            } catch (RequestException $e) {
-                $request = $e->getRequest();
-                $response = $e->getResponse();
-                if ($e->hasResponse()) {
-                    throw new Exception($response->getBody()->getContents());
-                }
-            } catch (Exception $e) {
-                throw $e;
-            }
-        }
-
-        $this->client->setAccessToken($accessToken);
+        $this->public = $apiPublic;
+        $this->secret = $apiSecret;
     }
 
     /**
      * base url for relative links
+     *
      * @param string $url base url
      */
-    public function setBaseUrl($url)
+    public function setBaseUrl(string $url)
     {
-        if (!substr($url, -1, 1) !== '/') {
+        $last = substr($url, -1, 1);
+        if ($last !== '/') {
             $url .= '/';
         }
 
-        $this->_baseUrl = $url;
+        $this->baseUrl = $url;
 
         return $this;
     }
 
     /**
      * set agenda uid
-     * @param   int $uid agenda uid
-     * @return  self
+     *
+     * @param int $uid agenda uid
+     * @return self
      */
-    public function setAgendaUid($uid)
+    public function setAgendaUid(int $uid)
     {
-        $this->_uid = (int)$uid;
+        $this->_uid = $uid;
 
         return $this;
     }
 
     /**
      * get agenda uid
-     * @return  int
+     *
+     * @return int|null
      */
-    public function getAgendaUid()
+    public function getAgendaUid(): ?int
     {
-        return (int)$this->_uid;
+        return $this->_uid;
     }
 
     public function newEvent()
     {
-        $event = new Event;
+        $event = new Event();
 
-        $event->baseUrl = $this->_baseUrl;
+        $event->set('baseUrl', $this->baseUrl);
 
         return $event;
     }
 
     /**
+     * get access token from API or local cache
+     *
+     * @return string|null
+     */
+    public function getAccessToken(): ?string
+    {
+        $accessToken = Cache::get('openagenda-token');
+
+        if (empty($accessToken)) {
+            try {
+                $response = $this->getClient()->post('/v2/requestAccessToken', [
+                    'json' => [
+                        'grant-type' => 'authorization_code',
+                        'code' => $this->secret,
+                    ],
+                ]);
+
+                $data = json_decode($response->getBody()->getContents(), true);
+
+                if ($response->getStatusCode() !== 200 || empty($data['access_token'])) {
+                    return null;
+                }
+
+                $accessToken = $data['access_token'];
+
+                Cache::set('openagenda-token', $accessToken, $data['expires_in']);
+            } catch (OpenAgendaException $e) {
+                return null;
+            }
+        }
+
+        return $accessToken;
+    }
+
+    /**
      * get Location object with uid
-     * @param  array|int $datas location id or datas
+     *
+     * @param array|int $datas location id or datas
      * @return Location object
+     * @throws \OpenAgenda\OpenAgendaException
      */
     public function getLocation($datas)
     {
         // create location
-        $location = new Location;
+        $location = new Location();
 
         if (is_numeric($datas)) {
             $datas = ['id' => $datas];
         } elseif (!is_array($datas)) {
-            throw new Exception("invalid location data", 1);
+            throw new OpenAgendaException('invalid location data', 1);
         }
 
         if (!isset($datas['id'])) {
             $datas['id'] = $this->createLocation($datas);
             $location->isNew(true);
+        } else {
+            $location->isNew(false);
         }
 
         // set Id
@@ -177,115 +178,172 @@ class OpenAgenda
 
     /**
      * create location
-     * @param  array $options               location options
-     * @return int                          location id
+     *
+     * @param array $options location options
+     * @return int|null Location id
+     * @throws \OpenAgenda\OpenAgendaException
      */
-    public function createLocation($options)
+    public function createLocation(array $options): ?int
     {
-        if (!isset($options['placename'])) {
-            throw new Exception("missing placename field", 1);
+        if (!isset($options['name'])) {
+            throw new OpenAgendaException('missing name field', 1);
         }
         if (!isset($options['latitude'])) {
-            throw new Exception("missing latitude field", 1);
+            throw new OpenAgendaException('missing latitude field', 1);
         }
         if (!isset($options['longitude'])) {
-            throw new Exception("missing longitude field", 1);
+            throw new OpenAgendaException('missing longitude field', 1);
         }
         if (!isset($options['address'])) {
-            throw new Exception("missing address field", 1);
+            throw new OpenAgendaException('missing address field', 1);
+        }
+        if (!isset($options['countryCode'])) {
+            throw new OpenAgendaException('missing countryCode field', 1);
         }
 
         // format
         $options['latitude'] = (float)$options['latitude'];
         $options['longitude'] = (float)$options['longitude'];
 
-        // Agenda uid
-        $options['agenda_uid'] = $this->_uid;
-
         try {
-            $response = $this->client->post('/v1/locations', ['data' => json_encode($options)]);
+            $response = $this->getClient()
+                ->setAccessToken($this->getAccessToken())
+                ->post(
+                    sprintf('/v2/agendas/%d/locations', $this->_uid),
+                    ['data' => json_encode($options)]
+                );
 
-            return (int)$response->uid;
-        } catch (ClientException $e) {
-            return false;
+            if ($response->getStatusCode() !== 200) {
+                throw new OpenAgendaException('Location creation failed');
+            }
+
+            $data = json_decode($response->getBody()->getContents(), true);
+
+            return $data['location']['uid'] ?? null;
+        } catch (OpenAgendaException $e) {
+            return null;
         }
     }
 
-    public function getUidFromSlug($slug)
+    /**
+     * @return \OpenAgenda\Client
+     */
+    public function getClient(): Client
+    {
+        if (!$this->client) {
+            $this->client = new Client();
+
+            $this->client->setPublicKey($this->public);
+        }
+
+        return $this->client;
+    }
+
+    /**
+     * @param \OpenAgenda\Client $client
+     * @return $this
+     */
+    public function setClient(Client $client)
+    {
+        $this->client = $client;
+
+        $this->client->setPublicKey($this->public);
+
+        return $this;
+    }
+
+    /**
+     * @param $slug
+     * @return \OpenAgenda\Entity\Agenda
+     * @throws \OpenAgenda\OpenAgendaException
+     */
+    public function getUidFromSlug($slug): ?Agenda
     {
         if (is_numeric($slug)) {
             return new Agenda(['uid' => $slug]);
         }
 
-        $agendaIds = Cache::read('openagenda-id');
+        $agendaIds = Cache::get('openagenda-id');
 
         if (empty($agendaIds)) {
             $agendaIds = [];
         }
 
         if (empty($agendaIds[$slug])) {
-            try {
-                $response = $this->client->get('/v1/agendas/uid/' . $slug);
+            $options = [
+                'query' => [
+                    'limit' => 1,
+                    'slug[]' => $slug,
+                ],
+            ];
 
-                $agendaIds[$slug] = $response->data->uid;
+            $response = $this->getClient()->get('/v2/agendas', $options);
+            $data = json_decode($response->getBody()->getContents(), true);
 
-                Cache::write('openagenda-id', $agendaIds, 86400 * 365);
-            } catch (RequestException $e) {
-                $request = $e->getRequest();
-                if ($e->hasResponse()) {
-                    $response = $e->getResponse();
-                    throw new Exception($response->getBody()->getContents());
-                } else {
-                    throw new Exception($e->getMessage());
-                }
+            if ($response->getStatusCode() !== 200 || empty($data['agendas'][0]['uid'])) {
+                return null;
             }
+
+            $uid = $data['agendas'][0]['uid'];
+            $agendaIds[$slug] = $uid;
+
+            Cache::set('openagenda-id', $agendaIds, 86400 * 365);
+        } else {
+            $uid = $agendaIds[$slug];
         }
 
-        return new Agenda(['uid' => $agendaIds[$slug]]);
+        return $uid ? new Agenda(['uid' => $uid]) : null;
     }
 
-    public function getAgendaSettings()
+    /**
+     * @return array|null
+     */
+    public function getAgendaSettings(): ?array
     {
         try {
-            $response = $this->client->get('/v2/agendas/' . $this->_uid . '/settings');
+            $response = $this->getClient()->get('/v2/agendas/' . $this->_uid);
 
-            return $response->form;
-        } catch (Exception $e) {
-            return false;
+            $return = json_decode($response->getBody()->getContents(), true);
+
+            return $return ?? null;
+        } catch (OpenAgendaException $e) {
+            return null;
         }
     }
 
     /**
      * publish event to openagenda and set uid to entity
-     * @param  Event  $event entity
-     * @return void|bool
+     *
+     * @param Event $event entity
+     * @return int
+     * @throws \OpenAgenda\OpenAgendaException
      */
-    public function publishEvent(Event $event)
+    public function publishEvent(Event $event): int
     {
-        try {
-            $response = $this->client->post('/v2/agendas/' . $this->_uid . '/events', $event->toDatas());
+        $response = $this->getClient()
+            ->setAccessToken($this->getAccessToken())
+            ->post('/v2/agendas/' . $this->_uid . '/events', $event->toDatas());
 
-            $event->id = $event->uid = $response->event->uid;
-        } catch (RequestException $e) {
-            $request = $e->getRequest();
-            $rawResponse = $e->getResponse();
-            if ($e->hasResponse()) {
-                return false;
-            }
-        } catch (ClientException $e) {
-            return false;
+        $data = json_decode($response->getBody()->getContents(), true);
+        if (!$data || empty($data['event']['uid'])) {
+            throw new OpenAgendaException('Publish event failed');
         }
+
+        $event->id = $event->uid = $data['event']['uid'];
+
+        return $event->id;
     }
 
     /**
      * update event to openagenda
-     * @param  Event  $event entity
+     *
+     * @param Event $event entity
      * @return bool
      */
-    public function updateEvent(Event $event)
+    public function updateEvent(Event $event): bool
     {
-        if (is_null($event->uid) || $event->uid <= 0) {
-            throw new Exception("event has no uid");
+        if (!$event->uid) {
+            return false;
         }
 
         try {
@@ -293,139 +351,83 @@ class OpenAgenda
                 return true;
             }
 
-            $response = $this->client->post('/v2/agendas/' . $this->_uid . '/events/' . $event->uid, $event->toDatas());
+            $response = $this->getClient()
+                ->setAccessToken($this->getAccessToken())
+                ->post('/v2/agendas/' . $this->_uid . '/events/' . $event->uid, $event->toDatas());
+            $data = json_decode($response->getBody()->getContents(), true);
 
-            return true;
+            return $response->getStatusCode() === 200 && !empty($data['success']);
         } catch (Exception $e) {
             return false;
-        }
-    }
-
-    /**
-     * attach event to agenda
-     * @param  Event  $event  entity
-     * @param  Agenda $agenda entity
-     * @return Object|false
-     */
-    public function attachEventToAgenda(Event $event, Agenda $agenda)
-    {
-        $datas = [
-            'data' => json_encode(['event_uid' => $event->uid]),
-        ];
-
-        try {
-            $response = $this->client->post('/v1/agendas/' . $agenda->uid . '/events', $datas);
-        } catch (RequestException $e) {
-            return false;
-        }
-    }
-
-    /**
-     * detach event from agenda
-     * @param  Event|int $event         id or object
-     * @param  Agenda|string $agenda    name or object
-     * @return bool
-     */
-    public function detachEventFromAgenda($event, $agenda)
-    {
-        if (is_numeric($event)) {
-            $event = $this->getEvent((int)$event);
-        }
-
-        if (is_numeric($agenda) || is_string($agenda)) {
-            $agenda = $this->getAgenda($agenda);
-        }
-
-        // not an event
-        if (is_null($event->uid) || $event->uid <= 0) {
-            throw new Exception("require valid event");
-        }
-
-        // not an agenda
-        if (is_null($agenda->uid) || $agenda->uid <= 0) {
-            throw new Exception("require valid agenda");
-        }
-
-        try {
-            $response = $this->client->delete('/v1/agendas/' . $agenda->uid . '/events/' . $event->uid);
-
-            if ($response->code === 200) {
-                return $response;
-            }
-
-            switch ($response->error) {
-                case 'TO DEFINE':
-                    throw new Exception("can't detach", 1);
-
-                default:
-                    return $response;
-            }
-
-        } catch (Exception $e) {
-            throw $e;
-        }
-    }
-
-    /**
-     * delete event from open agenda.
-     * Detach from agenda if attached
-     * @param  int|Event $event entity or uid
-     * @return Object           json response
-     */
-    public function deleteEvent($event)
-    {
-        if (is_numeric($event)) {
-            $event = $this->getEvent((int)$event);
-        }
-
-        // not an event
-        if (is_null($event->uid) || $event->uid <= 0) {
-            throw new Exception("require valid event");
-        }
-
-        try {
-            $response = $this->client->delete('/v2/agendas/' . $this->_uid . '/events/' . $event->uid);
-
-            return $response;
-        } catch (Exception $e) {
-            throw $e;
         }
     }
 
     /**
      * get event from openagenda and return Entity
-     * @param  int $eventId openagenda event id
+     *
+     * @param int $eventId openagenda event id
      * @return \OpenAgenda\Entity\Event
      */
-    public function getEvent($eventId)
+    public function getEvent(int $eventId): ?Event
     {
-        if (!is_numeric($eventId)) {
-            throw new Exception("event id should be integer", 1);
+        try {
+            $response = $this->getClient()->get(sprintf('/v2/agendas/%d/events/%d', $this->_uid, $eventId));
+
+            if ($response->getStatusCode() !== 200) {
+                return null;
+            }
+        } catch (OpenAgendaException $e) {
+            return null;
         }
 
-        $result = $this->client->get('/v1/events/' . (int)$eventId);
+        $decoded = json_decode($response->getBody()->getContents(), true);
 
-        if ($result->data === false) {
-            throw new Exception("event don't exists", 1);
-        }
-
-        // transform object to array
-        $arrayDatas = json_decode(json_encode($result->data), true);
-
-        // tags as keywords
-        $arrayDatas['keywords'] = $arrayDatas['tags'];
+        $data = $decoded['event'];
 
         // location
-        $location = new Location;
-        if (!empty($arrayDatas['locations'][0])) {
-            $location->import($arrayDatas['locations'][0]);
+        $location = new Location();
+        if (!empty($data['location'])) {
+            $location->import($data['location']);
         }
 
         // create event entity
-        $event = new Event($arrayDatas, ['useSetters' => false, 'markClean' => true]);
-        $event->id = $arrayDatas['uid'];
-        $event->setLocation($location)->setDirty('location', false);
+        $event = new Event($data, ['useSetters' => false, 'markClean' => true]);
+        $event->set(['id' => $data['uid'], 'baseUrl' => $this->baseUrl])
+            ->setLocation($location)
+            ->setDirty('location', false);
 
         return $event;
+    }
+
+    /**
+     * delete event from open agenda.
+     * Detach from agenda if attached
+     *
+     * @param \OpenAgenda\Entity\Event|int $event entity or uid
+     * @return bool
+     * @throws \OpenAgenda\OpenAgendaException
+     */
+    public function deleteEvent($event): bool
+    {
+        if (is_numeric($event)) {
+            $event = $this->getEvent((int)$event);
+        }
+
+        // not an event
+        if (!$event || !$event->uid) {
+            throw new OpenAgendaException('require valid event');
+        }
+
+        $response = $this->getClient()
+            ->setAccessToken($this->getAccessToken())
+            ->delete('/v2/agendas/' . $this->_uid . '/events/' . $event->uid);
+
+        if ($response->getStatusCode() !== 200) {
+            return false;
+        }
+
+        $data = json_decode($response->getBody()->getContents(), true);
+
+        return $data['success'] ?? false;
     }
 }

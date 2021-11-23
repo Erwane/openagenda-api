@@ -1,6 +1,11 @@
 <?php
+declare(strict_types=1);
+
 namespace OpenAgenda\Entity;
 
+/**
+ * @property int $uid
+ */
 class Agenda extends Entity
 {
     /**

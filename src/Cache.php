@@ -81,4 +81,9 @@ class Cache
             return false;
         }
     }
+
+    public static function clear(): bool
+    {
+        return static::cache()->clear();
+    }
 }

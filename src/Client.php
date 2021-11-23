@@ -87,6 +87,7 @@ class Client extends GuzzleClient
      * @param $options
      * @return \Psr\Http\Message\ResponseInterface
      * @throws \OpenAgenda\OpenAgendaException
+     * @noinspection PhpMultipleClassDeclarationsInspection
      */
     protected function doRequest(callable $callable, $uri, $options): ResponseInterface
     {
@@ -114,10 +115,17 @@ class Client extends GuzzleClient
 
             return $callable($uri, $options);
         } catch (RequestException $e) {
-            $response = $e->getResponse();
-            $json = json_decode((string)$response->getBody(), true);
+            if ($e->hasResponse()) {
+                $response = $e->getResponse();
+                $json = json_decode((string)$response->getBody(), true);
+                $code = $response->getStatusCode();
+                $message = $json['message'];
+            } else {
+                $code = $e->getCode();
+                $message = $e->getMessage();
+            }
 
-            throw new OpenAgendaException($json['message'], $e->getResponse()->getStatusCode());
+            throw new OpenAgendaException($message, $code);
         } catch (GuzzleException $e) {
             throw new OpenAgendaException($e->getMessage(), $e->getCode());
         }
@@ -214,7 +222,7 @@ class Client extends GuzzleClient
 
             $o['headers'] = $headers;
 
-            return $this->request('POST', $u, $o);
+            return $this->request('DELETE', $u, $o);
         }, $uri, $options);
     }
 }

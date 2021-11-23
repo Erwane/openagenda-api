@@ -8,6 +8,15 @@ use HTMLPurifier_Config;
 use HTMLPurifier_TagTransform_Simple;
 use League\HTMLToMarkdown\HtmlConverter;
 
+/**
+ * @property int $id
+ * @property int $uid
+ * @property int $locationUid
+ * @property \OpenAgenda\Entity\Location $location
+ * @property int $state
+ * @property string $image
+ * @property string|null $baseUrl
+ */
 class Event extends Entity
 {
 
@@ -16,9 +25,9 @@ class Event extends Entity
      * @param bool $value property value
      * @return self
      */
-    public function setState($value)
+    public function setState(bool $value)
     {
-        $this->_properties['state'] = (bool)$value;
+        $this->_properties['state'] = $value;
 
         return $this;
     }
@@ -26,10 +35,10 @@ class Event extends Entity
     /**
      * set event title
      * @param string $value property value
-     * @param string $lang lang information
+     * @param string|null $lang lang information
      * @return self
      */
-    public function setTitle($value, $lang = null)
+    public function setTitle(string $value, ?string $lang = null)
     {
         $value = $this->_i18nValue($value, $lang);
 
@@ -303,7 +312,7 @@ class Event extends Entity
 
         $return = [
             'publish' => $this->state,
-            'data' => json_encode($datas),
+            'data' => $datas,
         ];
 
         // picture
