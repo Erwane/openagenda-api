@@ -166,10 +166,10 @@ class Client extends GuzzleClient
     /**
      * transform a $array options to multipart array
      *
-     * @param array $data options and datas
+     * @param string|array $data options and datas
      * @return array
      */
-    private function _optionsToMultipart(array $data)
+    private function _optionsToMultipart($data)
     {
         $return = [];
 
@@ -178,7 +178,7 @@ class Client extends GuzzleClient
             unset($data['image']);
         }
 
-        $return[] = ['name' => 'data', 'contents' => json_encode($data)];
+        $return[] = ['name' => 'data', 'contents' => is_array($data) ? json_encode($data) : $data];
 
         return $return;
     }
