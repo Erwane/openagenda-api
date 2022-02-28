@@ -50,12 +50,12 @@ abstract class Entity
     /**
      * set event uid (or id)
      *
-     * @param int $value property value
-     * @return $this
+     * @param int|string $value property value
+     * @return int
      */
-    protected function _setUid(int $value)
+    protected function _setUid($value)
     {
-        $this->_properties['id'] = $value;
+        $this->_properties['id'] = (int)$value;
 
         return $this->_properties['id'];
     }
@@ -63,11 +63,11 @@ abstract class Entity
     /**
      * setUid alias
      *
-     * @param int $value property value
+     * @param int|string $value property value
      */
-    protected function _setId(int $value)
+    protected function _setId($value)
     {
-        $this->_properties['uid'] = $value;
+        $this->_properties['uid'] = (int)$value;
 
         return $this->_properties['uid'];
     }

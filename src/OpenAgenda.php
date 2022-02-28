@@ -110,14 +110,14 @@ class OpenAgenda
 
         if (empty($accessToken)) {
             try {
-                $response = $this->getClient()->post('/v2/requestAccessToken', [
+                $response = $this->getClient()->post('/requestAccessToken', [
                     'json' => [
                         'grant-type' => 'authorization_code',
                         'code' => $this->secret,
                     ],
                 ]);
 
-                $data = json_decode($response->getBody()->getContents(), true);
+                $data = json_decode((string)$response->getBody(), true);
 
                 if ($response->getStatusCode() !== 200 || empty($data['access_token'])) {
                     return null;
@@ -209,7 +209,7 @@ class OpenAgenda
             $response = $this->getClient()
                 ->setAccessToken($this->getAccessToken())
                 ->post(
-                    sprintf('/v2/agendas/%d/locations', $this->_uid),
+                    sprintf('/agendas/%d/locations', $this->_uid),
                     ['data' => json_encode($options)]
                 );
 
@@ -217,7 +217,7 @@ class OpenAgenda
                 throw new OpenAgendaException('Location creation failed');
             }
 
-            $data = json_decode($response->getBody()->getContents(), true);
+            $data = json_decode((string)$response->getBody(), true);
 
             return $data['location']['uid'] ?? null;
         } catch (OpenAgendaException $e) {
@@ -277,8 +277,8 @@ class OpenAgenda
                 ],
             ];
 
-            $response = $this->getClient()->get('/v2/agendas', $options);
-            $data = json_decode($response->getBody()->getContents(), true);
+            $response = $this->getClient()->get('/agendas', $options);
+            $data = json_decode((string)$response->getBody(), true);
 
             if ($response->getStatusCode() !== 200 || empty($data['agendas'][0]['uid'])) {
                 return null;
@@ -292,7 +292,7 @@ class OpenAgenda
             $uid = $agendaIds[$slug];
         }
 
-        return $uid ? new Agenda(['uid' => $uid]) : null;
+        return new Agenda(['uid' => $uid]);
     }
 
     /**
@@ -301,9 +301,9 @@ class OpenAgenda
     public function getAgendaSettings(): ?array
     {
         try {
-            $response = $this->getClient()->get('/v2/agendas/' . $this->_uid);
+            $response = $this->getClient()->get('/agendas/' . $this->_uid);
 
-            $return = json_decode($response->getBody()->getContents(), true);
+            $return = json_decode((string)$response->getBody(), true);
 
             return $return ?? null;
         } catch (OpenAgendaException $e) {
@@ -322,9 +322,9 @@ class OpenAgenda
     {
         $response = $this->getClient()
             ->setAccessToken($this->getAccessToken())
-            ->post('/v2/agendas/' . $this->_uid . '/events', $event->toDatas());
+            ->post('/agendas/' . $this->_uid . '/events', $event->toDatas());
 
-        $data = json_decode($response->getBody()->getContents(), true);
+        $data = json_decode((string)$response->getBody(), true);
         if (!$data || empty($data['event']['uid'])) {
             throw new OpenAgendaException('Publish event failed');
         }
@@ -353,8 +353,8 @@ class OpenAgenda
 
             $response = $this->getClient()
                 ->setAccessToken($this->getAccessToken())
-                ->post('/v2/agendas/' . $this->_uid . '/events/' . $event->uid, $event->toDatas());
-            $data = json_decode($response->getBody()->getContents(), true);
+                ->post('/agendas/' . $this->_uid . '/events/' . $event->uid, $event->toDatas());
+            $data = json_decode((string)$response->getBody(), true);
 
             return $response->getStatusCode() === 200 && !empty($data['success']);
         } catch (Exception $e) {
@@ -371,13 +371,13 @@ class OpenAgenda
     public function getEvent(int $eventId): ?Event
     {
         try {
-            $response = $this->getClient()->get(sprintf('/v2/agendas/%d/events/%d', $this->_uid, $eventId));
+            $response = $this->getClient()->get(sprintf('/agendas/%d/events/%d', $this->_uid, $eventId));
 
             if ($response->getStatusCode() !== 200) {
                 return null;
             }
 
-            $decoded = json_decode($response->getBody()->getContents(), true);
+            $decoded = json_decode((string)$response->getBody(), true);
 
             $data = $decoded['event'];
 
@@ -420,13 +420,13 @@ class OpenAgenda
 
         $response = $this->getClient()
             ->setAccessToken($this->getAccessToken())
-            ->delete('/v2/agendas/' . $this->_uid . '/events/' . $event->uid);
+            ->delete('/agendas/' . $this->_uid . '/events/' . $event->uid);
 
         if ($response->getStatusCode() !== 200) {
             return false;
         }
 
-        $data = json_decode($response->getBody()->getContents(), true);
+        $data = json_decode((string)$response->getBody(), true);
 
         return $data['success'] ?? false;
     }

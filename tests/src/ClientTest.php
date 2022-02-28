@@ -141,8 +141,7 @@ class ClientTest extends TestCase
                 'https://api.openagenda.com/v2/agendas/1/events',
                 [
                     'multipart' => [
-                        ['name' => 'key', 'contents' => 'value'],
-                        ['input'],
+                        ['name' => 'data', 'contents' => json_encode(['key' => 'value', 'array' => ['input']])],
                         ['name' => 'access_token', 'contents' => 'testing'],
                         ['name' => 'nonce', 'contents' => 1234567],
                     ],

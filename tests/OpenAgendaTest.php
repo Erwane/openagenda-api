@@ -153,7 +153,7 @@ class OpenAgendaTest extends TestCase
         $client = $this->createPartialMock(Client::class, ['post']);
         $client->expects(self::once())
             ->method('post')
-            ->with('/v2/requestAccessToken', [
+            ->with('/requestAccessToken', [
                 'json' => [
                     'grant-type' => 'authorization_code',
                     'code' => 'secret',
@@ -322,7 +322,7 @@ class OpenAgendaTest extends TestCase
         $client = $this->createPartialMock(Client::class, ['post']);
         $client->expects(self::once())
             ->method('post')
-            ->with('/v2/agendas/1/locations')
+            ->with('/agendas/1/locations')
             ->willReturn(new Response(400, [], ''));
         $oa = $this->mock(['getClient', 'getAccessToken']);
         $oa->expects(self::once())
@@ -354,7 +354,7 @@ class OpenAgendaTest extends TestCase
         $client = $this->createPartialMock(Client::class, ['post']);
         $client->expects(self::once())
             ->method('post')
-            ->with('/v2/agendas/1/locations')
+            ->with('/agendas/1/locations')
             ->willReturn(new Response(200, [], <<<JSON
 {
   "success": true,
@@ -464,7 +464,7 @@ JSON
         $client = $this->createPartialMock(Client::class, ['get']);
         $client->expects(self::once())
             ->method('get')
-            ->with('/v2/agendas', ['query' => ['limit' => 1, 'slug[]' => 'testing']])
+            ->with('/agendas', ['query' => ['limit' => 1, 'slug[]' => 'testing']])
             ->willReturn(new Response(
                 200, [],
                 '{"agendas": [],"total": 0,"success": true}'
@@ -484,7 +484,7 @@ JSON
         $client = $this->createPartialMock(Client::class, ['get']);
         $client->expects(self::once())
             ->method('get')
-            ->with('/v2/agendas', ['query' => ['limit' => 1, 'slug[]' => 'testing']])
+            ->with('/agendas', ['query' => ['limit' => 1, 'slug[]' => 'testing']])
             ->willReturn(new Response(
                 200, [],
                 '{"agendas": [{"uid": 123,"slug": "agendatrad"}],"total": 1,"success": true}'
@@ -524,7 +524,7 @@ JSON
         $client = $this->createPartialMock(Client::class, ['get']);
         $client->expects(self::once())
             ->method('get')
-            ->with('/v2/agendas/1')
+            ->with('/agendas/1')
             ->willReturn(new Response(
                 200,
                 [],
@@ -581,7 +581,7 @@ JSON
         $client = $this->createPartialMock(Client::class, ['post']);
         $client->expects(self::once())
             ->method('post')
-            ->with('/v2/agendas/1/events')
+            ->with('/agendas/1/events')
             ->willReturn(new Response(
                 200,
                 [],
@@ -680,7 +680,7 @@ JSON
         $client = $this->createPartialMock(Client::class, ['post']);
         $client->expects(self::once())
             ->method('post')
-            ->with('/v2/agendas/1/events/123456')
+            ->with('/agendas/1/events/123456')
             ->willReturn(new Response(
                 200,
                 [],
@@ -737,7 +737,7 @@ JSON
         $client = $this->createPartialMock(Client::class, ['get']);
         $client->expects(self::once())
             ->method('get')
-            ->with('/v2/agendas/1/events/123456')
+            ->with('/agendas/1/events/123456')
             ->willReturn(new Response(200, [], <<<JSON
 {
   "success": true,
@@ -812,13 +812,13 @@ JSON
         // get event
         $client->expects(self::once())
             ->method('get')
-            ->with('/v2/agendas/1/events/123456')
+            ->with('/agendas/1/events/123456')
             ->willReturn(new Response(200, [], '{"success": true, "event": {"uid": 123456}}'));
 
         // delete event
         $client->expects(self::once())
             ->method('delete')
-            ->with('/v2/agendas/1/events/123456')
+            ->with('/agendas/1/events/123456')
             ->willReturn(new Response(200, [], '{"success": true, "event": {"uid": 123456}}'));
 
         $this->oa->setClient($client)->setAgendaUid(1);

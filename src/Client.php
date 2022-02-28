@@ -166,22 +166,19 @@ class Client extends GuzzleClient
     /**
      * transform a $array options to multipart array
      *
-     * @param array $array options and datas
+     * @param array $data options and datas
      * @return array
      */
-    private function _optionsToMultipart(array $array)
+    private function _optionsToMultipart(array $data)
     {
         $return = [];
-        foreach ($array as $key => $value) {
-            if (!is_array($value)) {
-                $return[] = [
-                    'name' => $key,
-                    'contents' => $value,
-                ];
-            } else {
-                $return[] = $value;
-            }
+
+        if (!empty($data['image'])) {
+            $return[] = ['name' => 'image', 'contents' => $data['image'], 'Content-type' => 'multipart/form-data'];
+            unset($data['image']);
         }
+
+        $return[] = ['name' => 'data', 'contents' => json_encode($data)];
 
         return $return;
     }

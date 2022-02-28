@@ -345,17 +345,15 @@ class Event extends Entity
 
         // $datas = array_intersect_key($dirties, array_flip($keys));
 
-        $return = [
+        // picture
+        if (!is_null($this->image)) {
+            $datas['image'] = $this->image;
+        }
+
+        return [
             'publish' => $this->state,
             'data' => $datas,
         ];
-
-        // picture
-        if (!is_null($this->image)) {
-            $return[] = ['name' => 'image', 'contents' => $this->image, 'Content-type' => 'multipart/form-data'];
-        }
-
-        return $return;
     }
 
     /**
