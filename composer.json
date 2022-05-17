@@ -20,7 +20,7 @@
         "source": "https://github.com/erwane/openagenda-api"
     },
     "require": {
-        "php": "^7.1",
+        "php": "^7.2 || ^8.0",
         "ext-json":  "*",
         "symfony/cache": "^4.0 | ^5.0",
         "psr/simple-cache": "^1.0 | ^2.0",
