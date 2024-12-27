@@ -13,7 +13,7 @@ Return all results as array.
 Return all results and collection as JSON string.
 
 ### first() `mixed`
-Get first collection element.
+Get first element.
 
 ### last() `mixed`
-Get last collection element.
+Get last element.

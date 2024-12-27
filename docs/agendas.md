@@ -64,9 +64,7 @@ Possible values are:
 ### Example
 
 ```php
-$agendaId = $oa->agendas([
-    'slug' => 'agenda-slug',
-])
+$agendaId = $oa->agendas(['slug' => 'agenda-slug'])
     ->first()
     ->id;
 ```

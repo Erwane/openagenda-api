@@ -5,7 +5,7 @@ A location is a physical "rendez-vous" place.
 _You must create an OpenAgenda client object before querying locations._  
 _See [basics](basics.md) of how to do this._
 
-## Sumary
+## Summary
 
 * [search](#search)
 * [get or exists](#get)
@@ -50,13 +50,13 @@ The `/agendas/locations` endpoint or `$agenda->locations()` method accept an opt
     * `created_asc`: Sort by creation date ascending.
     * `created_desc`: Sort by creation date descending.
 * array `filters`:
-  * DateTimeInterface|string `created_before`: Only locations created before or at.  
+  * DateTimeInterface|string `created_lte`: Only locations created before or at.  
     String date format: `2023-06-02T12:40:00+0100` or `2023-06-02`
-  * DateTimeInterface|string `created_after`: Only locations created at or after.  
+  * DateTimeInterface|string `created_gte`: Only locations created at or after.  
     String date format: `2023-06-02T12:40:00+0100` or `2023-06-02`
-  * DateTimeInterface|string `updated_before`: Only locations updated before or at.  
+  * DateTimeInterface|string `updated_lte`: Only locations updated before or at.  
     String date format: `2023-06-02T12:40:00+0100` or `2023-06-02` 
-  * DateTimeInterface|string `updated_after`: Only locations updated at or after.  
+  * DateTimeInterface|string `updated_gte`: Only locations updated at or after.  
     String date format: `2023-06-02T12:40:00+0100` or `2023-06-02`
 
 ### Get
@@ -80,10 +80,10 @@ Return `true` if exists neither `false`.
 $exists = $oa->head('/agendas/location', $options);
 
 // using previous fetched OpenAgenda\Agenda object
-$exists = $agenda->location($id)->exists();
+$exists = $agenda->location($locationId)->exists();
 ```
 
-**array $options**
+**array $options** for endpoint method
 * int `agenda` (**required**): Agenda id.
 * int `id` (**required**): Location id
 
@@ -110,7 +110,7 @@ Return the updated Location object.
 
 You can use `post` or `patch` method.  
 If using `post`, all accessible update fields should be sets in `$data`.  
-If using `patch` only passed fields will be updated.
+If using `patch` only passed (or changed) fields will be updated.
 
 You can update a location with `ext_id` instead of `id`.  
 In this case, `id` should not exist in `$data`.
