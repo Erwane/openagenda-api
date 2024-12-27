@@ -1,9 +1,10 @@
 vendor/
 composer.lock
 composer.phar
-testing/
-tests/log
-build
+
+/phpunit.xml
+.phpunit.result.cache
+.phpunit.cache
 
 # OS generated files #
 ######################
@@ -29,13 +30,11 @@ Thumbs.db
 *.tmPreferences.cache
 # Eclipse
 .settings/*
+/.project
+/.buildpath
 # JetBrains, aka PHPStorm, IntelliJ IDEA
 .idea/*
 # NetBeans
 nbproject/*
 # Visual Studio Code
 .vscode
-# Sass preprocessor
-.sass-cache/
-.phpstorm.meta.php
-.phpunit.result.cache
