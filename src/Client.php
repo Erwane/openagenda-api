@@ -4,59 +4,64 @@ declare(strict_types=1);
 namespace OpenAgenda;
 
 use Exception;
-use GuzzleHttp\Client as GuzzleClient;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Psr7\Uri;
+use OpenAgenda\ClientWrapper\ClientWrapper;
+use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\UriInterface;
 
-class Client extends GuzzleClient
+class Client
 {
     /**
-     * api base url
+     * OpenAgenda api base url
      *
      * @var string
      */
-    protected $_url = 'https://api.openagenda.com/v2';
+    protected $url = 'https://api.openagenda.com/v2';
 
     /**
-     * public key
-     *
-     * @var null
+     * @var \Psr\Http\Client\ClientInterface|null
      */
-    protected $_public = null;
+    protected $http;
 
     /**
-     * api access token
+     * OpenAgenda api access token
      *
      * @var string|null
      */
     private $_accessToken = null;
 
-    private $_userAgent = 'Openagenda-api/2.1.0';
+    /**
+     * @var mixed|null
+     */
+    private $publicKey;
 
     /**
-     * set public key
-     *
-     * @param string $key public key
+     * @var mixed|null
      */
-    public function setPublicKey(string $key)
-    {
-        $this->_public = $key;
-    }
+    private $secretKey;
+
+    public const USER_AGENT = 'PheaOpenAgendaSdk/2.2';
 
     /**
-     * set access token
+     * Construct OpenAgenda Client.
      *
-     * @param string $token access token
-     * @return $this
+     * @param array $config OpenAgenda client config.
+     * @throws \OpenAgenda\ClientWrapper\UnknownClientException
+     * @throws \OpenAgenda\OpenAgendaException
      */
-    public function setAccessToken(string $token)
+    public function __construct(array $config = [])
     {
-        $this->_accessToken = $token;
+        $this->publicKey = $config['public_key'] ?? null;
+        $this->secretKey = $config['secret_key'] ?? null;
 
-        return $this;
+        if ($config['http'] instanceof ClientInterface) {
+            $this->http = ClientWrapper::build($config['http']);
+        } else {
+            throw new OpenAgendaException('Missing or invalid http client.');
+        }
     }
 
     /**

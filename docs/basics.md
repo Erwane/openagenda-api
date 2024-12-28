@@ -16,8 +16,10 @@ $cache = new Psr16Cache();
 
 // Create the OpenAgenda client. The public key is required for reading data (GET)
 // The private key is optional and only needed for writing data (POST, PUT, DELETE)
-$oa = new OpenAgenda('public_key', 'private_key', [
+$oa = new OpenAgenda([
+    'public_key' => 'my public key', // Required
     'client' => $http, // Required
+    'secret_key' => 'my secret key', // Optional, only for write/delete actions
     'cache' => $cache, // Optional
 ]);
 ```

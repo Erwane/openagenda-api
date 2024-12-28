@@ -9,14 +9,14 @@ _See [basics](basics.md) of how to do this._
 
 ```php
 // using endpoint
-$agendas = $oa->get('/agendas/me', $options);
+$agendas = $oa->get('/agendas/me', $params);
 // using myAgendas() method
-$agendas = $oa->myAgendas($options);
+$agendas = $oa->myAgendas($params);
 ```
 
-### Options
+### Params
 
-The `/agendas/me` endpoint or `myAgendas()` method accept an options array with this possible keys:
+The `/agendas/me` endpoint or `myAgendas()` method accept a params array with this possible keys:
 
 * int `limit`: How many results you want by request. Default `10`
 * int `page`: Pagination. Require a PSR-16 configured cache.  
@@ -34,14 +34,14 @@ $agenda = $oa->myAgendas(['limit' => 1])
 
 ```php
 // using endpoint
-$agendas = $oa->get('/agendas', $options);
+$agendas = $oa->get('/agendas', $params);
 // using agendas() method
-$agendas = $oa->agendas($options);
+$agendas = $oa->agendas($params);
 ```
 
-### Options
+### Params
 
-The `/agendas` endpoint or `agendas()` method accept an options array with this possible keys:
+The `/agendas` endpoint or `agendas()` method accept a params array with this possible keys:
 
 * int `size`: How many results by request. Default `10`
 * int `page`: Pagination. Require a PSR-16 configured cache.  
