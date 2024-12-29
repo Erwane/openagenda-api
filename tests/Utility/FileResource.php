@@ -6,7 +6,7 @@ declare(strict_types=1);
  * @copyright 2024 MIT Licence
  */
 
-namespace OpenAgenda\Test\TestCase\Utility;
+namespace OpenAgenda\Test\Utility;
 
 use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
