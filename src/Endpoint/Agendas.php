@@ -103,7 +103,7 @@ class Agendas extends Endpoint
     /**
      * Get agendas.
      *
-     * @return \Ramsey\Collection\Collection|\OpenAgenda\Entity\Agenda[]
+     * @return \OpenAgenda\Entity\Agenda[]|\Ramsey\Collection\Collection
      */
     public function get(): Collection
     {

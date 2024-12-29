@@ -4,90 +4,76 @@ declare(strict_types=1);
 namespace OpenAgenda;
 
 use Exception;
+use OpenAgenda\Endpoint\EndpointFactory;
 use OpenAgenda\Entity\Agenda;
 use OpenAgenda\Entity\Event;
 use OpenAgenda\Entity\Location;
+use OpenAgenda\Wrapper\HttpWrapper;
+use Psr\SimpleCache\CacheInterface;
+use Ramsey\Collection\Collection;
 
 class OpenAgenda
 {
     /**
-     * http client
+     * OpenAgenda client
      *
-     * @var \OpenAgenda\Client|null
+     * @var \OpenAgenda\Client
      */
-    protected $client = null;
+    protected $client;
 
     /**
-     * Api public key
-     */
-    protected $public;
-
-    /**
-     * api secret token
+     * OpenAgenda.
      *
-     * @var string|null
+     * @param array $params OpenAgenda params.
+     * @throws \OpenAgenda\OpenAgendaException
      */
-    protected $secret = null;
-
-    protected $baseUrl = null;
-
-    /**
-     * openagenda uid to publish
-     *
-     * @var int|null
-     */
-    protected $_uid = null;
-
-    /**
-     * constuctor
-     *
-     * @param string $apiPublic
-     * @param string $apiSecret openagenda api secret
-     */
-    public function __construct(string $apiPublic, string $apiSecret)
+    public function __construct(array $params = [])
     {
-        $this->public = $apiPublic;
-        $this->secret = $apiSecret;
-    }
+        $params += [
+            'public_key' => null,
+            'private_key' => null,
+            'wrapper' => null,
+            'cache' => null,
+        ];
 
-    /**
-     * base url for relative links
-     *
-     * @param string $url base url
-     */
-    public function setBaseUrl(string $url)
-    {
-        $last = substr($url, -1, 1);
-        if ($last !== '/') {
-            $url .= '/';
+        if (!$params['public_key']) {
+            throw new OpenAgendaException('Missing `public_key`.');
         }
 
-        $this->baseUrl = $url;
+        if (!($params['wrapper'] instanceof HttpWrapper)) {
+            throw new OpenAgendaException('Invalid or missing `wrapper`.');
+        }
 
-        return $this;
+        if ($params['cache'] && !($params['cache'] instanceof CacheInterface)) {
+            throw new OpenAgendaException('Cache should implement \Psr\SimpleCache\CacheInterface.');
+        }
+
+        $this->client = new Client($params);
     }
 
     /**
-     * set agenda uid
+     * Get agendas from OpenAgenda.
      *
-     * @param int $uid agenda uid
-     * @return $this
+     * @param array $params Query params.
+     * @return \OpenAgenda\Entity\Agenda[]|\Ramsey\Collection\Collection
+     * @throws \OpenAgenda\Endpoint\UnknownEndpointException
      */
-    public function setAgendaUid(int $uid)
+    public function agendas(array $params = []): Collection
     {
-        $this->_uid = $uid;
-
-        return $this;
+        return EndpointFactory::make($this->client, '/agendas', $params)->get();
     }
 
     /**
-     * get agenda uid
+     * Do a GET request on $path.
      *
-     * @return int|null
+     * @param string $path Endpoint path. Relative, not real OpenAgenda endpoint.
+     * @param array $params Client options
+     * @return \Ramsey\Collection\Collection|\OpenAgenda\Entity\Entity
+     * @throws \OpenAgenda\Endpoint\UnknownEndpointException
      */
-    public function getAgendaUid(): ?int
+    public function get(string $path, $params)
     {
-        return $this->_uid;
+        return EndpointFactory::make($this->client, $path, $params)->get();
     }
 
     public function newEvent()
@@ -138,7 +124,7 @@ class OpenAgenda
      * get Location object with uid
      *
      * @param array|int $datas location id or datas
-     * @return Location object
+     * @return \OpenAgenda\Entity\Location object
      * @throws \OpenAgenda\OpenAgendaException
      */
     public function getLocation($datas)
@@ -226,20 +212,6 @@ class OpenAgenda
     }
 
     /**
-     * @return \OpenAgenda\Client
-     */
-    public function getClient(): Client
-    {
-        if (!$this->client) {
-            $this->client = new Client();
-
-            $this->client->setPublicKey($this->public);
-        }
-
-        return $this->client;
-    }
-
-    /**
      * @param \OpenAgenda\Client $client
      * @return $this
      */
@@ -314,7 +286,7 @@ class OpenAgenda
     /**
      * publish event to openagenda and set uid to entity
      *
-     * @param Event $event entity
+     * @param \OpenAgenda\Entity\Event $event entity
      * @return int
      * @throws \OpenAgenda\OpenAgendaException
      */
@@ -337,7 +309,7 @@ class OpenAgenda
     /**
      * update event to openagenda
      *
-     * @param Event $event entity
+     * @param \OpenAgenda\Entity\Event $event entity
      * @return bool
      */
     public function updateEvent(Event $event): bool

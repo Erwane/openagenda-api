@@ -1,86 +1,108 @@
 <?php
 /**
- * @noinspection PhpParamsInspection
  * @noinspection PhpUnhandledExceptionInspection
  */
 declare(strict_types=1);
 
+namespace OpenAgenda\Test\TestCase;
+
 use GuzzleHttp\Psr7\Response;
-use OpenAgenda\Cache;
-use OpenAgenda\Client;
-use OpenAgenda\Entity\Agenda;
-use OpenAgenda\Entity\Event;
-use OpenAgenda\Entity\Location;
 use OpenAgenda\OpenAgenda;
 use OpenAgenda\OpenAgendaException;
+use OpenAgenda\Test\Utility\FileResource;
+use OpenAgenda\Wrapper\HttpWrapper;
 use PHPUnit\Framework\TestCase;
+use Ramsey\Collection\Collection;
+use stdClass;
+use Symfony\Component\Cache\Adapter\ArrayAdapter;
+use Symfony\Component\Cache\Psr16Cache;
 
 /**
- * @coversDefaultClass \OpenAgenda\OpenAgenda
+ * @uses   \OpenAgenda\OpenAgenda
+ * @covers \OpenAgenda\OpenAgenda
  */
 class OpenAgendaTest extends TestCase
 {
     /**
+     * @var \OpenAgenda\Wrapper\HttpWrapper
+     */
+    protected $wrapper;
+
+    /**
      * @var \OpenAgenda\OpenAgenda
      */
-    private $oa = null;
+    protected $oa;
 
     protected function setUp(): void
     {
         parent::setUp();
 
-        Cache::clear();
-        $this->oa = $this->mock(['getAccessToken']);
+        $this->wrapper = $this->getMockForAbstractClass(
+            HttpWrapper::class,
+            [],
+            '',
+            false,
+            true,
+            true,
+            ['head', 'get', 'post', 'patch', 'delete']
+        );
+
+        $this->oa = new OpenAgenda([
+            'public_key' => 'testing',
+            'wrapper' => $this->wrapper,
+        ]);
     }
 
-    /**
-     * @test
-     * @covers ::setAgendaUid
-     * @covers ::getAgendaUid
-     */
-    public function testAgendaUid(): void
+    public function testConstructMissingPublicKey()
     {
-        $this->assertNull($this->oa->getAgendaUid());
-
-        $this->oa->setAgendaUid(23);
-        $this->assertSame(23, $this->oa->getAgendaUid());
+        $this->expectException(OpenAgendaException::class);
+        $this->expectExceptionMessage('Missing `public_key`.');
+        new OpenAgenda();
     }
 
-    /**
-     * @test
-     * @covers ::setBaseUrl
-     * @covers ::newEvent
-     */
-    public function testSetBaseUrl(): void
+    public function testConstructMissingHttpClient()
     {
-        $this->oa->setBaseUrl('https://openagenda.com');
-
-        $event = $this->oa->newEvent();
-
-        $this->assertSame('https://openagenda.com/', $event->get('baseUrl'));
+        $this->expectException(OpenAgendaException::class);
+        $this->expectExceptionMessage('Invalid or missing `wrapper`.');
+        new OpenAgenda(['public_key' => 'testing']);
     }
 
-    /**
-     * @test
-     * @covers ::setClient
-     */
-    public function testSetClient(): void
+    public function testConstructInvalidHttpClient()
     {
-        $client = $this->createMock(Client::class);
-
-        $this->oa->setClient($client);
-
-        $this->assertSame($this->oa->getClient(), $client);
+        $this->expectException(OpenAgendaException::class);
+        $this->expectExceptionMessage('Invalid or missing `wrapper`.');
+        new OpenAgenda(['public_key' => 'testing', 'http' => new stdClass()]);
     }
 
-    /**
-     * @test
-     * @covers ::__construct
-     * @covers ::getClient
-     */
-    public function testGetClient(): void
+    public function testConstructInvalidCache()
     {
-        $this->assertInstanceOf(Client::class, $this->oa->getClient());
+        $this->expectException(OpenAgendaException::class);
+        $this->expectExceptionMessage('Cache should implement \Psr\SimpleCache\CacheInterface.');
+        new OpenAgenda(['public_key' => 'testing', 'wrapper' => $this->wrapper, 'cache' => new stdClass()]);
+    }
+
+    public function testConstruct()
+    {
+        $cache = new Psr16Cache(new ArrayAdapter());
+        $oa = new OpenAgenda([
+            'public_key' => 'testing',
+            'private_key' => 'private',
+            'wrapper' => $this->wrapper,
+            'cache' => $cache,
+        ]);
+        $this->assertInstanceOf(OpenAgenda::class, $oa);
+    }
+
+    public function testGetAgendas()
+    {
+        $payload = FileResource::instance($this)->getContent('Response/agendas-ok.json');
+        $this->wrapper->expects($this->once())
+            ->method('get')
+            ->with()
+            ->willReturn(new Response(200, [], $payload));
+
+        $agendas = $this->oa->agendas();
+        $this->assertInstanceOf(Collection::class, $agendas);
     }
 
     /**
@@ -466,7 +488,8 @@ JSON
             ->method('get')
             ->with('/agendas', ['query' => ['limit' => 1, 'slug[]' => 'testing']])
             ->willReturn(new Response(
-                200, [],
+                200,
+                [],
                 '{"agendas": [],"total": 0,"success": true}'
             ));
 
@@ -486,7 +509,8 @@ JSON
             ->method('get')
             ->with('/agendas', ['query' => ['limit' => 1, 'slug[]' => 'testing']])
             ->willReturn(new Response(
-                200, [],
+                200,
+                [],
                 '{"agendas": [{"uid": 123,"slug": "agendatrad"}],"total": 1,"success": true}'
             ));
 
