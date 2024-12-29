@@ -5,96 +5,108 @@
  */
 declare(strict_types=1);
 
-namespace OpenAgenda\Test;
+namespace OpenAgenda\Test\TestCase;
 
-use GuzzleHttp\Exception\InvalidArgumentException;
-use GuzzleHttp\Exception\RequestException;
-use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Response;
 use GuzzleHttp\Psr7\Uri;
 use OpenAgenda\Client;
+use OpenAgenda\Entity\Agenda;
 use OpenAgenda\OpenAgendaException;
+use OpenAgenda\Wrapper\HttpWrapper;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
+use Ramsey\Collection\Collection;
 
 /**
- * @coversDefaultClass \OpenAgenda\Client
+ * @uses   \OpenAgenda\Client
+ * @covers \OpenAgenda\Client
  */
 class ClientTest extends TestCase
 {
     /**
-     * @test
-     * @covers ::nonce
+     * @var (\object&\PHPUnit\Framework\MockObject\MockObject)|\OpenAgenda\Wrapper\HttpWrapper|(\OpenAgenda\Wrapper\HttpWrapper&\object&\PHPUnit\Framework\MockObject\MockObject)|(\OpenAgenda\Wrapper\HttpWrapper&\PHPUnit\Framework\MockObject\MockObject)|\PHPUnit\Framework\MockObject\MockObject
      */
-    public function testNonce(): void
-    {
-        $client = new Client();
-
-        $this->assertIsInt($client->nonce());
-    }
+    protected $wrapper;
 
     /**
-     * @test
-     * @covers ::doRequest
+     * @var \OpenAgenda\Client
      */
-    public function testDoQueryClientException(): void
-    {
-        $client = $this->createPartialMock(Client::class, ['request']);
-        $client->expects(self::once())
-            ->method('request')
-            ->willThrowException(new RequestException(
-                'client',
-                new Request('GET', 'https://testing'),
-                new Response(501, [], '{"message":"error"}')
-            ));
+    protected $client;
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->wrapper = $this->getMockForAbstractClass(
+            HttpWrapper::class,
+            [],
+            '',
+            false,
+            true,
+            true,
+            ['head', 'get', 'post', 'patch', 'delete']
+        );
+
+        $this->client = new Client([
+            'public_key' => 'testing',
+            'wrapper' => $this->wrapper,
+        ]);
+    }
+
+    public function testConstructPublicKeyMissing()
+    {
         $this->expectException(OpenAgendaException::class);
-        $this->expectExceptionMessage('error');
-        $this->expectExceptionCode(501);
-        $client->get('/agendas');
+        $this->expectExceptionMessage('Missing `public_key`.');
+        new Client();
     }
 
-    /**
-     * @test
-     * @covers ::doRequest
-     */
-    public function testDoQueryGuzzleException(): void
+    public function testConstructWrapperMissing()
     {
-        $client = $this->createPartialMock(Client::class, ['request']);
-        $client->expects(self::once())
-            ->method('request')
-            ->willThrowException(new InvalidArgumentException('GuzzleException', 1));
-
         $this->expectException(OpenAgendaException::class);
-        $this->expectExceptionMessage('GuzzleException');
-        $this->expectExceptionCode(1);
-        $client->get('/agendas');
+        $this->expectExceptionMessage('Invalid or missing `wrapper`.');
+        new Client(['public_key' => 'testing']);
     }
 
-    /**
-     * @test
-     * @covers ::get
-     * @covers ::setPublicKey
-     */
+    public function testAgendas()
+    {
+        $client = $this->createPartialMock(Client::class, ['get']);
+        $client->expects($this->once())
+            ->method('get')
+            ->with(
+                '/agendas',
+                ['limit' => 10]
+            )
+            ->willReturn(new Collection(Agenda::class, []));
+
+        $agendas = $client->agendas(['limit' => 10]);
+        $this->assertCount(2, $agendas);
+    }
+
     public function testGet(): void
     {
-        $client = $this->createPartialMock(Client::class, ['request']);
-        $client->expects(self::once())
-            ->method('request')
+        $this->wrapper->expects($this->once())
+            ->method('get')
             ->with(
-                'GET',
                 'https://api.openagenda.com/v2/agendas',
                 [
-                    'query' => ['size' => 2, 'key' => 'testing'],
-                    'headers' => ['User-Agent' => 'Openagenda-api/2.1.0'],
+                    'headers' => [
+                        'key' => 'testing',
+                        'X-Custom' => 'testing',
+                    ],
                 ]
             )
-            ->willReturn(new Response(200, [], '{"json":"object"}'));
+            ->willReturn(new Response(201, ['content-type' => 'application/json'], '{"json":"object"}'));
 
-        $client->setPublicKey('testing');
-        $response = $client->get('/agendas', ['query' => ['size' => 2]]);
+        $response = $this->client->get(
+            'https://api.openagenda.com/v2/agendas',
+            ['headers' => ['X-Custom' => 'testing']]
+        );
 
-        $this->assertInstanceOf(ResponseInterface::class, $response);
+        $this->assertEquals([
+            '_status' => 201,
+            '_success' => true,
+            'json' => 'object',
+        ], $response);
     }
 
     /**

@@ -7,8 +7,7 @@ use Exception;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Psr7\Uri;
-use OpenAgenda\ClientWrapper\ClientWrapper;
-use Psr\Http\Client\ClientInterface;
+use OpenAgenda\Wrapper\HttpWrapperInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\UriInterface;
 
@@ -22,7 +21,7 @@ class Client
     protected $url = 'https://api.openagenda.com/v2';
 
     /**
-     * @var \Psr\Http\Client\ClientInterface|null
+     * @var \OpenAgenda\Wrapper\HttpWrapper|null
      */
     protected $http;
 
@@ -43,47 +42,70 @@ class Client
      */
     private $secretKey;
 
-    public const USER_AGENT = 'PheaOpenAgendaSdk/2.2';
+    public const USER_AGENT = 'OpenAgenda-ESdk/2.2';
 
     /**
      * Construct OpenAgenda Client.
      *
      * @param array $config OpenAgenda client config.
-     * @throws \OpenAgenda\ClientWrapper\UnknownClientException
      * @throws \OpenAgenda\OpenAgendaException
      */
     public function __construct(array $config = [])
     {
         $this->publicKey = $config['public_key'] ?? null;
         $this->secretKey = $config['secret_key'] ?? null;
+        $this->http = $config['wrapper'] ?? null;
 
-        if ($config['http'] instanceof ClientInterface) {
-            $this->http = ClientWrapper::build($config['http']);
-        } else {
-            throw new OpenAgendaException('Missing or invalid http client.');
+        if (!$this->publicKey) {
+            throw new OpenAgendaException('Missing `public_key`.');
+        }
+
+        if (!($this->http instanceof HttpWrapperInterface)) {
+            throw new OpenAgendaException('Invalid or missing `wrapper`.');
         }
     }
 
     /**
-     * do a post request and return object from json
+     * Return response as an array.
      *
-     * @param string $uri Openagenda endpoint
-     * @param array $options Client options
-     * @return \Psr\Http\Message\ResponseInterface
-     * @throws \OpenAgenda\OpenAgendaException
-     * @noinspection PhpMissingParentCallCommonInspection
+     * @param \Psr\Http\Message\ResponseInterface $response Http client response.
+     * @return array
      */
-    public function get($uri, array $options = []): ResponseInterface
+    protected function payload(ResponseInterface $response): array
     {
-        return $this->doRequest(function ($u, $o) {
-            $query = $o['query'] ?? [];
+        $status = $response->getStatusCode();
+        $payload = [
+            '_status' => $status,
+            '_success' => false,
+        ];
 
-            $query += ['key' => $this->_public];
+        if ($status >= 200 && $status < 300) {
+            $payload['_success'] = true;
+            $applicationJson = $response->hasHeader('Content-Type')
+                && $response->getHeader('Content-Type')[0] === 'application/json';
+            if ($applicationJson) {
+                $payload += json_decode((string)$response->getBody(), true);
+            }
+        }
 
-            $o['query'] = $query;
+        return $payload;
+    }
 
-            return $this->request('GET', $u, $o);
-        }, $uri, $options);
+    /**
+     * Query OpenAgenda endpoint and return Collection or Entity
+     *
+     * @param \League\Uri\Uri|string $uri OpenAgenda uri
+     * @param array $params Request params
+     * @return array
+     */
+    public function get($uri, array $params = []): array
+    {
+        // Add key
+        $params['headers']['key'] = $this->publicKey;
+
+        $response = $this->http->get((string)$uri, $params);
+
+        return $this->payload($response);
     }
 
     /**
@@ -98,7 +120,7 @@ class Client
     {
         try {
             if (!($uri instanceof UriInterface)) {
-                $uri = new Uri($this->_url . $uri);
+                $uri = new Uri($this->url . $uri);
             }
 
             if (!isset($options['headers'])) {
