@@ -1,12 +1,16 @@
 {
     "name": "erwane/openagenda-api",
-    "description": "OpenAgenda SDK for PHP",
+    "description": "PHP sdk to request OpenAgenda api",
     "type": "library",
     "keywords": [
         "openagenda",
         "api"
     ],
     "homepage": "https://github.com/Erwane/openagenda-api",
+    "support": {
+        "issues": "https://github.com/erwane/openagenda-api/issues",
+        "source": "https://github.com/erwane/openagenda-api"
+    },
     "license": "MIT",
     "authors": [
         {
@@ -15,10 +19,6 @@
             "email": "erwane@phea.fr"
         }
     ],
-    "support": {
-        "issues": "https://github.com/erwane/openagenda-api/issues",
-        "source": "https://github.com/erwane/openagenda-api"
-    },
     "require": {
         "php": "^7.2",
         "ext-json": "*",

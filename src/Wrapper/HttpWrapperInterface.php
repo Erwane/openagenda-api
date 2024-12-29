@@ -1,12 +1,12 @@
 <?php
 declare(strict_types=1);
 
-namespace OpenAgenda\ClientWrapper;
+namespace OpenAgenda\Wrapper;
 
 use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\ResponseInterface;
 
-interface ClientWrapperInterface extends ClientInterface
+interface HttpWrapperInterface extends ClientInterface
 {
     /**
      * Do a HEAD request and return ResponseInterface.

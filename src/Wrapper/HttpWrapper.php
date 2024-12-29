@@ -1,13 +1,13 @@
 <?php
 declare(strict_types=1);
 
-namespace OpenAgenda\ClientWrapper;
+namespace OpenAgenda\Wrapper;
 
 use League\Uri\Contracts\UriInterface;
 use League\Uri\Uri;
 use Psr\Http\Client\ClientInterface;
 
-abstract class ClientWrapper implements ClientWrapperInterface
+abstract class HttpWrapper implements HttpWrapperInterface
 {
     /**
      * Http client
@@ -24,24 +24,6 @@ abstract class ClientWrapper implements ClientWrapperInterface
     public function __construct(ClientInterface $http)
     {
         $this->http = $http;
-    }
-
-    /**
-     * Build the correct wrapper for $http client.
-     *
-     * @param \Psr\Http\Client\ClientInterface $http PSR-18 Http client.
-     * @return \OpenAgenda\ClientWrapper\ClientWrapperInterface
-     * @throws \OpenAgenda\ClientWrapper\UnknownClientException
-     */
-    public static function build(ClientInterface $http): ClientWrapperInterface
-    {
-        $className = get_class($http);
-        switch ($className) {
-            case 'GuzzleHttp\Client':
-                return new GuzzleWrapper($http);
-            default:
-                throw new UnknownClientException(get_class($http));
-        }
     }
 
     /**
