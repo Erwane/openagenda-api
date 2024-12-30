@@ -9,14 +9,14 @@ _See [basics](basics.md) of how to do this._
 
 ```php
 // using endpoint
-$agendas = $oa->get('/agendas/me', $params);
+$agendas = $oa->get('/agendas/mines', $params);
 // using myAgendas() method
 $agendas = $oa->myAgendas($params);
 ```
 
 ### Params
 
-The `/agendas/me` endpoint or `myAgendas()` method accept a params array with this possible keys:
+The `/agendas/mines` endpoint or `myAgendas()` method accept a params array with this possible keys:
 
 * int `limit`: How many results you want by request. Default `10`
 * int `page`: Pagination. Require a PSR-16 configured cache.  

@@ -92,6 +92,10 @@ class Agendas extends Endpoint
     {
         $path = '/agendas';
 
+        if (isset($this->params['_path']) && $this->params['_path'] === '/agendas/mines') {
+            $path = '/me/agendas';
+        }
+
         $components = parse_url($this->baseUrl . $path);
         $query = $this->uriQuery();
         if ($query) {

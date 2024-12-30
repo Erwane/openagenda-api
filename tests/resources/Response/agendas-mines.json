@@ -1,0 +1,13 @@
+{
+    "total": 1,
+    "after": 356953,
+    "items": [
+        {
+            "uid": 12345678,
+            "slug": "myagenda",
+            "title": "Mon Agenda",
+            "member": {}
+        }
+    ],
+    "success": true
+}

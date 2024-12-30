@@ -15,9 +15,10 @@ class EndpointFactory
      */
     public static function make(string $path, array $params = []): Endpoint
     {
+        $params['_path'] = $path;
         switch ($path) {
             case '/agendas':
-            case '/agenda':
+            case '/agendas/mines':
                 return new Agendas($params);
             default:
                 throw new UnknownEndpointException($path);

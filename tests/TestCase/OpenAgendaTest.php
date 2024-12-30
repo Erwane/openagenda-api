@@ -93,15 +93,48 @@ class OpenAgendaTest extends TestCase
         $this->assertInstanceOf(OpenAgenda::class, $oa);
     }
 
+    public function testGet()
+    {
+        $this->wrapper->expects($this->once())
+            ->method('get')
+            ->with(
+                'https://api.openagenda.com/v2/agendas',
+                ['headers' => ['key' => 'testing']]
+            )
+            ->willReturn(new Response(200, [], ''));
+
+        $agendas = $this->oa->get('/agendas');
+        $this->assertInstanceOf(Collection::class, $agendas);
+    }
+
     public function testGetAgendas()
     {
         $payload = FileResource::instance($this)->getContent('Response/agendas-ok.json');
         $this->wrapper->expects($this->once())
             ->method('get')
-            ->with()
+            ->with(
+                'https://api.openagenda.com/v2/agendas',
+                ['headers' => ['key' => 'testing']]
+            )
             ->willReturn(new Response(200, [], $payload));
 
         $agendas = $this->oa->agendas();
+        $this->assertInstanceOf(Collection::class, $agendas);
+    }
+
+    public function testGetMyAgendas()
+    {
+        $payload = FileResource::instance($this)
+            ->getContent('Response/agendas-mines.json');
+        $this->wrapper->expects($this->once())
+            ->method('get')
+            ->with(
+                'https://api.openagenda.com/v2/me/agendas',
+                ['headers' => ['key' => 'testing']]
+            )
+            ->willReturn(new Response(200, [], $payload));
+
+        $agendas = $this->oa->myAgendas();
         $this->assertInstanceOf(Collection::class, $agendas);
     }
 

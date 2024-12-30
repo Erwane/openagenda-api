@@ -67,21 +67,6 @@ class ClientTest extends TestCase
         new Client(['public_key' => 'testing']);
     }
 
-    public function testAgendas()
-    {
-        $client = $this->createPartialMock(Client::class, ['get']);
-        $client->expects($this->once())
-            ->method('get')
-            ->with(
-                '/agendas',
-                ['limit' => 10]
-            )
-            ->willReturn(new Collection(Agenda::class, []));
-
-        $agendas = $client->agendas(['limit' => 10]);
-        $this->assertCount(2, $agendas);
-    }
-
     public function testGet(): void
     {
         $this->wrapper->expects($this->once())

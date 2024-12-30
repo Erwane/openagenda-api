@@ -85,6 +85,18 @@ class OpenAgenda
     }
 
     /**
+     * Get agendas from OpenAgenda.
+     *
+     * @param array $params Query params.
+     * @return \OpenAgenda\Entity\Agenda[]|\Ramsey\Collection\Collection
+     * @throws \OpenAgenda\Endpoint\UnknownEndpointException
+     */
+    public function myAgendas(array $params = []): Collection
+    {
+        return EndpointFactory::make('/agendas/mines', $params)->get();
+    }
+
+    /**
      * Do a GET request on $path.
      *
      * @param string $path Endpoint path. Relative, not real OpenAgenda endpoint.
