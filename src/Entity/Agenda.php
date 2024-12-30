@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace OpenAgenda\Entity;
 
 /**
- * @property int $uid
+ * @property int $id
  */
 class Agenda extends Entity
 {
@@ -20,16 +20,8 @@ class Agenda extends Entity
             $category = implode(', ', array_map('trim', $category));
         }
 
-        $this->_properties['category'] = $category;
+        $this->_fields['category'] = $category;
 
         return $this;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function toDatas()
-    {
-        return [];
     }
 }

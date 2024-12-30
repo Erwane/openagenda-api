@@ -3,11 +3,34 @@ declare(strict_types=1);
 
 namespace OpenAgenda\Entity;
 
+use InvalidArgumentException;
 use OpenAgenda\OpenAgendaException;
 
+/**
+ * Inspired by cakephp Entity.
+ *
+ * @copyright   Copyright (c) Cake Software Foundation, Inc. (https://cakefoundation.org)
+ * @link        https://cakephp.org CakePHP(tm) Project
+ * @see         https://github.com/cakephp/cakephp/blob/5.x/src/ORM/Entity.php
+ * @since       3.0.0
+ * @license     https://opensource.org/licenses/mit-license.php MIT License
+ */
 abstract class Entity
 {
-    use EntityTrait;
+    /**
+     * Holds all fields and their values for this entity
+     *
+     * @var array
+     */
+    protected $_fields = [];
+
+    /**
+     * Holds a list of the properties that were modified or added after this object
+     * was originally created.
+     *
+     * @var array
+     */
+    protected $_dirty = [];
 
     /**
      * @var bool
@@ -17,59 +40,111 @@ abstract class Entity
     /**
      * constructor
      *
-     * @param array $properties
+     * @param array $fields
      * @param array $options list of options to use when creating this entity
      */
-    public function __construct(array $properties = [], array $options = [])
+    public function __construct(array $fields = [], array $options = [])
     {
         $options += [
             'useSetters' => true,
             'markClean' => false,
         ];
 
-        if (!empty($properties) && $options['markClean'] && !$options['useSetters']) {
-            $this->_properties = $properties;
+        if (!empty($fields)) {
+            if ($options['markClean'] && !$options['useSetters']) {
+                $this->_fields = $fields;
 
-            return;
-        }
+                return;
+            }
 
-        if (!empty($properties)) {
-            $this->set($properties, [
+            $this->set($fields, [
                 'setter' => $options['useSetters'],
             ]);
         }
     }
 
     /**
-     * get entity datas for API
-     *
-     * @return array
+     * @param $field
+     * @param $value
+     * @param array $options
+     * @return $this
      */
-    abstract public function toDatas();
-
-    /**
-     * set event uid (or id)
-     *
-     * @param int|string $value property value
-     * @return int
-     */
-    protected function _setUid($value)
+    public function set($field, $value = null, array $options = [])
     {
-        $this->_properties['id'] = (int)$value;
+        if (is_string($field) && $field !== '') {
+            $field = [$field => $value];
+        } else {
+            $options = (array)$value;
+        }
 
-        return $this->_properties['id'];
+        if (!is_array($field)) {
+            throw new InvalidArgumentException('Cannot set an empty field');
+        }
+        $options += ['setter' => true];
+
+        foreach ($field as $name => $value) {
+            //$this->setDirty($name, true);
+
+            if ($options['setter']) {
+                $setter = static::_accessor($name, 'set');
+                if ($setter) {
+                    $value = $this->{$setter}($value);
+                }
+            }
+
+            $this->_fields[$name] = $value;
+        }
+
+        return $this;
     }
 
     /**
-     * setUid alias
+     * Fetch accessor method name
+     * Accessor methods (available or not) are cached in $_accessors
      *
-     * @param int|string $value property value
+     * @param string $property the field name to derive getter name from
+     * @param string $type the accessor type ('get' or 'set')
+     * @return string method name or empty string (no method available)
      */
-    protected function _setId($value)
+    protected static function _accessor(string $property, string $type): string
     {
-        $this->_properties['uid'] = (int)$value;
+        $class = static::class;
+        if ($class === Entity::class) {
+            return '';
+        }
 
-        return $this->_properties['uid'];
+        $method = sprintf('_%s%s', $type, ucfirst($property));
+
+        if (!method_exists($class, $method)) {
+            $method = '';
+        }
+
+        return $method;
+    }
+
+    /**
+     * Set id (uid)
+     *
+     * @param int|string $value Field value
+     * @return int
+     */
+    protected function _setUid($value): int
+    {
+        return $this->_setId($value);
+    }
+
+    /**
+     * Set id (uid)
+     *
+     * @param int|string $value Field value
+     * @return int
+     */
+    protected function _setId($value): int
+    {
+        $value = (int)$value;
+        $this->_fields['id'] = $value;
+
+        return $value;
     }
 
     /**
@@ -82,7 +157,7 @@ abstract class Entity
     public function setLang(string $value)
     {
         if ($this->_isValidLanguage($value)) {
-            $this->_properties['lang'] = $value;
+            $this->_fields['lang'] = $value;
         }
 
         return $this;
@@ -126,7 +201,7 @@ abstract class Entity
     protected function _getLang(?string $lang = null): string
     {
         // Throw exception if no lang set
-        if ($lang === null && !isset($this->_properties['lang'])) {
+        if ($lang === null && !isset($this->_fields['lang'])) {
             throw new OpenAgendaException('default lang not set. Use setLang()', 1);
         }
 
@@ -136,7 +211,7 @@ abstract class Entity
         }
 
         // return right lang
-        return $lang === null ? $this->_properties['lang'] : $lang;
+        return $lang ?? $this->_fields['lang'];
     }
 
     /**
@@ -145,7 +220,7 @@ abstract class Entity
      * @return object|array|false
      * @throws \OpenAgenda\OpenAgendaException
      */
-    protected function _i18nValue($data, string $lang = null)
+    protected function _i18nValue($data, ?string $lang = null)
     {
         if (is_string($data)) {
             $ary = [
