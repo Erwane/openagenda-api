@@ -19,7 +19,7 @@ class OpenAgenda
      *
      * @var \OpenAgenda\Client
      */
-    protected $client;
+    protected static $client;
 
     /**
      * OpenAgenda.
@@ -48,7 +48,28 @@ class OpenAgenda
             throw new OpenAgendaException('Cache should implement \Psr\SimpleCache\CacheInterface.');
         }
 
-        $this->client = new Client($params);
+        self::$client = new Client($params);
+    }
+
+    /**
+     * Set static client.
+     *
+     * @param \OpenAgenda\Client $client OpenAgenda client.
+     * @return void
+     */
+    public static function setClient(Client $client)
+    {
+        self::$client = $client;
+    }
+
+    /**
+     * Get OpenAgenda client.
+     *
+     * @return \OpenAgenda\Client
+     */
+    public static function getClient(): Client
+    {
+        return self::$client;
     }
 
     /**
@@ -60,7 +81,7 @@ class OpenAgenda
      */
     public function agendas(array $params = []): Collection
     {
-        return EndpointFactory::make($this->client, '/agendas', $params)->get();
+        return EndpointFactory::make('/agendas', $params)->get();
     }
 
     /**
@@ -71,9 +92,9 @@ class OpenAgenda
      * @return \Ramsey\Collection\Collection|\OpenAgenda\Entity\Entity
      * @throws \OpenAgenda\Endpoint\UnknownEndpointException
      */
-    public function get(string $path, $params)
+    public function get(string $path, array $params = [])
     {
-        return EndpointFactory::make($this->client, $path, $params)->get();
+        return EndpointFactory::make($path, $params)->get();
     }
 
     public function newEvent()
@@ -209,19 +230,6 @@ class OpenAgenda
         } catch (OpenAgendaException $e) {
             return null;
         }
-    }
-
-    /**
-     * @param \OpenAgenda\Client $client
-     * @return $this
-     */
-    public function setClient(Client $client)
-    {
-        $this->client = $client;
-
-        $this->client->setPublicKey($this->public);
-
-        return $this;
     }
 
     /**

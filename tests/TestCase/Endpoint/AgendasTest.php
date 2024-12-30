@@ -10,6 +10,7 @@ use GuzzleHttp\Psr7\Response;
 use League\Uri\Uri;
 use OpenAgenda\Client;
 use OpenAgenda\Endpoint\Agendas;
+use OpenAgenda\OpenAgenda;
 use OpenAgenda\Test\Utility\FileResource;
 use OpenAgenda\Wrapper\HttpWrapper;
 use PHPUnit\Framework\TestCase;
@@ -44,6 +45,8 @@ class AgendasTest extends TestCase
             'public_key' => 'testing',
             'wrapper' => $this->wrapper,
         ]);
+
+        OpenAgenda::setClient($this->client);
     }
 
     public static function dataGetUriSuccess(): array
@@ -74,7 +77,7 @@ class AgendasTest extends TestCase
      */
     public function testGetUriSuccess($params, $expected)
     {
-        $endpoint = new Agendas($this->client, $params);
+        $endpoint = new Agendas($params);
         $uri = $endpoint->getUri();
         $this->assertEquals(Uri::createFromString($expected), $uri);
     }
@@ -95,7 +98,7 @@ class AgendasTest extends TestCase
             )
             ->willReturn(new Response(200, ['Content-Type' => 'application/json'], $payload));
 
-        $endpoint = new Agendas($this->client, ['limit' => 2]);
+        $endpoint = new Agendas(['limit' => 2]);
 
         $agendas = $endpoint->get();
 

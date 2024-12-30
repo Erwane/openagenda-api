@@ -4,7 +4,6 @@ declare(strict_types=1);
 namespace OpenAgenda\Endpoint;
 
 use League\Uri\Uri;
-use OpenAgenda\Client;
 
 abstract class Endpoint
 {
@@ -16,11 +15,6 @@ abstract class Endpoint
     protected $baseUrl = 'https://api.openagenda.com/v2';
 
     /**
-     * @var \OpenAgenda\Client
-     */
-    protected $client;
-
-    /**
      * @var array
      */
     protected $params;
@@ -28,12 +22,10 @@ abstract class Endpoint
     /**
      * Construct OpenAgenda endpoint.
      *
-     * @param \OpenAgenda\Client $client OpenAgenda client with http wrapper.
      * @param array $params Endpoint params.
      */
-    public function __construct(Client $client, array $params = [])
+    public function __construct(array $params = [])
     {
-        $this->client = $client;
         $this->params = $params;
     }
 

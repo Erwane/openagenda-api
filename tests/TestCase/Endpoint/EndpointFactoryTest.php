@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace OpenAgenda\Test\TestCase\Endpoint;
 
-use OpenAgenda\Client;
 use OpenAgenda\Endpoint\Agendas;
 use OpenAgenda\Endpoint\EndpointFactory;
 use OpenAgenda\Endpoint\UnknownEndpointException;
@@ -20,8 +19,7 @@ class EndpointFactoryTest extends TestCase
         $this->expectException(UnknownEndpointException::class);
         $this->expectExceptionMessage('Path "/testing" is not a valid endpoint.');
 
-        $client = $this->createMock(Client::class);
-        EndpointFactory::make($client, '/testing');
+        EndpointFactory::make('/testing');
     }
 
     public static function dataMake(): array
@@ -41,8 +39,7 @@ class EndpointFactoryTest extends TestCase
      */
     public function testMake($path, $expectedClass)
     {
-        $client = $this->createMock(Client::class);
-        $endpoint = EndpointFactory::make($client, $path);
+        $endpoint = EndpointFactory::make($path);
         $this->assertInstanceOf($expectedClass, $endpoint);
     }
 }

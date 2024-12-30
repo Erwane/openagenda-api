@@ -5,6 +5,7 @@ namespace OpenAgenda\Endpoint;
 
 use League\Uri\Uri;
 use OpenAgenda\Entity\Agenda;
+use OpenAgenda\OpenAgenda;
 use Ramsey\Collection\Collection;
 use Respect\Validation\Validator as v;
 
@@ -109,11 +110,11 @@ class Agendas extends Endpoint
     {
         $collection = new Collection(Agenda::class);
 
-        $response = $this->client->get($this->getUri());
+        $response = OpenAgenda::getClient()->get($this->getUri());
 
         if ($response['_success'] && !empty($response['agendas'])) {
             foreach ($response['agendas'] as $item) {
-                $agenda = new Agenda($item);
+                $agenda = new Agenda($item, ['markClean' => true]);
                 $collection->add($agenda);
             }
         }
