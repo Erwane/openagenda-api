@@ -20,6 +20,8 @@ class EndpointFactory
             case '/agendas':
             case '/agendas/mines':
                 return new Agendas($params);
+            case '/locations':
+                return new Locations($params);
             default:
                 throw new UnknownEndpointException($path);
         }

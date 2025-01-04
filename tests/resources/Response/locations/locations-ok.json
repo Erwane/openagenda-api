@@ -1,0 +1,15 @@
+{
+    "success": true,
+    "after": 1234567,
+    "total": 1000,
+    "locations": [
+        {
+            "uid": 12345678,
+            "name": "Salle Brémontier, Arès (33)",
+            "address": "1, Route du Temple\nSalle Brémontier, 33740 Arès, France",
+            "latitude": 44.77145,
+            "longitude": -1.134858,
+            "state": 0
+        }
+    ]
+}

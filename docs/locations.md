@@ -25,17 +25,17 @@ Return a [Collection](collections.md) of Location items.
 
 ```php
 // using endpoint
-$locations = $oa->get('/agendas/locations', $options);
+$locations = $oa->get('/locations', $params);
 
 // using previous fetched OpenAgenda\Agenda object
-$locations = $agenda->locations($options);
+$locations = $agenda->locations($params);
 ```
 
-**array $options**
+**array $params**
 
-The `/agendas/locations` endpoint or `$agenda->locations()` method accept an options array with this possible keys:
+The `/locations` endpoint or `$agenda->locations()` method accept a params array with this possible keys:
 
-* int `agenda`: Agenda id. **required** if using endpoint.
+* int `agenda_id`: Agenda id. **required** if using endpoint.
 * int `limit`: How many results by request. Default `10`
 * int `page`: Pagination. Require a PSR-16 configured cache.  
   You can only ask for next or previous page.  
@@ -43,21 +43,20 @@ The `/agendas/locations` endpoint or `$agenda->locations()` method accept an opt
 * bool `detailed`: When `true`, get all locations fields. Default `false`
 * string `search`: Search terms in title, locations and agenda keywords.
 * bool `state`: When `true`, only verified locations. Default `null`.
+* DateTimeInterface|string `created_lte`: Only locations created before or at.  
+  String date format: `2023-06-02T12:40:00+0100` or `2023-06-02`
+* DateTimeInterface|string `created_gte`: Only locations created at or after.  
+  String date format: `2023-06-02T12:40:00+0100` or `2023-06-02`
+* DateTimeInterface|string `updated_lte`: Only locations updated before or at.  
+  String date format: `2023-06-02T12:40:00+0100` or `2023-06-02` 
+* DateTimeInterface|string `updated_gte`: Only locations updated at or after.  
+  String date format: `2023-06-02T12:40:00+0100` or `2023-06-02`
 * string `sort`: Sort results.  
   Possible values are:
     * `name_asc`: Sort by title ascending.
     * `name_desc`: Sort by title descending.
     * `created_asc`: Sort by creation date ascending.
     * `created_desc`: Sort by creation date descending.
-* array `filters`:
-  * DateTimeInterface|string `created_lte`: Only locations created before or at.  
-    String date format: `2023-06-02T12:40:00+0100` or `2023-06-02`
-  * DateTimeInterface|string `created_gte`: Only locations created at or after.  
-    String date format: `2023-06-02T12:40:00+0100` or `2023-06-02`
-  * DateTimeInterface|string `updated_lte`: Only locations updated before or at.  
-    String date format: `2023-06-02T12:40:00+0100` or `2023-06-02` 
-  * DateTimeInterface|string `updated_gte`: Only locations updated at or after.  
-    String date format: `2023-06-02T12:40:00+0100` or `2023-06-02`
 
 ### Get
 
@@ -65,7 +64,7 @@ Get a Location object
 
 ```php
 // using endpoint
-$location = $oa->get('/agendas/location', $options);
+$location = $oa->get('/location', $params);
 
 // using previous fetched OpenAgenda\Agenda object
 $location = $agenda->location($id)->get();
@@ -77,13 +76,13 @@ Return `true` if exists neither `false`.
 
 ```php
 // using endpoint
-$exists = $oa->head('/agendas/location', $options);
+$exists = $oa->head('/location', $params);
 
 // using previous fetched OpenAgenda\Agenda object
 $exists = $agenda->location($locationId)->exists();
 ```
 
-**array $options** for endpoint method
+**array $params** for endpoint method
 * int `agenda` (**required**): Agenda id.
 * int `id` (**required**): Location id
 
@@ -94,7 +93,7 @@ Return a Location object with the new id.
 
 ```php
 // using endpoint
-$location = $oa->post('/agendas/location', $data);
+$location = $oa->post('/location', $data);
 
 // using previous fetched OpenAgenda\Agenda object
 $location = $agenda->location($data)->post();
@@ -117,8 +116,8 @@ In this case, `id` should not exist in `$data`.
 
 ```php
 // using endpoint
-$location = $oa->post('/agendas/location', $data);
-$location = $oa->patch('/agendas/location', $data);
+$location = $oa->post('/location', $data);
+$location = $oa->patch('/location', $data);
 
 // using previous fetched OpenAgenda\Location object
 $location = $location->post($data);
@@ -139,7 +138,7 @@ In this case, `id` should not exist in `$data`.
 
 ```php
 // using endpoint
-$location = $oa->delete('/agendas/location', $data);
+$location = $oa->delete('/location', $data);
 
 // using previous fetched OpenAgenda\Location object
 $location = $location->delete($id);

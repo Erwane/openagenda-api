@@ -6,6 +6,8 @@ composer.phar
 .phpunit.result.cache
 .phpunit.cache
 
+/coverage.xml
+
 # OS generated files #
 ######################
 .DS_Store
