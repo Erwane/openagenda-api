@@ -1,0 +1,20 @@
+meta {
+  name: Agendas - mines
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}/me/agendas
+  body: none
+  auth: none
+}
+
+params:query {
+  ~size: 2
+}
+
+headers {
+  key: {{public_key}}
+  ~access-token: {{access_token}}
+}

@@ -1,0 +1,27 @@
+meta {
+  name: request-token
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/requestAccessToken
+  body: multipartForm
+  auth: none
+}
+
+body:json {
+  {
+    "code": "{{public_key}}",
+    "grant_type": "authorization_code"
+  }
+}
+
+body:multipart-form {
+  grant_type: authorization_code
+  code: {{secret_key}}
+}
+
+vars:post-response {
+  access_token: res.body.access_token
+}
