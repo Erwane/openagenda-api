@@ -3,8 +3,7 @@
     "description": "PHP sdk to request OpenAgenda api",
     "type": "library",
     "keywords": [
-        "openagenda",
-        "api"
+        "openagenda"
     ],
     "homepage": "https://github.com/Erwane/openagenda-api",
     "support": {
@@ -22,6 +21,7 @@
     "require": {
         "php": "^7.2",
         "ext-json": "*",
+        "cakephp/validation": "^3.0",
         "ezyang/htmlpurifier": "^4.9",
         "league/html-to-markdown": "^5.0",
         "league/uri": "^6.4",
@@ -33,7 +33,6 @@
         "cakephp/cakephp-codesniffer": "^4.0",
         "guzzlehttp/psr7": "^2.0",
         "phpunit/phpunit": "^8.5",
-        "respect/validation": "^2.0",
         "symfony/var-dumper": "^v5.0"
     },
     "autoload": {
