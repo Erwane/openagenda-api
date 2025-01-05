@@ -14,6 +14,9 @@ declare(strict_types=1);
  */
 namespace OpenAgenda\Endpoint;
 
+/**
+ * Endpoint factory
+ */
 class EndpointFactory
 {
     /**
@@ -35,6 +38,8 @@ class EndpointFactory
                 return new Agenda($params);
             case '/locations':
                 return new Locations($params);
+            case '/location':
+                return new Location($params);
             default:
                 throw new UnknownEndpointException($path);
         }

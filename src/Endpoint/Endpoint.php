@@ -14,6 +14,7 @@ declare(strict_types=1);
  */
 namespace OpenAgenda\Endpoint;
 
+use Cake\Validation\Validator;
 use Cake\Validation\ValidatorAwareInterface;
 use Cake\Validation\ValidatorAwareTrait;
 use DateTime;
@@ -51,7 +52,7 @@ abstract class Endpoint implements ValidatorAwareInterface
      *
      * @var array
      */
-    protected $fields = [];
+    protected $queryFields = [];
 
     /**
      * Construct OpenAgenda endpoint.
@@ -94,8 +95,8 @@ abstract class Endpoint implements ValidatorAwareInterface
      */
     protected function _formatType(string $param, $value)
     {
-        if (!empty($this->fields[$param]['type'])) {
-            switch ($this->fields[$param]['type']) {
+        if (!empty($this->queryFields[$param]['type'])) {
+            switch ($this->queryFields[$param]['type']) {
                 case 'datetime':
                     $value = new DateTime($value);
                     break;
@@ -109,6 +110,14 @@ abstract class Endpoint implements ValidatorAwareInterface
     }
 
     /**
+     * Validate URI path params. ex /agendas/<agenda_id>/locations/<location_id>
+     *
+     * @param \Cake\Validation\Validator $validator Validator
+     * @return \Cake\Validation\Validator
+     */
+    abstract public function validationUriPath(Validator $validator): Validator;
+
+    /**
      * Validate endpoint parameters.
      *
      * @param array $params Endpoint parameters.
@@ -117,10 +126,10 @@ abstract class Endpoint implements ValidatorAwareInterface
     protected function validateParams(array $params): array
     {
         // Default to null
-        $params += array_fill_keys(array_keys($this->fields), null);
+        $params += array_fill_keys(array_keys($this->queryFields), null);
 
         // Keep-only valid fields
-        $params = array_intersect_key($params, $this->fields);
+        $params = array_intersect_key($params, $this->queryFields);
 
         // Validate
         $errors = $this->getValidator('default')
@@ -175,6 +184,37 @@ abstract class Endpoint implements ValidatorAwareInterface
     }
 
     /**
+     * Get OpenAgenda endpoint uri.
+     *
+     * @return \League\Uri\Uri
+     */
+    public function getUri(): Uri
+    {
+        $errors = $this->getValidator('uriPath')->validate($this->params);
+
+        if ($errors) {
+            $this->throwException($errors);
+        }
+
+        $path = $this->uriPath();
+        $query = $this->uriQuery();
+
+        $components = parse_url($this->baseUrl . $path);
+        if ($query) {
+            $components['query'] = http_build_query($query);
+        }
+
+        return Uri::createFromComponents($components);
+    }
+
+    /**
+     * Get endpoint uri path.
+     *
+     * @return string
+     */
+    abstract public function uriPath(): string;
+
+    /**
      * Convert endpoint params to valid OpenAgenda endpoint query params.
      *
      * @return array
@@ -186,11 +226,11 @@ abstract class Endpoint implements ValidatorAwareInterface
         $params = $this->validateParams($this->params);
 
         foreach ($params as $param => $value) {
-            if (!isset($this->fields[$param])) {
+            if (!isset($this->queryFields[$param])) {
                 continue;
             }
 
-            $map = $this->fields[$param];
+            $map = $this->queryFields[$param];
             $query[$map['name']] = $this->convertQueryValue($map, $value);
         }
 
@@ -201,9 +241,19 @@ abstract class Endpoint implements ValidatorAwareInterface
     }
 
     /**
-     * Get OpenAgenda endpoint uri.
+     * Throw exception with endpoint errors
      *
-     * @return \League\Uri\Uri
+     * @param array $errors Endpoint errors
+     * @return void
+     * @throws \InvalidArgumentException
      */
-    abstract public function getUri(): Uri;
+    protected function throwException(array $errors)
+    {
+        $message = [
+            'message' => static::class . ' has errors.',
+            'errors' => $errors,
+        ];
+
+        throw new InvalidArgumentException(json_encode($message, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+    }
 }

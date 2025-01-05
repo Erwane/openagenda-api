@@ -48,7 +48,7 @@ The `/locations` endpoint or `$agenda->locations()` method accept a params array
 * DateTimeInterface|string `created_gte`: Only locations created at or after.  
   String date format: `2023-06-02T12:40:00+0100` or `2023-06-02`
 * DateTimeInterface|string `updated_lte`: Only locations updated before or at.  
-  String date format: `2023-06-02T12:40:00+0100` or `2023-06-02` 
+  String date format: `2023-06-02T12:40:00+0100` or `2023-06-02`
 * DateTimeInterface|string `updated_gte`: Only locations updated at or after.  
   String date format: `2023-06-02T12:40:00+0100` or `2023-06-02`
 * string `sort`: Sort results.  
@@ -60,31 +60,35 @@ The `/locations` endpoint or `$agenda->locations()` method accept a params array
 
 ### Get
 
-Get a Location object
+Get one location.  
+If you want to check a location exists, you can use `head()` method instead of `get()`.
 
 ```php
+// Endpoint params
+$params = [
+    'agenda_id' => 12345,
+    'id' => 67890, // location id
+    'ext_id' => 'my-uuid-v4', // OR external id
+];
+
 // using endpoint
 $location = $oa->get('/location', $params);
 
 // using previous fetched OpenAgenda\Agenda object
 $location = $agenda->location($id)->get();
-```
 
-You can check if a location **exists** with a head request or using `exists()` method.  
-Return `true` if exists neither `false`.
-
-
-```php
-// using endpoint
+// Check location exists
 $exists = $oa->head('/location', $params);
-
-// using previous fetched OpenAgenda\Agenda object
-$exists = $agenda->location($locationId)->exists();
+$exists = $agenda->location($params)->exists();
 ```
 
-**array $params** for endpoint method
-* int `agenda` (**required**): Agenda id.
-* int `id` (**required**): Location id
+**Params**:
+
+| field     | type    | Required | description                             |
+|-----------|---------|:--------:|-----------------------------------------|
+| agenda_id | integer |    Y     | Agenda id. Required if using endpoint.  |
+| id        | integer |    n     | Location id.                            |
+| ext_id    | mixed   |    n     | Your internal location id.              |
 
 ### Create
 
@@ -100,6 +104,7 @@ $location = $agenda->location($data)->post();
 ```
 
 #### Data
+
 Check [Location object](#schema) for more details.
 
 ### Update
@@ -125,8 +130,8 @@ $location = $location->patch($data);
 ```
 
 #### Data
-Check [Location object](#schema) for more details.
 
+Check [Location object](#schema) for more details.
 
 ### Delete
 
@@ -145,7 +150,6 @@ $location = $location->delete($id);
 // you can chain from Agenda too
 $location = $agenda->location($id)->delete();
 ```
-
 
 ## Schema
 
@@ -180,13 +184,15 @@ $location = $agenda->location($id)->delete();
 |   timezone    |      string       |    G     | Timezone [identifier](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones) |
 
 **Required**
+
 * **I**: Internal data. Can't be sets.
 * **R**: Required at creation or update with `post`.
 * **O**: Optional at creation or update
 * **G**: If the field is empty, the geocoding query from the `address` field will be used.
 
 **Multilingual text**  
-The `multilingual` type is an array of text where key is the language in [ISO 639-1](https://fr.wikipedia.org/wiki/Liste_des_codes_ISO_639-1) format.
+The `multilingual` type is an array of text where key is the language
+in [ISO 639-1](https://fr.wikipedia.org/wiki/Liste_des_codes_ISO_639-1) format.
 
 ```php
 [
@@ -195,6 +201,7 @@ The `multilingual` type is an array of text where key is the language in [ISO 63
 ```
 
 ### Latitude and Longitude precision
+
 Don't forget the precision of coordinates when you set latitude and longitude decimals.  
-According to wikipedia [Decimal degrees precision](https://en.wikipedia.org/wiki/Decimal_degrees#Precision) page, 
+According to wikipedia [Decimal degrees precision](https://en.wikipedia.org/wiki/Decimal_degrees#Precision) page,
 5 decimals is a precision of 1 meter. Maybe you don't need more.
