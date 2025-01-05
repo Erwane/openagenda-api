@@ -1,6 +1,17 @@
 <?php
 declare(strict_types=1);
 
+/**
+ * OpenAgenda API client.
+ * Copyright (c) Erwane BRETON
+ * Licensed under The MIT License
+ * For full copyright and license information, please see the LICENSE.txt
+ * Redistributions of files must retain the above copyright notice.
+ *
+ * @copyright   Copyright (c) Erwane BRETON
+ * @see         https://github.com/Erwane/openagenda-api
+ * @license     https://opensource.org/licenses/mit-license.php MIT License
+ */
 namespace OpenAgenda\Endpoint;
 
 use Cake\Validation\ValidatorAwareInterface;
@@ -33,7 +44,7 @@ abstract class Endpoint implements ValidatorAwareInterface
     /**
      * @var array
      */
-    protected $params;
+    protected $params = [];
 
     /**
      * Endpoint fields configuration.
@@ -87,6 +98,10 @@ abstract class Endpoint implements ValidatorAwareInterface
             switch ($this->fields[$param]['type']) {
                 case 'datetime':
                     $value = new DateTime($value);
+                    break;
+                case 'array':
+                    $value = $this->paramAsArray($value);
+                    break;
             }
         }
 
@@ -101,11 +116,15 @@ abstract class Endpoint implements ValidatorAwareInterface
      */
     protected function validateParams(array $params): array
     {
+        // Default to null
         $params += array_fill_keys(array_keys($this->fields), null);
 
-        $validator = $this->getValidator('default');
+        // Keep-only valid fields
+        $params = array_intersect_key($params, $this->fields);
 
-        $errors = $validator->validate($params);
+        // Validate
+        $errors = $this->getValidator('default')
+            ->validate($params);
 
         if ($errors) {
             dump($errors);

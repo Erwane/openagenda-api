@@ -1,23 +1,37 @@
 <?php
 declare(strict_types=1);
 
+/**
+ * OpenAgenda API client.
+ * Copyright (c) Erwane BRETON
+ * Licensed under The MIT License
+ * For full copyright and license information, please see the LICENSE.txt
+ * Redistributions of files must retain the above copyright notice.
+ *
+ * @copyright   Copyright (c) Erwane BRETON
+ * @see         https://github.com/Erwane/openagenda-api
+ * @license     https://opensource.org/licenses/mit-license.php MIT License
+ */
 namespace OpenAgenda\Endpoint;
 
+use Cake\Validation\Validator;
 use League\Uri\Uri;
 use OpenAgenda\Entity\Agenda;
 use OpenAgenda\OpenAgenda;
 use Ramsey\Collection\Collection;
-use Respect\Validation\Validator as v;
 
+/**
+ * Agendas endpoint
+ */
 class Agendas extends Endpoint
 {
-    protected $queryMap = [
+    protected $fields = [
         'limit' => ['name' => 'size'],
-        'fields' => ['name' => 'fields'],
+        'fields' => ['name' => 'fields', 'type' => 'array'],
         'search' => ['name' => 'search'],
         'official' => ['name' => 'official'],
-        'slug' => ['name' => 'slug'],
-        'id' => ['name' => 'uid'],
+        'slug' => ['name' => 'slug', 'type' => 'array'],
+        'id' => ['name' => 'uid', 'type' => 'array'],
         'network' => ['name' => 'network'],
         'sort' => [
             'name' => 'sort',
@@ -31,58 +45,19 @@ class Agendas extends Endpoint
     /**
      * @inheritDoc
      */
-    protected function validateParams(array $params): array
+    public function validationDefault(Validator $validator)
     {
-        $params += array_fill_keys(array_keys($this->queryMap), null);
-
-        $validators = [
-            'limit' => v::nullable(v::intVal()),
-            'fields' => v::nullable(v::arrayType()
-                ->subset(['summary', 'schema'])),
-            'search' => v::nullable(v::stringVal()),
-            'official' => v::nullable(v::boolType()),
-            'slug' => v::nullable(v::each(v::stringType())),
-            'id' => v::nullable(v::each(v::intVal())),
-            'network' => v::nullable(v::intVal()),
-            'sort' => v::nullable(v::stringVal()
-                ->in(['created_desc', 'recent_events'])),
-        ];
-
-        $params['fields'] = $this->paramAsArray($params['fields']);
-        $params['slug'] = $this->paramAsArray($params['slug']);
-        $params['id'] = $this->paramAsArray($params['id']);
-
-        foreach ($validators as $param => $validator) {
-            $validator->assert($params[$param]);
-        }
-
-        return $params;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    protected function uriQuery(): array
-    {
-        $query = [];
-
-        $params = $this->validateParams($this->params);
-
-        foreach ($params as $param => $value) {
-            if (!isset($this->queryMap[$param])) {
-                continue;
-            }
-
-            $map = $this->queryMap[$param];
-            $query[$map['name']] = $this->convertQueryValue($map, $value);
-        }
-
-        // filter
-        $query = array_filter($query, function ($value) {
-            return $value !== null;
-        });
-
-        return $query;
+        return parent::validationDefault($validator);
+        // 'limit' => v::nullable(v::intVal()),
+            // 'fields' => v::nullable(v::arrayType()
+            //     ->subset(['summary', 'schema'])),
+            // 'search' => v::nullable(v::stringVal()),
+            // 'official' => v::nullable(v::boolType()),
+            // 'slug' => v::nullable(v::each(v::stringType())),
+            // 'id' => v::nullable(v::each(v::intVal())),
+            // 'network' => v::nullable(v::intVal()),
+            // 'sort' => v::nullable(v::stringVal()
+            //     ->in(['created_desc', 'recent_events'])),
     }
 
     /**
@@ -113,11 +88,17 @@ class Agendas extends Endpoint
     public function get(): Collection
     {
         $collection = new Collection(Agenda::class);
+        $uri = $this->getUri();
 
-        $response = OpenAgenda::getClient()->get($this->getUri());
+        $response = OpenAgenda::getClient()->get($uri);
 
-        if ($response['_success'] && !empty($response['agendas'])) {
-            foreach ($response['agendas'] as $item) {
+        $target = 'agendas';
+        if ($uri->getPath() === '/v2/me/agendas') {
+            $target = 'items';
+        }
+
+        if ($response['_success'] && !empty($response[$target])) {
+            foreach ($response[$target] as $item) {
                 $agenda = new Agenda($item, ['markClean' => true]);
                 $collection->add($agenda);
             }
