@@ -31,6 +31,8 @@ class EndpointFactory
             case '/agendas':
             case '/agendas/mines':
                 return new Agendas($params);
+            case '/agenda':
+                return new Agenda($params);
             case '/locations':
                 return new Locations($params);
             default:

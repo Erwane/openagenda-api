@@ -7,6 +7,8 @@ declare(strict_types=1);
 namespace OpenAgenda\Test\TestCase;
 
 use GuzzleHttp\Psr7\Response;
+use OpenAgenda\Entity\Agenda;
+use OpenAgenda\Entity\Location;
 use OpenAgenda\OpenAgenda;
 use OpenAgenda\OpenAgendaException;
 use OpenAgenda\Test\Utility\FileResource;
@@ -116,10 +118,11 @@ class OpenAgendaTest extends TestCase
                 'https://api.openagenda.com/v2/agendas',
                 ['headers' => ['key' => 'testing']]
             )
-            ->willReturn(new Response(200, [], $payload));
+            ->willReturn(new Response(200, ['Content-Type' => 'application/json'], $payload));
 
         $agendas = $this->oa->agendas();
         $this->assertInstanceOf(Collection::class, $agendas);
+        $this->assertInstanceOf(Agenda::class, $agendas->first());
     }
 
     public function testGetMyAgendas()
@@ -132,10 +135,42 @@ class OpenAgendaTest extends TestCase
                 'https://api.openagenda.com/v2/me/agendas',
                 ['headers' => ['key' => 'testing']]
             )
-            ->willReturn(new Response(200, [], $payload));
+            ->willReturn(new Response(200, ['Content-Type' => 'application/json'], $payload));
 
         $agendas = $this->oa->myAgendas();
         $this->assertInstanceOf(Collection::class, $agendas);
+        $this->assertInstanceOf(Agenda::class, $agendas->first());
+    }
+
+    public function testGetAgenda()
+    {
+        $payload = FileResource::instance($this)
+            ->getContent('Response/agendas/agenda.json');
+        $this->wrapper->expects($this->once())
+            ->method('get')
+            ->with(
+                'https://api.openagenda.com/v2/agendas/12345',
+                ['headers' => ['key' => 'testing']]
+            )
+            ->willReturn(new Response(200, ['Content-Type' => 'application/json'], $payload));
+
+        $agenda = $this->oa->agenda(['id' => 12345]);
+        $this->assertInstanceOf(Agenda::class, $agenda);
+    }
+
+    public function testGetLocations()
+    {
+        $payload = FileResource::instance($this)->getContent('Response/locations/locations-ok.json');
+        $this->wrapper->expects($this->once())
+            ->method('get')
+            ->with(
+                'https://api.openagenda.com/v2/agendas/123456/locations',
+                ['headers' => ['key' => 'testing']]
+            )
+            ->willReturn(new Response(200, ['Content-Type' => 'application/json'], $payload));
+
+        $locations = $this->oa->locations(['agenda_id' => 123456]);
+        $this->assertInstanceOf(Location::class, $locations->first());
     }
 
     /**
@@ -544,7 +579,7 @@ JSON
             ->willReturn(new Response(
                 200,
                 [],
-                '{"agendas": [{"uid": 123,"slug": "agendatrad"}],"total": 1,"success": true}'
+                '{"agendas": [{"uid": 123,"slug": "myagenda"}],"total": 1,"success": true}'
             ));
 
         $this->oa->setClient($client);

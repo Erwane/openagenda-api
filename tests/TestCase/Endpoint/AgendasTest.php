@@ -15,13 +15,10 @@ declare(strict_types=1);
 namespace OpenAgenda\Test\TestCase\Endpoint;
 
 use GuzzleHttp\Psr7\Response;
-use OpenAgenda\Client;
 use OpenAgenda\Endpoint\Agendas;
 use OpenAgenda\Entity\Agenda;
-use OpenAgenda\OpenAgenda;
+use OpenAgenda\Test\EndpointTestCase;
 use OpenAgenda\Test\Utility\FileResource;
-use OpenAgenda\Wrapper\HttpWrapper;
-use PHPUnit\Framework\TestCase;
 use Ramsey\Collection\Collection;
 
 /**
@@ -30,35 +27,8 @@ use Ramsey\Collection\Collection;
  * @uses   \OpenAgenda\Endpoint\Agendas
  * @covers \OpenAgenda\Endpoint\Agendas
  */
-class AgendasTest extends TestCase
+class AgendasTest extends EndpointTestCase
 {
-    /**
-     * @var (\object&\PHPUnit\Framework\MockObject\MockObject)|\OpenAgenda\Client|(\OpenAgenda\Client&\object&\PHPUnit\Framework\MockObject\MockObject)|(\OpenAgenda\Client&\PHPUnit\Framework\MockObject\MockObject)|\PHPUnit\Framework\MockObject\MockObject
-     */
-    protected $client;
-
-    protected function setUp(): void
-    {
-        parent::setUp();
-
-        $this->wrapper = $this->getMockForAbstractClass(
-            HttpWrapper::class,
-            [],
-            '',
-            false,
-            true,
-            true,
-            ['head', 'get', 'post', 'patch', 'delete']
-        );
-
-        $this->client = new Client([
-            'public_key' => 'testing',
-            'wrapper' => $this->wrapper,
-        ]);
-
-        OpenAgenda::setClient($this->client);
-    }
-
     public static function dataGetUriSuccess(): array
     {
         return [

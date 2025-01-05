@@ -130,8 +130,8 @@ class Locations extends Endpoint
 
         if ($response['_success'] && !empty($response['locations'])) {
             foreach ($response['locations'] as $item) {
-                $agenda = new Location($item, ['markClean' => true]);
-                $collection->add($agenda);
+                $entity = new Location($item, ['markClean' => true]);
+                $collection->add($entity);
             }
         }
 

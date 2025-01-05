@@ -1,0 +1,138 @@
+{
+    "uid": 41648,
+    "title": "La Semaine Nationale de la Petite Enfance",
+    "description": "Du 15 au 24 mars 2025, tous ensemble pour l'éveil du tout-petit ! \nUne semaine d'ateliers & activités à travers toute la France, pour réunir le trio parent-enfant-professionnel.",
+    "slug": "semainepetiteenfance",
+    "url": "https://www.semainepetiteenfance.fr",
+    "official": 1,
+    "networkUid": null,
+    "locationSetUid": null,
+    "updatedAt": "2025-01-04T10:31:53.000Z",
+    "createdAt": "2016-07-27T12:24:08.000Z",
+    "memberSchemaId": null,
+    "officializedAt": null,
+    "image": "https://cdn.openagenda.com/main/agenda41648.jpg?__ts=1664443597781",
+    "private": 0,
+    "indexed": 1,
+    "settings": {
+        "tracking": {
+            "googleAnalytics": null,
+            "matomoUrl": null,
+            "matomoSiteId": null,
+            "matomoCustom": []
+        },
+        "public": {
+            "filters": {
+                "displayed": null
+            }
+        },
+        "lab": {
+            "status": false
+        },
+        "inbox": {
+            "mailto": {
+                "enabled": false,
+                "email": null,
+                "subject": null,
+                "body": null
+            }
+        },
+        "contribution": {
+            "type": 1,
+            "defaultState": 2,
+            "canPublish": [
+                "administrators",
+                "moderators"
+            ],
+            "moderateOnChangeBy": [],
+            "defaultLang": null,
+            "allowLocationCreate": true,
+            "messages": {
+                "instructions": "Bonjour ! Vous pouvez ajouter votre événement à la Carte de Mobilisation, à vous de jouer !",
+                "complete": null,
+                "publication": null,
+                "GDPRInformation": null
+            },
+            "useFields": true
+        },
+        "registration": {
+            "passCulture": {
+                "siren": null,
+                "bookingEmail": null
+            }
+        }
+    },
+    "summary": {
+        "keywords": [
+            "Le Mans",
+            "Valenciennes",
+            "Paris",
+            "Verneuil d'Avre et d'Iton",
+            "Bussy-Saint-Georges",
+            "Gretz-Armainvilliers",
+            "Marseille",
+            "Nilvange",
+            "Angoulême",
+            "Beaupréau-en-Mauges",
+            "Eure",
+            "Moselle",
+            "Nord",
+            "Seine-et-Marne",
+            "Meurthe-et-Moselle",
+            "Gironde",
+            "Ille-et-Vilaine",
+            "Yvelines",
+            "Loire-Atlantique",
+            "Sarthe",
+            "Grand Est",
+            "Nouvelle-Aquitaine",
+            "Île-de-France",
+            "Normandie",
+            "Occitanie",
+            "Hauts-de-France",
+            "Pays de la Loire",
+            "Auvergne-Rhône-Alpes",
+            "Provence-Alpes-Côte d'Azur",
+            "Bretagne",
+            "spectacle",
+            "conte",
+            "jeune public",
+            "Mandapa",
+            "conte musical",
+            "enfants",
+            "famille",
+            "Paris 13",
+            "Paris 75013",
+            "parentalité"
+        ],
+        "publishedEvents": {
+            "current": 0,
+            "passed": 1944,
+            "upcoming": 74
+        },
+        "languages": {
+            "fr": 2017,
+            "en": 3,
+            "de": 2,
+            "es": 2,
+            "it": 2
+        },
+        "recentlyAddedEvents": {
+            "contribution": 13,
+            "shared": 0,
+            "aggregation": 0
+        },
+        "viewport": {
+            "topLeft": {
+                "latitude": 51.04806298390031,
+                "longitude": -149.59571502171457
+            },
+            "bottomRight": {
+                "latitude": -21.148413000628352,
+                "longitude": 55.69257393479347
+            }
+        }
+    },
+    "network": null,
+    "locationSet": null
+}

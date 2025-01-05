@@ -12,6 +12,9 @@ use OpenAgenda\Wrapper\HttpWrapper;
 use Psr\SimpleCache\CacheInterface;
 use Ramsey\Collection\Collection;
 
+/**
+ * OpenAgenda
+ */
 class OpenAgenda
 {
     /**
@@ -73,11 +76,26 @@ class OpenAgenda
     }
 
     /**
+     * Do a GET request on $path.
+     *
+     * @param string $path Endpoint path. Relative, not real OpenAgenda endpoint.
+     * @param array $params Client options
+     * @return \Ramsey\Collection\Collection|\OpenAgenda\Entity\Entity|\Psr\Http\Message\ResponseInterface
+     * @throws \OpenAgenda\Endpoint\UnknownEndpointException
+     */
+    public function get(string $path, array $params = [])
+    {
+        // todo: allow passing raw OpenAgenda endpoint url and return ResponseInterface.
+        return EndpointFactory::make($path, $params)->get();
+    }
+
+    /**
      * Get agendas from OpenAgenda.
      *
      * @param array $params Query params.
      * @return \OpenAgenda\Entity\Agenda[]|\Ramsey\Collection\Collection
      * @throws \OpenAgenda\Endpoint\UnknownEndpointException
+     * @uses \OpenAgenda\Endpoint\Agendas::get()
      */
     public function agendas(array $params = []): Collection
     {
@@ -90,6 +108,7 @@ class OpenAgenda
      * @param array $params Query params.
      * @return \OpenAgenda\Entity\Agenda[]|\Ramsey\Collection\Collection
      * @throws \OpenAgenda\Endpoint\UnknownEndpointException
+     * @uses \OpenAgenda\Endpoint\Agendas
      */
     public function myAgendas(array $params = []): Collection
     {
@@ -97,16 +116,28 @@ class OpenAgenda
     }
 
     /**
-     * Do a GET request on $path.
+     * Get agendas from OpenAgenda.
      *
-     * @param string $path Endpoint path. Relative, not real OpenAgenda endpoint.
-     * @param array $params Client options
-     * @return \Ramsey\Collection\Collection|\OpenAgenda\Entity\Entity
+     * @param array $params Query params.
+     * @return \OpenAgenda\Entity\Agenda|null
+     * @throws \OpenAgenda\Endpoint\UnknownEndpointException
+     * @uses \OpenAgenda\Endpoint\Agendas
+     */
+    public function agenda(array $params): ?Agenda
+    {
+        return EndpointFactory::make('/agenda', $params)->get();
+    }
+
+    /**
+     * Get OpenAgenda locations for an agenda.
+     *
+     * @param array $params Query params.
+     * @return \OpenAgenda\Entity\Location[]|\Ramsey\Collection\Collection
      * @throws \OpenAgenda\Endpoint\UnknownEndpointException
      */
-    public function get(string $path, array $params = [])
+    public function locations(array $params = []): Collection
     {
-        return EndpointFactory::make($path, $params)->get();
+        return EndpointFactory::make('/locations', $params)->get();
     }
 
     public function newEvent()

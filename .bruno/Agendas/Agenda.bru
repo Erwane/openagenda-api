@@ -5,14 +5,13 @@ meta {
 }
 
 get {
-  url: {{baseUrl}}/agendas?uid={{agenda_id}}&detailed=1
+  url: {{baseUrl}}/agendas/{{agenda_id}}
   body: none
   auth: none
 }
 
 params:query {
-  uid: {{agenda_id}}
-  detailed: 1
+  ~detailed: 1
 }
 
 headers {
