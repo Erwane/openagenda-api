@@ -26,6 +26,9 @@ use PHPUnit\Framework\TestCase;
  */
 class EntityTest extends TestCase
 {
+    /**
+     * @covers \OpenAgenda\Entity\Entity::fromOpenAgenda
+     */
     public function testConstructFromOpenAgenda()
     {
         $ent = new ent([
@@ -33,18 +36,23 @@ class EntityTest extends TestCase
             'postalCode' => '12345',
             'createdAt' => Chronos::now()->toAtomString(),
             'description' => json_encode(['fr' => 'Lorem ipsum']),
+            'state' => 1,
             'unknownField' => 'value',
         ]);
-
-        // Unknown field exists in fields / property
-        $this->assertEquals('value', $ent->unknownField);
 
         $this->assertEquals([
             'id' => 1,
             'postal_code' => '12345',
             'created_at' => Chronos::parse('2024-12-23T12:34:56+00:00'),
+            'state' => true,
             'description' => ['fr' => 'Lorem ipsum'],
         ], $ent->toArray());
+
+        // boolean field
+        $this->assertTrue($ent->state);
+
+        // Unknown field exists in fields / property
+        $this->assertEquals('value', $ent->unknownField);
     }
 
     public function testConstructNoSetter()
@@ -75,6 +83,7 @@ class EntityTest extends TestCase
             'postal_code' => '12345',
             'created_at' => $now,
             'description' => ['fr' => 'Lorem ipsum'],
+            'state' => true,
             'unknownField' => 'value',
         ]);
 
@@ -83,6 +92,7 @@ class EntityTest extends TestCase
             'postalCode' => '12345',
             'createdAt' => '2024-12-23T12:34:56',
             'description' => ['fr' => 'Lorem ipsum'],
+            'state' => 1,
         ], $ent->toOpenAgenda());
     }
 }

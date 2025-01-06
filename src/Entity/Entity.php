@@ -105,7 +105,7 @@ abstract class Entity
      * @param array $data OpenAgenda data
      * @return array
      */
-    protected function fromOpenAgenda($data): array
+    protected function fromOpenAgenda(array $data): array
     {
         $out = [];
         foreach ($data as $name => $value) {
@@ -119,6 +119,9 @@ abstract class Entity
                         if (is_string($value)) {
                             $value = json_decode($value, true);
                         }
+                        break;
+                    case 'boolean':
+                        $value = (bool)$value;
                         break;
                 }
             }
@@ -149,6 +152,9 @@ abstract class Entity
                 switch ($this->_aliases[$field]['type']) {
                     case 'DateTime':
                         $value = $value->format('Y-m-d\TH:i:s');
+                        break;
+                    case 'boolean':
+                        $value = $value ? 1 : 0;
                         break;
                 }
             }
