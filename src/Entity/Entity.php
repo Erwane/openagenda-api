@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace OpenAgenda\Entity;
 
+use Cake\Chronos\Chronos;
 use InvalidArgumentException;
 use OpenAgenda\OpenAgendaException;
 
@@ -14,6 +15,7 @@ use OpenAgenda\OpenAgendaException;
  * @see         https://github.com/cakephp/cakephp/blob/5.x/src/ORM/Entity.php
  * @since       3.0.0
  * @license     https://opensource.org/licenses/mit-license.php MIT License
+ * @property int $id
  */
 abstract class Entity
 {
@@ -37,52 +39,150 @@ abstract class Entity
      */
     protected $_new = false;
 
+    protected $_aliases = [];
+
+    /**
+     * @var array
+     */
+    private $_oaToEntity = [];
+
+    /**
+     * @var array
+     */
+    private $_entityToOa = [];
+
     /**
      * constructor
      *
-     * @param array $fields
+     * @param array $properties Entity properties
      * @param array $options list of options to use when creating this entity
      */
-    public function __construct(array $fields = [], array $options = [])
+    public function __construct(array $properties = [], array $options = [])
     {
         $options += [
             'useSetters' => true,
             'markClean' => false,
         ];
 
-        if (!empty($fields)) {
-            if ($options['markClean'] && !$options['useSetters']) {
-                $this->_fields = $fields;
+        $this->_buildAliasesMaps();
 
-                return;
-            }
+        if (!empty($properties) && $options['markClean'] && !$options['useSetters']) {
+            $this->_fields = $this->fromOpenAgenda($properties);
 
-            $this->set($fields, [
+            return;
+        }
+
+        if (!empty($properties)) {
+            $this->set($properties, [
                 'setter' => $options['useSetters'],
             ]);
+        }
+
+        if ($options['markClean']) {
+            $this->clean();
         }
     }
 
     /**
-     * @param $field
-     * @param $value
-     * @param array $options
+     * Build aliases maps (cache)
+     *
+     * @return void
+     */
+    protected function _buildAliasesMaps(): void
+    {
+        $this->_oaToEntity = [];
+        $this->_entityToOa = [];
+        foreach ($this->_aliases as $field => $info) {
+            $this->_oaToEntity[$info['field']] = $field;
+            $this->_entityToOa[$field] = $info['field'];
+        }
+    }
+
+    /**
+     * Import data from OpenAgenda to this entity.
+     * Doing alias mapping from OpenAgenda to Entity
+     *
+     * @param array $data OpenAgenda data
+     * @return array
+     */
+    protected function fromOpenAgenda($data): array
+    {
+        $out = [];
+        foreach ($data as $name => $value) {
+            $field = $this->_oaToEntity[$name] ?? $name;
+            if (isset($this->_aliases[$field]['type'])) {
+                switch ($this->_aliases[$field]['type']) {
+                    case 'DateTime':
+                        $value = Chronos::parse($value);
+                        break;
+                    case 'json':
+                        if (is_string($value)) {
+                            $value = json_decode($value, true);
+                        }
+                        break;
+                }
+            }
+
+            $out[$field] = $value;
+        }
+
+        return $out;
+    }
+
+    /**
+     * @return array
+     */
+    public function toArray(): array
+    {
+        return array_intersect_key($this->_fields, $this->_aliases);
+    }
+
+    /**
+     * @return array
+     */
+    public function toOpenAgenda(): array
+    {
+        $out = [];
+        foreach ($this->_fields as $field => $value) {
+            $name = $this->_entityToOa[$field] ?? $field;
+            if (isset($this->_aliases[$field]['type'])) {
+                switch ($this->_aliases[$field]['type']) {
+                    case 'DateTime':
+                        $value = $value->format('Y-m-d\TH:i:s');
+                        break;
+                }
+            }
+
+            $out[$name] = $value;
+        }
+
+        return array_intersect_key($out, $this->_oaToEntity);
+    }
+
+    /**
+     * Set property⋅ies value⋅s.
+     *
+     * @param string|array $fields Property name.
+     * @param mixed $value Property value.
+     * @param array $options Set options.
      * @return $this
      */
-    public function set($field, $value = null, array $options = [])
+    public function set($fields, $value = null, array $options = [])
     {
-        if (is_string($field) && $field !== '') {
-            $field = [$field => $value];
+        if (is_string($fields) && $fields !== '') {
+            $fields = [$fields => $value];
         } else {
             $options = (array)$value;
         }
 
-        if (!is_array($field)) {
+        if (!is_array($fields)) {
             throw new InvalidArgumentException('Cannot set an empty field');
         }
         $options += ['setter' => true];
 
-        foreach ($field as $name => $value) {
+        $fields = $this->fromOpenAgenda($fields);
+
+        foreach ($fields as $name => $value) {
             //$this->setDirty($name, true);
 
             if ($options['setter']) {
@@ -123,14 +223,46 @@ abstract class Entity
     }
 
     /**
-     * Set id (uid)
+     * Set property/field.
      *
-     * @param int|string $value Field value
-     * @return int
+     * @param string $name Property (field) name.
+     * @param mixed $value Property (field) value.
+     * @return void
      */
-    protected function _setUid($value): int
+    public function __set(string $name, $value): void
     {
-        return $this->_setId($value);
+        $this->set($name, $value);
+    }
+
+    /**
+     * Get property/field.
+     *
+     * @param string $name Property (field) name.
+     * @return mixed|null
+     */
+    public function __get(string $name)
+    {
+        if ($name === '') {
+            throw new InvalidArgumentException('Cannot get an empty field');
+        }
+
+        if (isset($this->_fields[$name])) {
+            return $this->_fields[$name];
+        }
+
+        return null;
+    }
+
+    /**
+     * Sets the entire entity as clean, which means that it will appear as
+     * no fields being modified or added at all. This is an useful call
+     * for an initial object hydration
+     *
+     * @return void
+     */
+    public function clean(): void
+    {
+        $this->_dirty = [];
     }
 
     /**
@@ -141,10 +273,7 @@ abstract class Entity
      */
     protected function _setId($value): int
     {
-        $value = (int)$value;
-        $this->_fields['id'] = $value;
-
-        return $value;
+        return (int)$value;
     }
 
     /**
@@ -215,13 +344,15 @@ abstract class Entity
     }
 
     /**
-     * @param string|mixed $data
-     * @param string|null $lang
-     * @return object|array|false
-     * @throws \OpenAgenda\OpenAgendaException
+     * Get i18n value.
+     *
+     * @param string|mixed $data I18n value.
+     * @param string|null $lang Language code.
+     * @return array
      */
     protected function _i18nValue($data, ?string $lang = null)
     {
+        // todo: tests that
         if (is_string($data)) {
             $ary = [
                 $this->_getLang($lang) => $data,

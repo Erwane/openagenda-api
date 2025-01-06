@@ -21,6 +21,7 @@
     "require": {
         "php": "^7.2",
         "ext-json": "*",
+        "cakephp/chronos": "^2.4",
         "cakephp/validation": "^3.0",
         "ezyang/htmlpurifier": "^4.9",
         "league/html-to-markdown": "^5.0",
@@ -42,7 +43,8 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "OpenAgenda\\Test\\": "tests/"
+            "OpenAgenda\\Test\\": "tests/",
+            "TestApp\\": "tests/test_app/TestApp/"
         }
     },
     "config": {
