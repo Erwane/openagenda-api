@@ -18,10 +18,8 @@ use Cake\Validation\Validator;
 use Cake\Validation\ValidatorAwareInterface;
 use Cake\Validation\ValidatorAwareTrait;
 use DateTime;
-use Exception;
 use InvalidArgumentException;
 use League\Uri\Uri;
-use libphonenumber\PhoneNumberUtil;
 
 /**
  * Abstract Endpoint
@@ -188,6 +186,7 @@ abstract class Endpoint implements ValidatorAwareInterface
     /**
      * Get OpenAgenda endpoint uri.
      *
+     * @param string $method Request method
      * @return \League\Uri\Uri
      */
     public function getUri(string $method): Uri
@@ -271,25 +270,6 @@ abstract class Endpoint implements ValidatorAwareInterface
         ];
 
         throw new InvalidArgumentException(json_encode($message, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
-    }
-
-    /**
-     * Validate a phone with libphonenumber library
-     *
-     * @param string $check Input phone number
-     * @param string $country Country code number
-     * @return bool
-     */
-    public static function checkPhone(string $check, string $country = 'FR'): bool
-    {
-        $phoneNumberUtil = PhoneNumberUtil::getInstance();
-        try {
-            $number = $phoneNumberUtil->parse($check, $country);
-
-            return $phoneNumberUtil->isValidNumber($number);
-        } catch (Exception $exception) {
-            return false;
-        }
     }
 
     /**
