@@ -7,6 +7,9 @@ use League\Uri\Contracts\UriInterface;
 use League\Uri\Uri;
 use Psr\Http\Client\ClientInterface;
 
+/**
+ * Abstract HttpWrapper
+ */
 abstract class HttpWrapper implements HttpWrapperInterface
 {
     /**

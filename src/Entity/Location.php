@@ -25,7 +25,45 @@ namespace OpenAgenda\Entity;
  */
 class Location extends Entity
 {
-    public function import($locationData)
+    protected $_aliases = [
+        'id' => ['field' => 'uid'],
+        'name' => ['field' => 'name'],
+        'address' => ['field' => 'address'],
+        'access' => ['field' => 'access'],
+        'description' => ['field' => 'description'],
+        'image' => ['field' => 'image'],
+        'image_credits' => ['field' => 'imageCredits'],
+        'slug' => ['field' => 'slug'],
+        'set_id' => ['field' => 'setUid'],
+        'city' => ['field' => 'city'],
+        'department' => ['field' => 'department'],
+        'region' => ['field' => 'region'],
+        'postal_code' => ['field' => 'postalCode'],
+        'insee' => ['field' => 'insee'],
+        'country' => ['field' => 'countryCode'],
+        'district' => ['field' => 'district'],
+        'latitude' => ['field' => 'latitude'],
+        'longitude' => ['field' => 'longitude'],
+        'created_at' => ['field' => 'createdAt', 'type' => 'DateTime'],
+        'updated_at' => ['field' => 'updatedAt', 'type' => 'DateTime'],
+        // website exists in doc but not in API payload
+        // 'website' => ['field' => 'website'],
+        'email' => ['field' => 'email'],
+        'phone' => ['field' => 'phone'],
+        'links' => ['field' => 'links'],
+        'timezone' => ['field' => 'timezone'],
+        'ext_id' => ['field' => 'extId'],
+        'state' => ['field' => 'state'],
+    ];
+
+    /**
+     * Import data from openagenda
+     *
+     * @param array $locationData Location data
+     * @return void
+     * @deprecated Automatically sets from Entity::fromOpenAgenda()
+     */
+    public function import(array $locationData): void
     {
         $this->id = $locationData['uid'];
         $this->uid = $this->id;
@@ -56,9 +94,10 @@ class Location extends Entity
     }
 
     /**
-     * mutator for latitude
+     * Set latitude
      *
      * @param string|float $value coordinate
+     * @return float
      */
     protected function _setLatitude($value)
     {
@@ -66,39 +105,13 @@ class Location extends Entity
     }
 
     /**
-     * mutator for longitude
+     * Set longitude
      *
      * @param string|float $value coordinate
+     * @return float
      */
     protected function _setLongitude($value)
     {
         return (float)$value;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function toDatas()
-    {
-        return [];
-    }
-
-    /**
-     * export location to array
-     *
-     * @return array
-     * @noinspection PhpMissingParentCallCommonInspection
-     */
-    public function toArray()
-    {
-        $data = [
-            'uid' => $this->id,
-        ];
-
-        if (!is_null($this->pricingInfo)) {
-            $data['pricingInfo'] = $this->pricingInfo;
-        }
-
-        return $data;
     }
 }
