@@ -12,7 +12,6 @@ declare(strict_types=1);
  * @see         https://github.com/Erwane/openagenda-api
  * @license     https://opensource.org/licenses/mit-license.php MIT License
  */
-
 namespace OpenAgenda\Test\TestCase\Endpoint;
 
 use Cake\Validation\Validator;
@@ -21,7 +20,14 @@ use InvalidArgumentException;
 use OpenAgenda\Endpoint\Location;
 use OpenAgenda\Test\EndpointTestCase;
 use OpenAgenda\Test\Utility\FileResource;
+use OpenAgenda\Validation;
 
+/**
+ * Endpoint\Location tests
+ *
+ * @uses \OpenAgenda\Endpoint\Location
+ * @covers \OpenAgenda\Endpoint\Location
+ */
 class LocationTest extends EndpointTestCase
 {
     public function testValidationUriPath()
@@ -142,13 +148,17 @@ class LocationTest extends EndpointTestCase
         $field = $v->field('description');
         $this->assertTrue($field->isEmptyAllowed());
         $rules = $field->rules();
-        // todo multilingual validation
+        $this->assertArrayHasKey('multilingual', $rules);
+        $this->assertEquals([Validation::class, 'multilingual'], $rules['multilingual']->get('rule'));
+        $this->assertEquals([5000], $rules['multilingual']->get('pass'));
 
         // access
         $field = $v->field('access');
         $this->assertTrue($field->isEmptyAllowed());
         $rules = $field->rules();
-        // todo multilingual validation
+        $this->assertArrayHasKey('multilingual', $rules);
+        $this->assertEquals([Validation::class, 'multilingual'], $rules['multilingual']->get('rule'));
+        $this->assertEquals([1000], $rules['multilingual']->get('pass'));
 
         // website
         $field = $v->field('website');
@@ -167,7 +177,7 @@ class LocationTest extends EndpointTestCase
         $this->assertTrue($field->isEmptyAllowed());
         $rules = $field->rules();
         $this->assertArrayHasKey('phone', $rules);
-        $this->assertEquals('checkPhone', $rules['phone']->get('rule'));
+        $this->assertEquals([Validation::class, 'phone'], $rules['phone']->get('rule'));
 
         // links
         $field = $v->field('links');

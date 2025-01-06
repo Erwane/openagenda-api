@@ -17,6 +17,7 @@ namespace OpenAgenda\Endpoint;
 use Cake\Validation\Validator;
 use OpenAgenda\Entity\Location as LocationEntity;
 use OpenAgenda\OpenAgenda;
+use OpenAgenda\Validation;
 
 /**
  * Location endpoint
@@ -34,6 +35,12 @@ class Location extends Endpoint
             ->integer('agenda_id');
     }
 
+    /**
+     * Validation rules for Uri path GET.
+     *
+     * @param \Cake\Validation\Validator $validator Validator.
+     * @return \Cake\Validation\Validator
+     */
     public function validationUriPathGet(Validator $validator): Validator
     {
         return $this->validationUriPath($validator)
@@ -54,11 +61,23 @@ class Location extends Endpoint
             ->scalar('ext_id');
     }
 
+    /**
+     * Validation rules for Uri path HEAD.
+     *
+     * @param \Cake\Validation\Validator $validator Validator.
+     * @return \Cake\Validation\Validator
+     */
     public function validationUriPathHead(Validator $validator): Validator
     {
         return $this->validationUriPathGet($validator);
     }
 
+    /**
+     * Validation rules for POST/PATCH data.
+     *
+     * @param \Cake\Validation\Validator $validator Validator.
+     * @return \Cake\Validation\Validator
+     */
     public function validationPost(Validator $validator): Validator
     {
         return $this->validationUriPathGet($validator)
@@ -78,9 +97,15 @@ class Location extends Endpoint
             ->allowEmptyString('state')
             ->boolean('state')
             // description
-            ->allowEmptyString('description') // todo multilingual
+            ->allowEmptyArray('description')
+            ->add('description', 'multilingual', [
+                'rule' => [[Validation::class, 'multilingual'], 5000],
+            ])
             // access
-            ->allowEmptyString('access') // todo multilingual
+            ->allowEmptyArray('access')
+            ->add('access', 'multilingual', [
+                'rule' => [[Validation::class, 'multilingual'], 1000],
+            ])
             // website
             ->allowEmptyString('website')
             ->url('website')
@@ -89,7 +114,7 @@ class Location extends Endpoint
             ->email('email')
             // phone
             ->allowEmptyString('phone')
-            ->add('phone', 'phone', ['rule' => 'checkPhone'])
+            ->add('phone', 'phone', ['rule' => [Validation::class, 'phone']])
             // links
             ->allowEmptyArray('links')
             ->isArray('links')
@@ -124,8 +149,7 @@ class Location extends Endpoint
             ->numeric('longitude')
             // timezone
             ->allowEmptyString('timezone')
-            ->scalar('timezone')
-            ;
+            ->scalar('timezone');
     }
 
     /**
@@ -193,7 +217,7 @@ class Location extends Endpoint
     /**
      * Create location
      *
-     * @return bool
+     * @return \OpenAgenda\Entity\Location
      */
     public function post()
     {
@@ -210,13 +234,12 @@ class Location extends Endpoint
         }
 
         return $entity;
-        // TODO: Implement head() method.
     }
 
     /**
      * Patch location
      *
-     * @return bool
+     * @return \OpenAgenda\Entity\Location
      */
     public function patch()
     {

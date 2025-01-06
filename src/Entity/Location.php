@@ -94,6 +94,17 @@ class Location extends Entity
     }
 
     /**
+     * Country code is uppercase.
+     *
+     * @param string|null $value Country code.
+     * @return string
+     */
+    protected function _setCountry(?string $value): string
+    {
+        return strtoupper($value);
+    }
+
+    /**
      * Set latitude
      *
      * @param string|float $value coordinate

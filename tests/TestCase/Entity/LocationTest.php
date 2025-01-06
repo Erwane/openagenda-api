@@ -22,7 +22,7 @@ use PHPUnit\Framework\TestCase;
 /**
  * Entity\Location tests
  *
- * @uses \OpenAgenda\Entity\Location
+ * @uses   \OpenAgenda\Entity\Location
  * @covers \OpenAgenda\Entity\Location
  */
 class LocationTest extends TestCase
