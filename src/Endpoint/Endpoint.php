@@ -18,8 +18,10 @@ use Cake\Validation\Validator;
 use Cake\Validation\ValidatorAwareInterface;
 use Cake\Validation\ValidatorAwareTrait;
 use DateTime;
+use Exception;
 use InvalidArgumentException;
 use League\Uri\Uri;
+use libphonenumber\PhoneNumberUtil;
 
 /**
  * Abstract Endpoint
@@ -188,16 +190,12 @@ abstract class Endpoint implements ValidatorAwareInterface
      *
      * @return \League\Uri\Uri
      */
-    public function getUri(): Uri
+    public function getUri(string $method): Uri
     {
-        $errors = $this->getValidator('uriPath')->validate($this->params);
+        $method = strtolower($method);
 
-        if ($errors) {
-            $this->throwException($errors);
-        }
-
-        $path = $this->uriPath();
-        $query = $this->uriQuery();
+        $path = $this->uriPath($method);
+        $query = $this->uriQuery($method);
 
         $components = parse_url($this->baseUrl . $path);
         if ($query) {
@@ -208,11 +206,29 @@ abstract class Endpoint implements ValidatorAwareInterface
     }
 
     /**
-     * Get endpoint uri path.
+     * Validate uri path params and return an empty path.
+     * Endpoint SHOULD have an uriPath method and return endpoint path.
      *
+     * @param string $method Request method (HEAD, GET, POST, PATCH, DELETE)
      * @return string
      */
-    abstract public function uriPath(): string;
+    public function uriPath(string $method): string
+    {
+        $validator = 'uriPath' . ucfirst(strtolower($method));
+        if (method_exists($this, 'validation' . ucfirst($validator))) {
+            $validator = $this->getValidator($validator);
+        } else {
+            $validator = $this->getValidator('uriPath');
+        }
+
+        $errors = $validator->validate($this->params);
+
+        if ($errors) {
+            $this->throwException($errors);
+        }
+
+        return '';
+    }
 
     /**
      * Convert endpoint params to valid OpenAgenda endpoint query params.
@@ -256,4 +272,58 @@ abstract class Endpoint implements ValidatorAwareInterface
 
         throw new InvalidArgumentException(json_encode($message, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
     }
+
+    /**
+     * Validate a phone with libphonenumber library
+     *
+     * @param string $check Input phone number
+     * @param string $country Country code number
+     * @return bool
+     */
+    public static function checkPhone(string $check, string $country = 'FR'): bool
+    {
+        $phoneNumberUtil = PhoneNumberUtil::getInstance();
+        try {
+            $number = $phoneNumberUtil->parse($check, $country);
+
+            return $phoneNumberUtil->isValidNumber($number);
+        } catch (Exception $exception) {
+            return false;
+        }
+    }
+
+    /**
+     * Do a HEAD request.
+     *
+     * @return mixed
+     */
+    abstract public function head();
+
+    /**
+     * Do a GET request.
+     *
+     * @return mixed
+     */
+    abstract public function get();
+
+    /**
+     * Do a POST request.
+     *
+     * @return mixed
+     */
+    abstract public function post();
+
+    /**
+     * Do a PATCH request.
+     *
+     * @return mixed
+     */
+    abstract public function patch();
+
+    /**
+     * Do a DELETE request.
+     *
+     * @return mixed
+     */
+    abstract public function delete();
 }

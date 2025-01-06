@@ -36,6 +36,16 @@ class LocationTest extends EndpointTestCase
         $this->assertTrue($field->isPresenceRequired());
         $rules = $field->rules();
         $this->assertArrayHasKey('integer', $rules);
+    }
+
+    public function testValidationUriPathGet()
+    {
+        $endpoint = new Location([]);
+
+        $v = $endpoint->validationUriPathGet(new Validator());
+
+        // agenda_id
+        $this->assertTrue($v->hasField('agenda_id'));
 
         // id
         $this->assertTrue($v->hasField('id'));
@@ -54,10 +64,186 @@ class LocationTest extends EndpointTestCase
         $this->assertArrayHasKey('scalar', $rules);
     }
 
+    public function testValidationUriPathHead()
+    {
+        $endpoint = new Location([]);
+
+        $v = $endpoint->validationUriPathHead(new Validator());
+        $this->assertTrue($v->hasField('agenda_id'));
+        $this->assertTrue($v->hasField('id'));
+        $this->assertTrue($v->hasField('ext_id'));
+    }
+
+    public function testValidationUriPathDelete()
+    {
+        $endpoint = new Location([]);
+
+        $v = $endpoint->validationUriPathDelete(new Validator());
+        $this->assertTrue($v->hasField('agenda_id'));
+        $this->assertTrue($v->hasField('id'));
+        $this->assertTrue($v->hasField('ext_id'));
+    }
+
+    public function testValidationDataPost()
+    {
+        $endpoint = new Location([]);
+
+        $v = $endpoint->validationPost(new Validator());
+
+        // agenda_id
+        // todo test agenda_id field ?
+        // $this->assertTrue($v->hasField('agenda_id'));
+
+        // id
+        $field = $v->field('id');
+        $this->assertIsCallable($field->isPresenceRequired());
+        $this->assertEquals('checkIdOrExtId', $field->isPresenceRequired()[1]);
+        $rules = $field->rules();
+        $this->assertArrayHasKey('integer', $rules);
+
+        // ext_id
+        $field = $v->field('ext_id');
+        $this->assertIsCallable($field->isPresenceRequired());
+        $this->assertEquals('checkIdOrExtId', $field->isPresenceRequired()[1]);
+        $rules = $field->rules();
+        $this->assertArrayHasKey('scalar', $rules);
+
+        // name
+        $field = $v->field('name');
+        $this->assertTrue($field->isPresenceRequired());
+        $rules = $field->rules();
+        $this->assertArrayHasKey('scalar', $rules);
+        $this->assertArrayHasKey('maxLength', $rules);
+        $this->assertEquals([100], $rules['maxLength']->get('pass'));
+
+        // address
+        $field = $v->field('address');
+        $this->assertTrue($field->isPresenceRequired());
+        $rules = $field->rules();
+        $this->assertArrayHasKey('scalar', $rules);
+        $this->assertArrayHasKey('maxLength', $rules);
+        $this->assertEquals([255], $rules['maxLength']->get('pass'));
+
+        // country
+        $field = $v->field('country');
+        $this->assertTrue($field->isPresenceRequired());
+        $rules = $field->rules();
+        $this->assertArrayHasKey('scalar', $rules);
+        $this->assertArrayHasKey('lengthBetween', $rules);
+        $this->assertEquals([2, 2], $rules['lengthBetween']->get('pass'));
+
+        // state
+        $field = $v->field('state');
+        $this->assertTrue($field->isEmptyAllowed());
+        $rules = $field->rules();
+        $this->assertArrayHasKey('boolean', $rules);
+
+        // description
+        $field = $v->field('description');
+        $this->assertTrue($field->isEmptyAllowed());
+        $rules = $field->rules();
+        // todo multilingual validation
+
+        // access
+        $field = $v->field('access');
+        $this->assertTrue($field->isEmptyAllowed());
+        $rules = $field->rules();
+        // todo multilingual validation
+
+        // website
+        $field = $v->field('website');
+        $this->assertTrue($field->isEmptyAllowed());
+        $rules = $field->rules();
+        $this->assertArrayHasKey('url', $rules);
+
+        // email
+        $field = $v->field('email');
+        $this->assertTrue($field->isEmptyAllowed());
+        $rules = $field->rules();
+        $this->assertArrayHasKey('email', $rules);
+
+        // phone
+        $field = $v->field('phone');
+        $this->assertTrue($field->isEmptyAllowed());
+        $rules = $field->rules();
+        $this->assertArrayHasKey('phone', $rules);
+        $this->assertEquals('checkPhone', $rules['phone']->get('rule'));
+
+        // links
+        $field = $v->field('links');
+        $this->assertTrue($field->isEmptyAllowed());
+        $rules = $field->rules();
+        $this->assertArrayHasKey('isArray', $rules);
+
+        // image
+        // todo
+
+        // image_credits
+        $field = $v->field('image_credits');
+        $this->assertTrue($field->isEmptyAllowed());
+        $rules = $field->rules();
+        $this->assertArrayHasKey('scalar', $rules);
+
+        // region
+        $field = $v->field('region');
+        $this->assertTrue($field->isEmptyAllowed());
+        $rules = $field->rules();
+        $this->assertArrayHasKey('scalar', $rules);
+
+        // department
+        $field = $v->field('department');
+        $this->assertTrue($field->isEmptyAllowed());
+        $rules = $field->rules();
+        $this->assertArrayHasKey('scalar', $rules);
+
+        // district
+        $field = $v->field('district');
+        $this->assertTrue($field->isEmptyAllowed());
+        $rules = $field->rules();
+        $this->assertArrayHasKey('scalar', $rules);
+
+        // city
+        $field = $v->field('city');
+        $this->assertTrue($field->isEmptyAllowed());
+        $rules = $field->rules();
+        $this->assertArrayHasKey('scalar', $rules);
+
+        // postal_code
+        $field = $v->field('postal_code');
+        $this->assertTrue($field->isEmptyAllowed());
+        $rules = $field->rules();
+        $this->assertArrayHasKey('scalar', $rules);
+
+        // insee
+        $field = $v->field('insee');
+        $this->assertTrue($field->isEmptyAllowed());
+        $rules = $field->rules();
+        $this->assertArrayHasKey('scalar', $rules);
+
+        // latitude
+        $field = $v->field('latitude');
+        $this->assertTrue($field->isEmptyAllowed());
+        $rules = $field->rules();
+        $this->assertArrayHasKey('numeric', $rules);
+
+        // longitude
+        $field = $v->field('longitude');
+        $this->assertTrue($field->isEmptyAllowed());
+        $rules = $field->rules();
+        $this->assertArrayHasKey('numeric', $rules);
+
+        // timezone
+        $field = $v->field('timezone');
+        $this->assertTrue($field->isEmptyAllowed());
+        $rules = $field->rules();
+        $this->assertArrayHasKey('scalar', $rules);
+    }
+
     public static function dataGetUriErrors(): array
     {
         return [
             [
+                'GET',
                 [],
                 [
                     'agenda_id' => [
@@ -72,6 +258,7 @@ class LocationTest extends EndpointTestCase
                 ],
             ],
             [
+                'GET',
                 ['agenda_id' => 123],
                 [
                     'id' => [
@@ -82,13 +269,22 @@ class LocationTest extends EndpointTestCase
                     ],
                 ],
             ],
+            [
+                'POST',
+                [],
+                [
+                    'agenda_id' => [
+                        '_required' => 'This field is required',
+                    ],
+                ],
+            ],
         ];
     }
 
     /**
      * @dataProvider dataGetUriErrors
      */
-    public function testGetUriErrors($params, $expected)
+    public function testGetUriErrors($method, $params, $expected)
     {
         $endpoint = new Location($params);
         $message = [
@@ -97,25 +293,26 @@ class LocationTest extends EndpointTestCase
         ];
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage(json_encode($message, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
-        $endpoint->getUri();
+        $endpoint->getUri($method);
     }
 
     public static function dataGetUriSuccess(): array
     {
         return [
             [
+                'GET',
                 ['agenda_id' => 123, 'id' => 456, 'ext_id' => 'my-internal-id'],
-                [
-                    'path' => '/v2/agendas/123/locations/456',
-                    'query' => [],
-                ],
+                'path' => '/v2/agendas/123/locations/456',
             ],
             [
+                'GET',
                 ['agenda_id' => 123, 'ext_id' => 'my-internal-id'],
-                [
-                    'path' => '/v2/agendas/123/locations/ext/my-internal-id',
-                    'query' => [],
-                ],
+                '/v2/agendas/123/locations/ext/my-internal-id',
+            ],
+            [
+                'POST',
+                ['agenda_id' => 123, 'id' => 456, 'ext_id' => 'my-internal-id'],
+                '/v2/agendas/123/locations',
             ],
         ];
     }
@@ -123,13 +320,11 @@ class LocationTest extends EndpointTestCase
     /**
      * @dataProvider dataGetUriSuccess
      */
-    public function testGetUriSuccess($params, $expected)
+    public function testGetUriSuccess($method, $params, $expected)
     {
         $endpoint = new Location($params);
-        $uri = $endpoint->getUri();
-        $this->assertEquals($expected['path'], $uri->getPath());
-        parse_str((string)$uri->getQuery(), $query);
-        $this->assertEquals($expected['query'], $query);
+        $uri = $endpoint->getUri($method);
+        $this->assertEquals($expected, $uri->getPath());
     }
 
     public function testGet()
@@ -148,6 +343,37 @@ class LocationTest extends EndpointTestCase
 
         $entity = $endpoint->get();
 
+        $this->assertInstanceOf(\OpenAgenda\Entity\Location::class, $entity);
+    }
+
+    public function testPost()
+    {
+        $this->client->expects($this->once())
+            ->method('getAccessToken')
+            ->willReturn('authorization-key');
+
+        $this->wrapper->expects($this->once())
+            ->method('post')
+            ->with(
+                'https://api.openagenda.com/v2/agendas/123/locations',
+                [
+                    'name' => 'My location',
+                    'address' => '1, place liberté, 75001 Paris, France',
+                    'countryCode' => 'FR',
+                ],
+                ['headers' => ['access-token' => 'authorization-key', 'nonce' => 1734957296123456]]
+            )
+            ->willReturn(new Response(200, ['Content-Type' => 'application/json'], ''));
+
+        $endpoint = new Location([
+            'agenda_id' => 123,
+            'id' => 456,
+            'name' => 'My location',
+            'address' => '1, place liberté, 75001 Paris, France',
+            'country' => 'FR',
+        ]);
+
+        $entity = $endpoint->post();
         $this->assertInstanceOf(\OpenAgenda\Entity\Location::class, $entity);
     }
 }
