@@ -406,5 +406,16 @@ class LocationTest extends EndpointTestCase
         $this->assertInstanceOf(LocationEntity::class, $entity);
     }
 
-    public function testDelete() {}
+    public function testDelete()
+    {
+        $payload = FileResource::instance($this)->getContent('Response/locations/delete.json');
+        $this->mockRequest(true, 'delete', [
+            'https://api.openagenda.com/v2/agendas/123/locations/456',
+            ['headers' => ['access-token' => 'authorization-key', 'nonce' => 1734957296123456]],
+        ], [200, $payload]);
+
+        $endpoint = new Location(['agenda_id' => 123, 'id' => 456]);
+        $entity = $endpoint->delete();
+        $this->assertInstanceOf(LocationEntity::class, $entity);
+    }
 }

@@ -50,9 +50,8 @@ interface HttpWrapperInterface extends ClientInterface
      * Do a DELETE request and return ResponseInterface.
      *
      * @param \Psr\Http\Message\UriInterface|string $uri Endpoint URI.
-     * @param array $data Request data
      * @param array $params Request options
      * @return \Psr\Http\Message\ResponseInterface
      */
-    public function delete($uri, array $data, array $params = []): ResponseInterface;
+    public function delete($uri, array $params = []): ResponseInterface;
 }

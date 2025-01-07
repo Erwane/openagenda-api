@@ -18,6 +18,7 @@ use Cake\Validation\Validator;
 use OpenAgenda\Entity\Location as LocationEntity;
 use OpenAgenda\OpenAgenda;
 use OpenAgenda\Validation;
+use Psr\Http\Message\ResponseInterface;
 
 /**
  * Location endpoint
@@ -206,16 +207,6 @@ class Location extends Endpoint
     }
 
     /**
-     * Check location exists
-     *
-     * @return bool
-     */
-    public function head()
-    {
-        // TODO: Implement head() method.
-    }
-
-    /**
      * Get location.
      *
      * @return \OpenAgenda\Entity\Location|null
@@ -237,7 +228,7 @@ class Location extends Endpoint
     /**
      * Create location
      *
-     * @return \OpenAgenda\Entity\Location
+     * @return \OpenAgenda\Entity\Location|null
      */
     public function create()
     {
@@ -250,12 +241,7 @@ class Location extends Endpoint
         $response = OpenAgenda::getClient()
             ->post($uri, $entity->toOpenAgenda());
 
-        $entity = null;
-        if ($response['_success'] && !empty($response['location'])) {
-            $entity = new LocationEntity($response['location'], ['markClean' => true]);
-        }
-
-        // todo handle errors and define what to return
+        $entity = $this->_parseResponse($response);
 
         return $entity;
     }
@@ -263,7 +249,7 @@ class Location extends Endpoint
     /**
      * Patch location
      *
-     * @return \OpenAgenda\Entity\Location
+     * @return \OpenAgenda\Entity\Location|null
      */
     public function update()
     {
@@ -283,23 +269,39 @@ class Location extends Endpoint
 
         $response = $client->patch($uri, $data);
 
+        return $this->_parseResponse($response);
+    }
+
+    /**
+     * Delete location
+     *
+     * @return \OpenAgenda\Entity\Location|null
+     */
+    public function delete()
+    {
+        $entity = new LocationEntity($this->params);
+        $entity->setNew(false);
+
+        $response = OpenAgenda::getClient()
+            ->delete($this->getUri(__FUNCTION__));
+
+        return $this->_parseResponse($response);
+    }
+
+    /**
+     * Parse client response.
+     *
+     * @param array $response Client response.
+     * @return \OpenAgenda\Entity\Location|null
+     */
+    protected function _parseResponse(array $response): ?LocationEntity
+    {
         $entity = null;
         if ($response['_success'] && !empty($response['location'])) {
             $entity = new LocationEntity($response['location'], ['markClean' => true]);
         }
 
         // todo handle errors and define what to return
-
         return $entity;
-    }
-
-    /**
-     * Delete location
-     *
-     * @return bool
-     */
-    public function delete()
-    {
-        // TODO: Implement head() method.
     }
 }
