@@ -27,7 +27,7 @@ use Ramsey\Collection\Collection;
  */
 class Locations extends Endpoint
 {
-    protected $fields = [
+    protected $queryFields = [
         'limit' => ['name' => 'size'],
         'search' => ['name' => 'search'],
         'detailed' => ['name' => 'detailed'],
@@ -50,13 +50,23 @@ class Locations extends Endpoint
     /**
      * @inheritDoc
      */
-    public function validationDefault(Validator $validator)
+    public function validationUriPath(Validator $validator): Validator
     {
-        return parent::validationDefault($validator)
+        return parent::validationUriPath($validator)
             // agenda_id
             ->requirePresence('agenda_id')
-            ->integer('agenda_id')
+            ->integer('agenda_id');
+    }
 
+    /**
+     * Validation rules for Uri path GET.
+     *
+     * @param \Cake\Validation\Validator $validator Validator.
+     * @return \Cake\Validation\Validator
+     */
+    public function validationUriPathGet(Validator $validator): Validator
+    {
+        return $this->validationUriPath($validator)
             // limit
             ->allowEmptyString('limit')
             ->numeric('limit')
@@ -100,21 +110,11 @@ class Locations extends Endpoint
     /**
      * @inheritDoc
      */
-    public function getUri(): Uri
+    public function uriPath(string $method): string
     {
-        if (!Validation::numeric($this->params['agenda_id'] ?? null)) {
-            throw new InvalidArgumentException('Missing valid `agenda_id` param.');
-        }
+        parent::uriPath($method);
 
-        $path = sprintf('/agendas/%s/locations', $this->params['agenda_id']);
-
-        $components = parse_url($this->baseUrl . $path);
-        $query = $this->uriQuery();
-        if ($query) {
-            $components['query'] = http_build_query($query);
-        }
-
-        return Uri::createFromComponents($components);
+        return sprintf('/agendas/%s/locations', $this->params['agenda_id']);
     }
 
     /**
@@ -126,7 +126,7 @@ class Locations extends Endpoint
     {
         $collection = new Collection(Location::class);
 
-        $response = OpenAgenda::getClient()->get($this->getUri());
+        $response = OpenAgenda::getClient()->get($this->getUri(__FUNCTION__));
 
         if ($response['_success'] && !empty($response['locations'])) {
             foreach ($response['locations'] as $item) {

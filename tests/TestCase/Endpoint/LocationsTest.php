@@ -18,13 +18,10 @@ use Cake\Validation\Validation;
 use Cake\Validation\Validator;
 use GuzzleHttp\Psr7\Response;
 use InvalidArgumentException;
-use OpenAgenda\Client;
 use OpenAgenda\Endpoint\Locations;
-use OpenAgenda\Entity\Location;
-use OpenAgenda\OpenAgenda;
+use OpenAgenda\Entity\Location as LocationEntity;
+use OpenAgenda\Test\EndpointTestCase;
 use OpenAgenda\Test\Utility\FileResource;
-use OpenAgenda\Wrapper\HttpWrapper;
-use PHPUnit\Framework\TestCase;
 use Ramsey\Collection\Collection;
 
 /**
@@ -33,35 +30,27 @@ use Ramsey\Collection\Collection;
  * @uses   \OpenAgenda\Endpoint\Locations
  * @covers \OpenAgenda\Endpoint\Locations
  */
-class LocationsTest extends TestCase
+class LocationsTest extends EndpointTestCase
 {
-    protected function setUp(): void
-    {
-        parent::setUp();
-
-        $this->wrapper = $this->getMockForAbstractClass(
-            HttpWrapper::class,
-            [],
-            '',
-            false,
-            true,
-            true,
-            ['head', 'get', 'post', 'patch', 'delete']
-        );
-
-        $this->client = new Client([
-            'public_key' => 'testing',
-            'wrapper' => $this->wrapper,
-        ]);
-
-        OpenAgenda::setClient($this->client);
-    }
-
-    public function testValidationDefault()
+    public function testValidationUriPath()
     {
         $endpoint = new Locations([]);
 
-        $v = $endpoint->validationDefault(new Validator());
+        $v = $endpoint->validationUriPath(new Validator());
+
+        // agenda_id
+        $this->assertTrue($v->hasField('agenda_id'));
+        $field = $v->field('agenda_id');
+        $this->assertTrue($field->isPresenceRequired());
+        $rules = $field->rules();
+        $this->assertArrayHasKey('integer', $rules);
+    }
+
+    public function testValidationUriPathGet()
+    {
+        $endpoint = new Locations();
+
+        $v = $endpoint->validationUriPathGet(new Validator());
 
         // agenda_id
         $this->assertTrue($v->hasField('agenda_id'));
@@ -147,18 +136,41 @@ class LocationsTest extends TestCase
         ], $rules['inList']->get('pass')[0]);
     }
 
-    public function testMissingAgendaId(): void
+    public static function dataGetUriErrors(): array
     {
-        $endpoint = new Locations([]);
+        return [
+            [
+                'GET',
+                [],
+                [
+                    'agenda_id' => [
+                        '_required' => 'This field is required',
+                    ],
+                ],
+            ],
+        ];
+    }
+
+    /**
+     * @dataProvider dataGetUriErrors
+     */
+    public function testGetUriErrors($method, $params, $expected)
+    {
+        $endpoint = new Locations($params);
+        $message = [
+            'message' => 'OpenAgenda\\Endpoint\\Locations has errors.',
+            'errors' => $expected,
+        ];
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Missing valid `agenda_id` param.');
-        $endpoint->getUri();
+        $this->expectExceptionMessage(json_encode($message, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+        $endpoint->getUri($method);
     }
 
     public static function dataGetUriSuccess(): array
     {
         return [
             [
+                'GET',
                 ['agenda_id' => 123],
                 [
                     'path' => '/v2/agendas/123/locations',
@@ -166,6 +178,7 @@ class LocationsTest extends TestCase
                 ],
             ],
             [
+                'GET',
                 [
                     'agenda_id' => 123,
                     'limit' => 2,
@@ -195,10 +208,10 @@ class LocationsTest extends TestCase
     /**
      * @dataProvider dataGetUriSuccess
      */
-    public function testGetUriSuccess($params, $expected)
+    public function testGetUriSuccess($method, $params, $expected)
     {
         $endpoint = new Locations($params);
-        $uri = $endpoint->getUri();
+        $uri = $endpoint->getUri($method);
         $this->assertEquals($expected['path'], $uri->getPath());
         parse_str((string)$uri->getQuery(), $query);
         $this->assertEquals($expected['query'], $query);
@@ -225,7 +238,7 @@ class LocationsTest extends TestCase
         $locations = $endpoint->get();
 
         $this->assertInstanceOf(Collection::class, $locations);
-        $this->assertEquals(Location::class, $locations->getType());
+        $this->assertEquals(LocationEntity::class, $locations->getType());
         $this->assertCount(1, $locations);
     }
 }

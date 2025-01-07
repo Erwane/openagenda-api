@@ -144,7 +144,6 @@ abstract class Endpoint implements ValidatorAwareInterface
             ->validate($params);
 
         if ($errors) {
-            dump($errors);
             $message = '';
             throw new InvalidArgumentException($message);
         }

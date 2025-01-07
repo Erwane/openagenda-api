@@ -1,0 +1,24 @@
+meta {
+  name: update
+  type: http
+  seq: 4
+}
+
+patch {
+  url: {{baseUrl}}/agendas/{{agenda_id}}/locations/{{location_id}}
+  body: json
+  auth: none
+}
+
+headers {
+  access-token: {{access_token}}
+}
+
+body:json {
+  {
+    "name": "My location",
+    "address": "122 rue de charonne, 75011 Paris, France",
+    "countryCode": "FR",
+    "state": 1
+  }
+}

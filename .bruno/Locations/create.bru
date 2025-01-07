@@ -1,0 +1,23 @@
+meta {
+  name: create
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/agendas/{{agenda_id}}/locations
+  body: json
+  auth: none
+}
+
+headers {
+  access-token: {{access_token}}
+}
+
+body:json {
+  {
+    "name": "My location",
+    "address": "1 place liberté, 75001 Paris, France",
+    "countryCode": "fr"
+  }
+}

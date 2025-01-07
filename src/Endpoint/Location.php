@@ -29,7 +29,7 @@ class Location extends Endpoint
      */
     public function validationUriPath(Validator $validator): Validator
     {
-        return $validator
+        return parent::validationUriPath($validator)
             // agenda_id
             ->requirePresence('agenda_id')
             ->integer('agenda_id');

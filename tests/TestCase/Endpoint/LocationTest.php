@@ -54,7 +54,6 @@ class LocationTest extends EndpointTestCase
         $this->assertTrue($v->hasField('agenda_id'));
 
         // id
-        $this->assertTrue($v->hasField('id'));
         $field = $v->field('id');
         $this->assertIsCallable($field->isPresenceRequired());
         $this->assertEquals('checkIdOrExtId', $field->isPresenceRequired()[1]);
@@ -62,7 +61,6 @@ class LocationTest extends EndpointTestCase
         $this->assertArrayHasKey('integer', $rules);
 
         // ext_id
-        $this->assertTrue($v->hasField('ext_id'));
         $field = $v->field('ext_id');
         $this->assertIsCallable($field->isPresenceRequired());
         $this->assertEquals('checkIdOrExtId', $field->isPresenceRequired()[1]);
