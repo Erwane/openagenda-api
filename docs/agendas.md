@@ -16,9 +16,9 @@ _See [basics](basics.md) of how to do this._
 ## My agendas
 
 ```php
-// using endpoint
+// Using endpoint
 $agendas = $oa->get('/agendas/mines', $params);
-// using myAgendas() method
+// Using OpenAgenda::myAgendas() method
 $agendas = $oa->myAgendas($params);
 ```
 

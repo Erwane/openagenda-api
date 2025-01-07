@@ -18,6 +18,7 @@ use Cake\Validation\Validator;
 use GuzzleHttp\Psr7\Response;
 use InvalidArgumentException;
 use OpenAgenda\Endpoint\Location;
+use OpenAgenda\Entity\Location as LocationEntity;
 use OpenAgenda\Test\EndpointTestCase;
 use OpenAgenda\Test\Utility\FileResource;
 use OpenAgenda\Validation;
@@ -25,25 +26,11 @@ use OpenAgenda\Validation;
 /**
  * Endpoint\Location tests
  *
- * @uses \OpenAgenda\Endpoint\Location
+ * @uses   \OpenAgenda\Endpoint\Location
  * @covers \OpenAgenda\Endpoint\Location
  */
 class LocationTest extends EndpointTestCase
 {
-    public function testValidationUriPath()
-    {
-        $endpoint = new Location([]);
-
-        $v = $endpoint->validationUriPath(new Validator());
-
-        // agenda_id
-        $this->assertTrue($v->hasField('agenda_id'));
-        $field = $v->field('agenda_id');
-        $this->assertTrue($field->isPresenceRequired());
-        $rules = $field->rules();
-        $this->assertArrayHasKey('integer', $rules);
-    }
-
     public function testValidationUriPathGet()
     {
         $endpoint = new Location([]);
@@ -52,6 +39,10 @@ class LocationTest extends EndpointTestCase
 
         // agenda_id
         $this->assertTrue($v->hasField('agenda_id'));
+        $field = $v->field('agenda_id');
+        $this->assertTrue($field->isPresenceRequired());
+        $rules = $field->rules();
+        $this->assertArrayHasKey('integer', $rules);
 
         // id
         $field = $v->field('id');
@@ -68,11 +59,11 @@ class LocationTest extends EndpointTestCase
         $this->assertArrayHasKey('scalar', $rules);
     }
 
-    public function testValidationUriPathHead()
+    public function testValidationUriPathExists()
     {
         $endpoint = new Location([]);
 
-        $v = $endpoint->validationUriPathHead(new Validator());
+        $v = $endpoint->validationUriPathExists(new Validator());
         $this->assertTrue($v->hasField('agenda_id'));
         $this->assertTrue($v->hasField('id'));
         $this->assertTrue($v->hasField('ext_id'));
@@ -88,11 +79,26 @@ class LocationTest extends EndpointTestCase
         $this->assertTrue($v->hasField('ext_id'));
     }
 
-    public function testValidationDataPost()
+    public static function dataValidationCreateUpdate()
+    {
+        return [
+            ['validationCreate'],
+            ['validationUpdate'],
+        ];
+    }
+
+    /**
+     * Testing validations for post and patch
+     *
+     * @uses         \OpenAgenda\Endpoint\Location::validationCreate()
+     * @uses         \OpenAgenda\Endpoint\Location::validationUpdate()
+     * @dataProvider dataValidationCreateUpdate
+     */
+    public function testValidationCreateUpdate($method)
     {
         $endpoint = new Location([]);
 
-        $v = $endpoint->validationPost(new Validator());
+        $v = $endpoint->{$method}(new Validator());
 
         // agenda_id
         // todo test agenda_id field ?
@@ -114,7 +120,7 @@ class LocationTest extends EndpointTestCase
 
         // name
         $field = $v->field('name');
-        $this->assertTrue($field->isPresenceRequired());
+        $this->assertEquals('create', $field->isPresenceRequired());
         $rules = $field->rules();
         $this->assertArrayHasKey('scalar', $rules);
         $this->assertArrayHasKey('maxLength', $rules);
@@ -122,7 +128,7 @@ class LocationTest extends EndpointTestCase
 
         // address
         $field = $v->field('address');
-        $this->assertTrue($field->isPresenceRequired());
+        $this->assertEquals('create', $field->isPresenceRequired());
         $rules = $field->rules();
         $this->assertArrayHasKey('scalar', $rules);
         $this->assertArrayHasKey('maxLength', $rules);
@@ -130,7 +136,7 @@ class LocationTest extends EndpointTestCase
 
         // country
         $field = $v->field('country');
-        $this->assertTrue($field->isPresenceRequired());
+        $this->assertEquals('create', $field->isPresenceRequired());
         $rules = $field->rules();
         $this->assertArrayHasKey('scalar', $rules);
         $this->assertArrayHasKey('lengthBetween', $rules);
@@ -251,7 +257,7 @@ class LocationTest extends EndpointTestCase
     {
         return [
             [
-                'GET',
+                'get',
                 [],
                 [
                     'agenda_id' => [
@@ -266,7 +272,7 @@ class LocationTest extends EndpointTestCase
                 ],
             ],
             [
-                'GET',
+                'get',
                 ['agenda_id' => 123],
                 [
                     'id' => [
@@ -278,7 +284,7 @@ class LocationTest extends EndpointTestCase
                 ],
             ],
             [
-                'POST',
+                'create',
                 [],
                 [
                     'agenda_id' => [
@@ -308,19 +314,24 @@ class LocationTest extends EndpointTestCase
     {
         return [
             [
-                'GET',
+                'get',
                 ['agenda_id' => 123, 'id' => 456, 'ext_id' => 'my-internal-id'],
                 'path' => '/v2/agendas/123/locations/456',
             ],
             [
-                'GET',
+                'get',
                 ['agenda_id' => 123, 'ext_id' => 'my-internal-id'],
                 '/v2/agendas/123/locations/ext/my-internal-id',
             ],
             [
-                'POST',
+                'create',
                 ['agenda_id' => 123, 'id' => 456, 'ext_id' => 'my-internal-id'],
                 '/v2/agendas/123/locations',
+            ],
+            [
+                'update',
+                ['agenda_id' => 123, 'ext_id' => 'my-internal-id'],
+                '/v2/agendas/123/locations/ext/my-internal-id',
             ],
         ];
     }
@@ -351,11 +362,13 @@ class LocationTest extends EndpointTestCase
 
         $entity = $endpoint->get();
 
-        $this->assertInstanceOf(\OpenAgenda\Entity\Location::class, $entity);
+        $this->assertInstanceOf(LocationEntity::class, $entity);
     }
 
-    public function testPost()
+    public function testCreate()
     {
+        $payload = FileResource::instance($this)->getContent('Response/locations/location-post.json');
+
         $this->client->expects($this->once())
             ->method('getAccessToken')
             ->willReturn('authorization-key');
@@ -371,7 +384,7 @@ class LocationTest extends EndpointTestCase
                 ],
                 ['headers' => ['access-token' => 'authorization-key', 'nonce' => 1734957296123456]]
             )
-            ->willReturn(new Response(200, ['Content-Type' => 'application/json'], ''));
+            ->willReturn(new Response(200, ['Content-Type' => 'application/json'], $payload));
 
         $endpoint = new Location([
             'agenda_id' => 123,
@@ -381,7 +394,36 @@ class LocationTest extends EndpointTestCase
             'country' => 'FR',
         ]);
 
-        $entity = $endpoint->post();
-        $this->assertInstanceOf(\OpenAgenda\Entity\Location::class, $entity);
+        $entity = $endpoint->create();
+        $this->assertInstanceOf(LocationEntity::class, $entity);
+    }
+
+    public function testUpdate()
+    {
+        $payload = FileResource::instance($this)->getContent('Response/locations/location-post.json');
+
+        $this->client->expects($this->once())
+            ->method('getAccessToken')
+            ->willReturn('authorization-key');
+
+        $this->wrapper->expects($this->once())
+            ->method('patch')
+            ->with(
+                'https://api.openagenda.com/v2/agendas/123/locations/456',
+                [
+                    'state' => 1,
+                ],
+                ['headers' => ['access-token' => 'authorization-key', 'nonce' => 1734957296123456]]
+            )
+            ->willReturn(new Response(200, ['Content-Type' => 'application/json'], $payload));
+
+        $endpoint = new Location([
+            'agenda_id' => 123,
+            'id' => 456,
+            'state' => 1,
+        ]);
+
+        $entity = $endpoint->update();
+        $this->assertInstanceOf(LocationEntity::class, $entity);
     }
 }

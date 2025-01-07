@@ -31,7 +31,7 @@ $params = [
 
 // Using endpoint
 $locations = $oa->get('/locations', $params);
-// Using previous fetched OpenAgenda\Agenda object
+// Using previous fetched OpenAgenda\Entity\Agenda object
 $locations = $agenda->locations($params);
 ```
 
@@ -66,10 +66,10 @@ $params = [
     'ext_id' => 'my-uuid-v4', // OR external id
 ];
 
-// using endpoint
+// Using endpoint
 $location = $oa->get('/location', $params);
 
-// using previous fetched OpenAgenda\Agenda object
+// Using previous fetched OpenAgenda\Entity\Agenda object
 $location = $agenda->location($id)->get();
 
 // Check location exists
@@ -91,10 +91,10 @@ Create a location in an agenda.
 Return a Location object with the new id.
 
 ```php
-// using endpoint
+// Using endpoint
 $location = $oa->post('/location', $data);
 
-// using previous fetched OpenAgenda\Agenda object
+// Using previous fetched OpenAgenda\Entity\Agenda object
 $location = $agenda->location($data)->post();
 ```
 
@@ -108,18 +108,18 @@ Update a location in an agenda.
 Return the updated Location object.
 
 You can use `post` or `patch` method.  
-If using `post`, all accessible update fields should be sets in `$data`.  
+If using `post`, all required update fields should be sets in `$data`.  
 If using `patch` only passed (or changed) fields will be updated.
 
 You can update a location with `ext_id` instead of `id`.  
 In this case, `id` should not exist in `$data`.
 
 ```php
-// using endpoint
+// Using endpoint
 $location = $oa->post('/location', $data);
 $location = $oa->patch('/location', $data);
 
-// using previous fetched OpenAgenda\Location object
+// Using previous fetched OpenAgenda\Entity\Location object
 $location = $location->post($data);
 $location = $location->patch($data);
 ```
@@ -137,10 +137,10 @@ You can delete a location with `ext_id` instead of `id`.
 In this case, `id` should not exist in `$data`.
 
 ```php
-// using endpoint
+// Using endpoint
 $location = $oa->delete('/location', $data);
 
-// using previous fetched OpenAgenda\Location object
+// Using previous fetched OpenAgenda\Entity\Location object
 $location = $location->delete($id);
 // you can chain from Agenda too
 $location = $agenda->location($id)->delete();

@@ -67,7 +67,18 @@ class Location extends Endpoint
      * @param \Cake\Validation\Validator $validator Validator.
      * @return \Cake\Validation\Validator
      */
-    public function validationUriPathHead(Validator $validator): Validator
+    public function validationUriPathExists(Validator $validator): Validator
+    {
+        return $this->validationUriPathGet($validator);
+    }
+
+    /**
+     * Validation rules for Uri path DELETE.
+     *
+     * @param \Cake\Validation\Validator $validator Validator.
+     * @return \Cake\Validation\Validator
+     */
+    public function validationUriPathDelete(Validator $validator): Validator
     {
         return $this->validationUriPathGet($validator);
     }
@@ -78,19 +89,19 @@ class Location extends Endpoint
      * @param \Cake\Validation\Validator $validator Validator.
      * @return \Cake\Validation\Validator
      */
-    public function validationPost(Validator $validator): Validator
+    public function validationCreate(Validator $validator): Validator
     {
         return $this->validationUriPathGet($validator)
             // name
-            ->requirePresence('name')
+            ->requirePresence('name', 'create')
             ->scalar('name')
             ->maxLength('name', 100)
             // address
-            ->requirePresence('address')
+            ->requirePresence('address', 'create')
             ->scalar('address')
             ->maxLength('address', 255)
             // country
-            ->requirePresence('country')
+            ->requirePresence('country', 'create')
             ->scalar('country')
             ->lengthBetween('country', [2, 2])
             // state
@@ -153,20 +164,29 @@ class Location extends Endpoint
     }
 
     /**
+     * Validation rules for POST/PATCH data.
+     *
+     * @param \Cake\Validation\Validator $validator Validator.
+     * @return \Cake\Validation\Validator
+     */
+    public function validationUpdate(Validator $validator)
+    {
+        return $this->validationCreate($validator);
+    }
+
+    /**
      * @inheritDoc
      */
     public function uriPath(string $method): string
     {
         parent::uriPath($method);
 
-        if ($method === 'get' || $method === 'head') {
-            if (!empty($this->params['id'])) {
-                $path = sprintf('/agendas/%s/locations/%s', $this->params['agenda_id'], $this->params['id']);
-            } else {
-                $path = sprintf('/agendas/%s/locations/ext/%s', $this->params['agenda_id'], $this->params['ext_id']);
-            }
-        } else {
+        if ($method === 'create') {
             $path = sprintf('/agendas/%s/locations', $this->params['agenda_id']);
+        } elseif (!empty($this->params['id'])) {
+            $path = sprintf('/agendas/%s/locations/%s', $this->params['agenda_id'], $this->params['id']);
+        } else {
+            $path = sprintf('/agendas/%s/locations/ext/%s', $this->params['agenda_id'], $this->params['ext_id']);
         }
 
         return $path;
@@ -219,19 +239,23 @@ class Location extends Endpoint
      *
      * @return \OpenAgenda\Entity\Location
      */
-    public function post()
+    public function create()
     {
         unset($this->params['id']);
-        $uri = $this->getUri(__FUNCTION__);
 
         $entity = new LocationEntity($this->params);
+
+        $uri = $this->getUri(__FUNCTION__);
 
         $response = OpenAgenda::getClient()
             ->post($uri, $entity->toOpenAgenda());
 
+        $entity = null;
         if ($response['_success'] && !empty($response['location'])) {
             $entity = new LocationEntity($response['location'], ['markClean' => true]);
         }
+
+        // todo handle errors and define what to return
 
         return $entity;
     }
@@ -241,9 +265,32 @@ class Location extends Endpoint
      *
      * @return \OpenAgenda\Entity\Location
      */
-    public function patch()
+    public function update()
     {
-        // TODO: Implement head() method.
+        $entity = new LocationEntity($this->params);
+        $entity->setNew(false);
+        $errors = $this->getValidator('update')->validate($this->params, $entity->isNew());
+
+        if ($errors) {
+            $this->throwException($errors);
+        }
+        $data = $entity->toOpenAgenda();
+
+        // todo: no data to update, skip. Maybe an option ?
+
+        $uri = $this->getUri(__FUNCTION__);
+        $client = OpenAgenda::getClient();
+
+        $response = $client->patch($uri, $data);
+
+        $entity = null;
+        if ($response['_success'] && !empty($response['location'])) {
+            $entity = new LocationEntity($response['location'], ['markClean' => true]);
+        }
+
+        // todo handle errors and define what to return
+
+        return $entity;
     }
 
     /**

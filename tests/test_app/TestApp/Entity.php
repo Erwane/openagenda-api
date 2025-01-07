@@ -20,9 +20,10 @@ namespace OpenAgenda\Test\test_app\TestApp;
 class Entity extends \OpenAgenda\Entity\Entity
 {
     protected $_aliases = [
-        'id' => ['field' => 'uid'],
+        'id' => ['field' => 'uid', 'required' => true],
         'postal_code' => ['field' => 'postalCode'],
         'created_at' => ['field' => 'createdAt', 'type' => 'DateTime'],
         'description' => ['field' => 'description', 'type' => 'json'],
+        'state' => ['field' => 'state', 'type' => 'boolean'],
     ];
 }

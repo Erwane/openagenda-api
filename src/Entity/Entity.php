@@ -8,12 +8,11 @@ use InvalidArgumentException;
 use OpenAgenda\OpenAgendaException;
 
 /**
- * Inspired by cakephp Entity.
+ * Inspired by CakePHP Entity.
  *
  * @copyright   Copyright (c) Cake Software Foundation, Inc. (https://cakefoundation.org)
  * @link        https://cakephp.org CakePHP(tm) Project
  * @see         https://github.com/cakephp/cakephp/blob/5.x/src/ORM/Entity.php
- * @since       3.0.0
  * @license     https://opensource.org/licenses/mit-license.php MIT License
  * @property int $id
  */
@@ -37,16 +36,27 @@ abstract class Entity
     /**
      * @var bool
      */
-    protected $_new = false;
+    protected $_new = true;
 
     protected $_aliases = [];
 
     /**
+     * Entity required fields for post/patch.
+     *
+     * @var array
+     */
+    protected $_required;
+
+    /**
+     * OpenAgenda field name to Entity field name.
+     *
      * @var array
      */
     private $_oaToEntity = [];
 
     /**
+     * Entity field name to OpenAgenda field name.
+     *
      * @var array
      */
     private $_entityToOa = [];
@@ -84,6 +94,37 @@ abstract class Entity
     }
 
     /**
+     * Set property/field.
+     *
+     * @param string $name Property (field) name.
+     * @param mixed $value Property (field) value.
+     * @return void
+     */
+    public function __set(string $name, $value): void
+    {
+        $this->set($name, $value);
+    }
+
+    /**
+     * Get property/field.
+     *
+     * @param string $name Property (field) name.
+     * @return mixed|null
+     */
+    public function __get(string $name)
+    {
+        if ($name === '') {
+            throw new InvalidArgumentException('Cannot get an empty field');
+        }
+
+        if (isset($this->_fields[$name])) {
+            return $this->_fields[$name];
+        }
+
+        return null;
+    }
+
+    /**
      * Build aliases maps (cache)
      *
      * @return void
@@ -92,9 +133,13 @@ abstract class Entity
     {
         $this->_oaToEntity = [];
         $this->_entityToOa = [];
+        $this->_required = [];
         foreach ($this->_aliases as $field => $info) {
             $this->_oaToEntity[$info['field']] = $field;
             $this->_entityToOa[$field] = $info['field'];
+            if (!empty($info['required'])) {
+                $this->_required[$field] = true;
+            }
         }
     }
 
@@ -141,12 +186,23 @@ abstract class Entity
     }
 
     /**
+     * Return OpenAgenda fields array.
+     *
+     * @param bool $onlyChanged Only required and dirty fields if true.
      * @return array
      */
-    public function toOpenAgenda(): array
+    public function toOpenAgenda(bool $onlyChanged = false): array
     {
         $out = [];
-        foreach ($this->_fields as $field => $value) {
+
+        if ($onlyChanged) {
+            $fields = array_intersect_key($this->_fields, $this->_required);
+            $fields += array_intersect_key($this->_fields, $this->_dirty);
+        } else {
+            $fields = $this->_fields;
+        }
+
+        foreach ($fields as $field => $value) {
             $name = $this->_entityToOa[$field] ?? $field;
             if (isset($this->_aliases[$field]['type'])) {
                 switch ($this->_aliases[$field]['type']) {
@@ -189,7 +245,7 @@ abstract class Entity
         $fields = $this->fromOpenAgenda($fields);
 
         foreach ($fields as $name => $value) {
-            //$this->setDirty($name, true);
+            $this->setDirty($name, true);
 
             if ($options['setter']) {
                 $setter = static::_accessor($name, 'set');
@@ -229,34 +285,18 @@ abstract class Entity
     }
 
     /**
-     * Set property/field.
+     * Sets the dirty status of a single field.
      *
-     * @param string $name Property (field) name.
-     * @param mixed $value Property (field) value.
-     * @return void
+     * @param string $field the field to set or check status for
+     * @param bool $isDirty true means the field was changed, false means
+     * it was not changed. Defaults to true.
+     * @return $this
      */
-    public function __set(string $name, $value): void
+    public function setDirty(string $field, bool $isDirty = true)
     {
-        $this->set($name, $value);
-    }
+        $this->_dirty[$field] = true;
 
-    /**
-     * Get property/field.
-     *
-     * @param string $name Property (field) name.
-     * @return mixed|null
-     */
-    public function __get(string $name)
-    {
-        if ($name === '') {
-            throw new InvalidArgumentException('Cannot get an empty field');
-        }
-
-        if (isset($this->_fields[$name])) {
-            return $this->_fields[$name];
-        }
-
-        return null;
+        return $this;
     }
 
     /**
@@ -269,6 +309,38 @@ abstract class Entity
     public function clean(): void
     {
         $this->_dirty = [];
+    }
+
+    /**
+     * Set the status of this entity.
+     *
+     * Using `true` means that the entity has not been persisted in the database,
+     * `false` that it already is.
+     *
+     * @param bool $new Indicate whether this entity has been persisted.
+     * @return $this
+     */
+    public function setNew(bool $new)
+    {
+        if ($new) {
+            foreach ($this->_fields as $k => $p) {
+                $this->_dirty[$k] = true;
+            }
+        }
+
+        $this->_new = $new;
+
+        return $this;
+    }
+
+    /**
+     * Returns whether this entity has already been persisted.
+     *
+     * @return bool Whether the entity has been persisted.
+     */
+    public function isNew(): bool
+    {
+        return $this->_new;
     }
 
     /**

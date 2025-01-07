@@ -24,11 +24,11 @@ use League\Uri\Uri;
 /**
  * Abstract Endpoint
  *
- * @method mixed head() Do a "HEAD" request.
- * @method mixed get() Do a "GET" request.
- * @method mixed post() Do a "POST" request.
- * @method mixed patch() Do a "PATCH" request.
- * @method mixed delete() Do a "DELETE" request.
+ * @method mixed exists() Check entity exists
+ * @method mixed get() Get collection or entity
+ * @method mixed create() Create entity
+ * @method mixed update(bool $full) Update entity (full data or partial)
+ * @method mixed delete() Delete entity
  */
 abstract class Endpoint implements ValidatorAwareInterface
 {
@@ -121,7 +121,8 @@ abstract class Endpoint implements ValidatorAwareInterface
      * @param \Cake\Validation\Validator $validator Validator
      * @return \Cake\Validation\Validator
      */
-    public function validationUriPath(Validator $validator): Validator{
+    public function validationUriPath(Validator $validator): Validator
+    {
         return $validator;
     }
 
@@ -201,7 +202,7 @@ abstract class Endpoint implements ValidatorAwareInterface
         $method = strtolower($method);
 
         $path = $this->uriPath($method);
-        $query = $this->uriQuery($method);
+        $query = $this->uriQuery();
 
         $components = parse_url($this->baseUrl . $path);
         if ($query) {

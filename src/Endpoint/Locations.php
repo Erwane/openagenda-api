@@ -16,8 +16,6 @@ namespace OpenAgenda\Endpoint;
 
 use Cake\Validation\Validation;
 use Cake\Validation\Validator;
-use InvalidArgumentException;
-use League\Uri\Uri;
 use OpenAgenda\Entity\Location;
 use OpenAgenda\OpenAgenda;
 use Ramsey\Collection\Collection;

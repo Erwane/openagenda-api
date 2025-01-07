@@ -95,4 +95,20 @@ class EntityTest extends TestCase
             'state' => 1,
         ], $ent->toOpenAgenda());
     }
+
+    public function testToOpenAgendaChanged(): void
+    {
+        $ent = new ent([
+            'id' => 1,
+            'postal_code' => '12345',
+            'state' => false,
+        ], ['markClean' => true]);
+
+        $ent->set('state', true);
+
+        $this->assertEquals([
+            'uid' => '1',
+            'state' => 1,
+        ], $ent->toOpenAgenda(true));
+    }
 }

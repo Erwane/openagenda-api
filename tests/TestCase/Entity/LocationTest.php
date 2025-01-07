@@ -97,7 +97,6 @@ class LocationTest extends TestCase
         ]);
 
         $this->assertEquals([
-            'uid' => 35867424,
             'name' => 'Centres sociaux de Wattrelos 59150',
             'address' => '4 rue Edouard Herriot 59150 Wattrelos',
             'access' => [],

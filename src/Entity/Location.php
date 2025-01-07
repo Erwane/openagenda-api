@@ -27,8 +27,8 @@ class Location extends Entity
 {
     protected $_aliases = [
         'id' => ['field' => 'uid'],
-        'name' => ['field' => 'name'],
-        'address' => ['field' => 'address'],
+        'name' => ['field' => 'name', 'required' => true],
+        'address' => ['field' => 'address'], 'required' => true,
         'access' => ['field' => 'access'],
         'description' => ['field' => 'description'],
         'image' => ['field' => 'image'],
@@ -40,7 +40,7 @@ class Location extends Entity
         'region' => ['field' => 'region'],
         'postal_code' => ['field' => 'postalCode'],
         'insee' => ['field' => 'insee'],
-        'country' => ['field' => 'countryCode'],
+        'country' => ['field' => 'countryCode', 'required' => true],
         'district' => ['field' => 'district'],
         'latitude' => ['field' => 'latitude'],
         'longitude' => ['field' => 'longitude'],
@@ -124,5 +124,16 @@ class Location extends Entity
     protected function _setLongitude($value)
     {
         return (float)$value;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function toOpenAgenda(bool $onlyChanged = false): array
+    {
+        $data = parent::toOpenAgenda($onlyChanged);
+        unset($data['uid']);
+
+        return $data;
     }
 }

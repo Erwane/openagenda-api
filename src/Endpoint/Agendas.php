@@ -15,7 +15,6 @@ declare(strict_types=1);
 namespace OpenAgenda\Endpoint;
 
 use Cake\Validation\Validator;
-use League\Uri\Uri;
 use OpenAgenda\Entity\Agenda;
 use OpenAgenda\OpenAgenda;
 use Ramsey\Collection\Collection;

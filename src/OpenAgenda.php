@@ -117,7 +117,7 @@ class OpenAgenda
     {
         // todo: allow passing raw OpenAgenda endpoint url and return ResponseInterface.
         // todo: return response or json payload
-        return EndpointFactory::make($path, $params)->post();
+        return EndpointFactory::make($path, $params)->patch();
     }
 
     /**
@@ -132,7 +132,7 @@ class OpenAgenda
     {
         // todo: allow passing raw OpenAgenda endpoint url and return ResponseInterface.
         // todo: return response or json payload
-        return EndpointFactory::make($path, $params)->post();
+        return EndpointFactory::make($path, $params)->delete();
     }
 
     /**
@@ -162,7 +162,7 @@ class OpenAgenda
     }
 
     /**
-     * Get agendas from OpenAgenda.
+     * Get one agenda from OpenAgenda.
      *
      * @param array $params Query params.
      * @return \OpenAgenda\Entity\Agenda|null
