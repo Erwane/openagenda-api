@@ -41,44 +41,32 @@ $agenda = $oa->myAgendas(['limit' => 1])
 ## Search
 
 ```php
-// using endpoint
+// Endpoint params
+$params = [
+    'limit' => 5,
+    'id' => [12, 34, 56],
+    'sort' => 'recent_events',
+];
+
+// Using endpoint
 $agendas = $oa->get('/agendas', $params);
-// using agendas() method
+// Using OpenAgenda::agenda() method
 $agendas = $oa->agendas($params);
 ```
 
 ### Params
 
-The `/agendas` endpoint or `agendas()` method accept a params array with this possible keys:
-
-* int `size`: How many results by request. Default `10`
-* int `page`: Pagination. Require a PSR-16 configured cache.  
-  You can only ask for next or previous page.  
-  **Not implemented yet**.
-* array `fields`: Optional extra fields to get for agendas.  
-  Possible values are `['summary', 'schema']`.
-* string `search`: Search terms in title, locations and agenda keywords.
-* bool `official`: Only officials agendas. Default `false`.
-* string|string[] `slug`: Get agendas with this slug(s).  
-  Can be a string or an array of slugs.
-* int|int[] `id`: Get agendas with this id(s).  
-  Can be an integer or an array of integers.
-* int `network`: Get only agendas in this network id.
-* string `sort`: Sort results.  
-  Possible values are:
-    * `created_desc`: New agendas first.
-    * `recent_events`: Agendas with recent added event first.
-
-### Example
-
-```php
-$agendaId = $oa->agendas(['slug' => 'agenda-slug'])
-    ->first()
-    ->id;
-
-$agenda = $oa->agendas(['uid' => 12345678])
-    ->first();
-```
+| field    | type               | description                                                                                                                 |
+|----------|--------------------|-----------------------------------------------------------------------------------------------------------------------------|
+| limit    | integer            | How many results by request. Default `100`                                                                                  |
+| page     | integer            | Pagination. Require a PSR-16 configured cache.<br/>You can only ask for next or previous page.<br/>**Not implemented yet**. |
+| fields   | string or string[] | Optional extra fields to get for agendas.<br/>Possible values are `['summary', 'schema']`.                                  |
+| search   | string             | Search terms in title, locations and agenda keywords                                                                        |
+| official | boolean            | Only officials agendas. Default `false`.                                                                                    |
+| slug     | string or string[] | Get agendas with this slug(s).                                                                                              |
+| id       | id or id[]         | Get agendas with this id(s)                                                                                                 |
+| network  | int                | Get only agendas in this network id                                                                                         |
+| sort     | string             | Sort results.<br/>Allowed values are `created_desc` and `recent_events`                                                     |
 
 ## Results
 
@@ -107,7 +95,7 @@ $agenda = $oa->agenda($params);
 | field    | type    | Required | description                             |
 |----------|---------|:--------:|-----------------------------------------|
 | id       | integer |    Y     | Agenda id                               |
-| detailed | boolean |    N     | Return detailed Agenda schema if `true` |
+| detailed | boolean |    n     | Return detailed Agenda schema if `true` |
 
 ## `Agenda` object
 

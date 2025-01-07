@@ -40,10 +40,17 @@ class EndpointTestCase extends TestCase
             ['head', 'get', 'post', 'patch', 'delete']
         );
 
-        $this->client = new Client([
-            'public_key' => 'testing',
-            'wrapper' => $this->wrapper,
-        ]);
+        $this->client = $this->getMockBuilder(Client::class)
+            ->setConstructorArgs([
+                [
+                    'public_key' => 'testing',
+                    'wrapper' => $this->wrapper,
+                ],
+            ])
+            ->onlyMethods(['getAccessToken'])
+            ->getMock();
+
+        // $this->client = new Client();
 
         OpenAgenda::setClient($this->client);
     }

@@ -23,6 +23,12 @@ use League\Uri\Uri;
 
 /**
  * Abstract Endpoint
+ *
+ * @method mixed head() Do a "HEAD" request.
+ * @method mixed get() Do a "GET" request.
+ * @method mixed post() Do a "POST" request.
+ * @method mixed patch() Do a "PATCH" request.
+ * @method mixed delete() Do a "DELETE" request.
  */
 abstract class Endpoint implements ValidatorAwareInterface
 {
@@ -115,7 +121,9 @@ abstract class Endpoint implements ValidatorAwareInterface
      * @param \Cake\Validation\Validator $validator Validator
      * @return \Cake\Validation\Validator
      */
-    abstract public function validationUriPath(Validator $validator): Validator;
+    public function validationUriPath(Validator $validator): Validator{
+        return $validator;
+    }
 
     /**
      * Validate endpoint parameters.
@@ -213,6 +221,7 @@ abstract class Endpoint implements ValidatorAwareInterface
      */
     public function uriPath(string $method): string
     {
+        // validate Uri path params
         $validator = 'uriPath' . ucfirst(strtolower($method));
         if (method_exists($this, 'validation' . ucfirst($validator))) {
             $validator = $this->getValidator($validator);
@@ -226,6 +235,7 @@ abstract class Endpoint implements ValidatorAwareInterface
             $this->throwException($errors);
         }
 
+        // Return no path. Endpoint method should set this
         return '';
     }
 
@@ -271,39 +281,4 @@ abstract class Endpoint implements ValidatorAwareInterface
 
         throw new InvalidArgumentException(json_encode($message, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
     }
-
-    /**
-     * Do a HEAD request.
-     *
-     * @return mixed
-     */
-    abstract public function head();
-
-    /**
-     * Do a GET request.
-     *
-     * @return mixed
-     */
-    abstract public function get();
-
-    /**
-     * Do a POST request.
-     *
-     * @return mixed
-     */
-    abstract public function post();
-
-    /**
-     * Do a PATCH request.
-     *
-     * @return mixed
-     */
-    abstract public function patch();
-
-    /**
-     * Do a DELETE request.
-     *
-     * @return mixed
-     */
-    abstract public function delete();
 }

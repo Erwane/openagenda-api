@@ -14,9 +14,10 @@ declare(strict_types=1);
  */
 namespace OpenAgenda\Test\TestCase\Endpoint;
 
+use Cake\Validation\Validator;
 use GuzzleHttp\Psr7\Response;
 use OpenAgenda\Endpoint\Agendas;
-use OpenAgenda\Entity\Agenda;
+use OpenAgenda\Entity\Agenda as AgendaEntity;
 use OpenAgenda\Test\EndpointTestCase;
 use OpenAgenda\Test\Utility\FileResource;
 use Ramsey\Collection\Collection;
@@ -29,10 +30,74 @@ use Ramsey\Collection\Collection;
  */
 class AgendasTest extends EndpointTestCase
 {
+    public function testValidationUriPathGet()
+    {
+        $endpoint = new Agendas([]);
+
+        $v = $endpoint->validationUriPathGet(new Validator());
+
+        // limit
+        $field = $v->field('limit');
+        $this->assertTrue($field->isEmptyAllowed());
+        $rules = $field->rules();
+        $this->assertArrayHasKey('integer', $rules);
+
+        // page
+        $field = $v->field('page');
+        $this->assertTrue($field->isEmptyAllowed());
+        $rules = $field->rules();
+        $this->assertArrayHasKey('integer', $rules);
+
+        // fields
+        $field = $v->field('fields');
+        $this->assertTrue($field->isEmptyAllowed());
+        $rules = $field->rules();
+        $this->assertArrayHasKey('multipleOptions', $rules);
+        $this->assertEquals(['summary', 'schema'], $rules['multipleOptions']->get('pass')[0]);
+
+        // search
+        $field = $v->field('search');
+        $this->assertTrue($field->isEmptyAllowed());
+        $rules = $field->rules();
+        $this->assertArrayHasKey('scalar', $rules);
+
+        // official
+        $field = $v->field('official');
+        $this->assertTrue($field->isEmptyAllowed());
+        $rules = $field->rules();
+        $this->assertArrayHasKey('boolean', $rules);
+
+        // slug
+        $field = $v->field('slug');
+        $this->assertTrue($field->isEmptyAllowed());
+        $rules = $field->rules();
+        $this->assertArrayHasKey('isArray', $rules);
+
+        // id
+        $field = $v->field('id');
+        $this->assertTrue($field->isEmptyAllowed());
+        $rules = $field->rules();
+        $this->assertArrayHasKey('isArray', $rules);
+
+        // network
+        $field = $v->field('network');
+        $this->assertTrue($field->isEmptyAllowed());
+        $rules = $field->rules();
+        $this->assertArrayHasKey('integer', $rules);
+
+        // sort
+        $field = $v->field('sort');
+        $this->assertTrue($field->isEmptyAllowed());
+        $rules = $field->rules();
+        $this->assertArrayHasKey('inList', $rules);
+        $this->assertEquals(['created_desc', 'recent_events'], $rules['inList']->get('pass')[0]);
+    }
+
     public static function dataGetUriSuccess(): array
     {
         return [
             [
+                'GET',
                 [],
                 [
                     'path' => '/v2/agendas',
@@ -40,6 +105,7 @@ class AgendasTest extends EndpointTestCase
                 ],
             ],
             [
+                'GET',
                 [
                     'limit' => 2,
                     'fields' => ['summary', 'schema'],
@@ -64,16 +130,28 @@ class AgendasTest extends EndpointTestCase
                     ],
                 ],
             ],
+
+            // My agendas. _path is set by EndpointFactory::make()
+            [
+                'GET',
+                [
+                    '_path' => '/agendas/mines',
+                ],
+                [
+                    'path' => '/v2/me/agendas',
+                    'query' => [],
+                ],
+            ],
         ];
     }
 
     /**
      * @dataProvider dataGetUriSuccess
      */
-    public function testGetUriSuccess($params, $expected)
+    public function testGetUriSuccess($method, $params, $expected)
     {
         $endpoint = new Agendas($params);
-        $uri = $endpoint->getUri();
+        $uri = $endpoint->getUri($method);
         $this->assertEquals($expected['path'], $uri->getPath());
         parse_str((string)$uri->getQuery(), $query);
         $this->assertEquals($expected['query'], $query);
@@ -81,7 +159,7 @@ class AgendasTest extends EndpointTestCase
 
     public function testGet()
     {
-        $payload = FileResource::instance($this)->getContent('Response/agendas-ok.json');
+        $payload = FileResource::instance($this)->getContent('Response/agendas/agendas.json');
 
         $this->wrapper->expects($this->once())
             ->method('get')
@@ -100,7 +178,7 @@ class AgendasTest extends EndpointTestCase
         $agendas = $endpoint->get();
 
         $this->assertInstanceOf(Collection::class, $agendas);
-        $this->assertEquals(Agenda::class, $agendas->getType());
+        $this->assertEquals(AgendaEntity::class, $agendas->getType());
         $this->assertCount(2, $agendas);
     }
 }

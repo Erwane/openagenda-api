@@ -86,7 +86,53 @@ class OpenAgenda
     public function get(string $path, array $params = [])
     {
         // todo: allow passing raw OpenAgenda endpoint url and return ResponseInterface.
+        // todo: return response or json payload
         return EndpointFactory::make($path, $params)->get();
+    }
+
+    /**
+     * Do a POST request on $path.
+     *
+     * @param string $path Endpoint path. Relative, not real OpenAgenda endpoint.
+     * @param array $params Client options
+     * @return \Ramsey\Collection\Collection|\OpenAgenda\Entity\Entity|\Psr\Http\Message\ResponseInterface
+     * @throws \OpenAgenda\Endpoint\UnknownEndpointException
+     */
+    public function post(string $path, array $params = [])
+    {
+        // todo: allow passing raw OpenAgenda endpoint url and return ResponseInterface.
+        // todo: return response or json payload
+        return EndpointFactory::make($path, $params)->post();
+    }
+
+    /**
+     * Do a PATCH request on $path.
+     *
+     * @param string $path Endpoint path. Relative, not real OpenAgenda endpoint.
+     * @param array $params Client options
+     * @return \Ramsey\Collection\Collection|\OpenAgenda\Entity\Entity|\Psr\Http\Message\ResponseInterface
+     * @throws \OpenAgenda\Endpoint\UnknownEndpointException
+     */
+    public function patch(string $path, array $params = [])
+    {
+        // todo: allow passing raw OpenAgenda endpoint url and return ResponseInterface.
+        // todo: return response or json payload
+        return EndpointFactory::make($path, $params)->post();
+    }
+
+    /**
+     * Do a DELETE request on $path.
+     *
+     * @param string $path Endpoint path. Relative, not real OpenAgenda endpoint.
+     * @param array $params Client options
+     * @return \Ramsey\Collection\Collection|\OpenAgenda\Entity\Entity|\Psr\Http\Message\ResponseInterface
+     * @throws \OpenAgenda\Endpoint\UnknownEndpointException
+     */
+    public function delete(string $path, array $params = [])
+    {
+        // todo: allow passing raw OpenAgenda endpoint url and return ResponseInterface.
+        // todo: return response or json payload
+        return EndpointFactory::make($path, $params)->post();
     }
 
     /**

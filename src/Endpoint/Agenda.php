@@ -14,10 +14,7 @@ declare(strict_types=1);
  */
 namespace OpenAgenda\Endpoint;
 
-use Cake\Validation\Validation;
 use Cake\Validation\Validator;
-use InvalidArgumentException;
-use League\Uri\Uri;
 use OpenAgenda\Entity\Agenda as AgendaEntity;
 use OpenAgenda\OpenAgenda;
 
@@ -26,17 +23,30 @@ use OpenAgenda\OpenAgenda;
  */
 class Agenda extends Endpoint
 {
-    protected $fields = [
+    protected $queryFields = [
         'detailed' => ['name' => 'detailed'],
     ];
 
     /**
      * @inheritDoc
      */
-    public function validationDefault(Validator $validator)
+    public function validationUriPath(Validator $validator): Validator
     {
-        return parent::validationDefault($validator)
+        return parent::validationUriPath($validator)
+            // id
+            ->requirePresence('id')
+            ->integer('id');
+    }
 
+    /**
+     * Validation rules for Uri path GET.
+     *
+     * @param \Cake\Validation\Validator $validator Validator.
+     * @return \Cake\Validation\Validator
+     */
+    public function validationUriPathGet(Validator $validator)
+    {
+        return $this->validationUriPath($validator)
             // detailed
             ->allowEmptyString('detailed')
             ->boolean('detailed');
@@ -45,25 +55,15 @@ class Agenda extends Endpoint
     /**
      * @inheritDoc
      */
-    public function getUri(): Uri
+    public function uriPath(string $method): string
     {
-        if (!Validation::numeric($this->params['id'] ?? null)) {
-            throw new InvalidArgumentException('Missing valid `id` param.');
-        }
+        parent::uriPath($method);
 
-        $path = sprintf('/agendas/%s', $this->params['id']);
-
-        $components = parse_url($this->baseUrl . $path);
-        $query = $this->uriQuery();
-        if ($query) {
-            $components['query'] = http_build_query($query);
-        }
-
-        return Uri::createFromComponents($components);
+        return sprintf('/agendas/%s', $this->params['id']);
     }
 
     /**
-     * Get locations.
+     * Get agenda.
      *
      * @return \OpenAgenda\Entity\Agenda|null
      */
@@ -71,7 +71,8 @@ class Agenda extends Endpoint
     {
         $agenda = null;
 
-        $response = OpenAgenda::getClient()->get($this->getUri());
+        $response = OpenAgenda::getClient()
+            ->get($this->getUri(__FUNCTION__));
 
         if ($response['_success'] && !empty($response['uid'])) {
             $agenda = new AgendaEntity($response, ['markClean' => true]);

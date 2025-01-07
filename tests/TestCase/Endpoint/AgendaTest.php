@@ -30,32 +30,70 @@ use OpenAgenda\Test\Utility\FileResource;
  */
 class AgendaTest extends EndpointTestCase
 {
-    public function testValidationDefault()
+    public function testValidationUriPath()
     {
-        $endpoint = new Agenda([]);
+        $endpoint = new Agenda();
 
-        $v = $endpoint->validationDefault(new Validator());
+        $v = $endpoint->validationUriPath(new Validator());
+
+        // id
+        $field = $v->field('id');
+        $this->assertTrue($field->isPresenceRequired());
+        $rules = $field->rules();
+        $this->assertArrayHasKey('integer', $rules);
+    }
+
+    public function testValidationUriPathGet()
+    {
+        $endpoint = new Agenda();
+
+        $v = $endpoint->validationUriPathGet(new Validator());
+
+        // id
+        $this->assertTrue($v->hasField('id'));
 
         // detailed
-        $this->assertTrue($v->hasField('detailed'));
         $field = $v->field('detailed');
         $this->assertTrue($field->isEmptyAllowed());
         $rules = $field->rules();
         $this->assertArrayHasKey('boolean', $rules);
     }
 
-    public function testMissingAgendaId(): void
+    public static function dataGetUriErrors(): array
     {
-        $endpoint = new Agenda([]);
+        return [
+            [
+                'GET',
+                [],
+                [
+                    'id' => [
+                        '_required' => 'This field is required',
+                    ],
+                ],
+            ],
+        ];
+    }
+
+    /**
+     * @dataProvider dataGetUriErrors
+     */
+    public function testGetUriErrors($method, $params, $expected)
+    {
+        $endpoint = new Agenda($params);
+        $message = [
+            'message' => 'OpenAgenda\\Endpoint\\Agenda has errors.',
+            'errors' => $expected,
+        ];
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Missing valid `id` param.');
-        $endpoint->getUri();
+        $this->expectExceptionMessage(json_encode($message, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+        $endpoint->getUri($method);
     }
 
     public static function dataGetUriSuccess(): array
     {
         return [
             [
+                'GET',
                 ['id' => 12345],
                 [
                     'path' => '/v2/agendas/12345',
@@ -63,6 +101,7 @@ class AgendaTest extends EndpointTestCase
                 ],
             ],
             [
+                'GET',
                 [
                     'id' => 12345,
                     'detailed' => true,
@@ -80,10 +119,10 @@ class AgendaTest extends EndpointTestCase
     /**
      * @dataProvider dataGetUriSuccess
      */
-    public function testGetUriSuccess($params, $expected)
+    public function testGetUriSuccess($method, $params, $expected)
     {
         $endpoint = new Agenda($params);
-        $uri = $endpoint->getUri();
+        $uri = $endpoint->getUri($method);
         $this->assertEquals($expected['path'], $uri->getPath());
         parse_str((string)$uri->getQuery(), $query);
         $this->assertEquals($expected['query'], $query);

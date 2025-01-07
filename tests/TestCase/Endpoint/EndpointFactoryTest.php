@@ -3,8 +3,10 @@ declare(strict_types=1);
 
 namespace OpenAgenda\Test\TestCase\Endpoint;
 
+use OpenAgenda\Endpoint\Agenda;
 use OpenAgenda\Endpoint\Agendas;
 use OpenAgenda\Endpoint\EndpointFactory;
+use OpenAgenda\Endpoint\Location;
 use OpenAgenda\Endpoint\Locations;
 use OpenAgenda\Endpoint\UnknownEndpointException;
 use PHPUnit\Framework\TestCase;

@@ -25,7 +25,7 @@ use Ramsey\Collection\Collection;
  */
 class Agendas extends Endpoint
 {
-    protected $fields = [
+    protected $queryFields = [
         'limit' => ['name' => 'size'],
         'fields' => ['name' => 'fields', 'type' => 'array'],
         'search' => ['name' => 'search'],
@@ -43,41 +43,57 @@ class Agendas extends Endpoint
     ];
 
     /**
-     * @inheritDoc
+     * Validation rules for Uri path GET.
+     *
+     * @param \Cake\Validation\Validator $validator Validator.
+     * @return \Cake\Validation\Validator
      */
-    public function validationDefault(Validator $validator)
+    public function validationUriPathGet(Validator $validator): Validator
     {
-        return parent::validationDefault($validator);
-        // 'limit' => v::nullable(v::intVal()),
-            // 'fields' => v::nullable(v::arrayType()
-            //     ->subset(['summary', 'schema'])),
-            // 'search' => v::nullable(v::stringVal()),
-            // 'official' => v::nullable(v::boolType()),
-            // 'slug' => v::nullable(v::each(v::stringType())),
-            // 'id' => v::nullable(v::each(v::intVal())),
-            // 'network' => v::nullable(v::intVal()),
-            // 'sort' => v::nullable(v::stringVal()
-            //     ->in(['created_desc', 'recent_events'])),
+        return $this->validationUriPath($validator)
+            // limit
+            ->allowEmptyString('limit')
+            ->integer('limit')
+            // page
+            ->allowEmptyString('page')
+            ->integer('page')
+            // fields
+            ->allowEmptyArray('fields')
+            ->multipleOptions('fields', ['summary', 'schema'])
+            // search
+            ->allowEmptyString('search')
+            ->scalar('search')
+            // official
+            ->allowEmptyString('official')
+            ->boolean('official')
+            // slug
+            ->allowEmptyArray('slug')
+            ->isArray('slug')
+            // id
+            ->allowEmptyArray('id')
+            ->isArray('id')
+            // network
+            ->allowEmptyString('network')
+            ->integer('network')
+            // sort
+            ->allowEmptyArray('sort')
+            ->inList('sort', ['created_desc', 'recent_events']);
     }
 
     /**
      * @inheritDoc
      */
-    public function getUri(): Uri
+    public function uriPath(string $method): string
     {
+        parent::uriPath($method);
+
         $path = '/agendas';
 
         if (isset($this->params['_path']) && $this->params['_path'] === '/agendas/mines') {
             $path = '/me/agendas';
         }
 
-        $components = parse_url($this->baseUrl . $path);
-        $query = $this->uriQuery();
-        if ($query) {
-            $components['query'] = http_build_query($query);
-        }
-
-        return Uri::createFromComponents($components);
+        return $path;
     }
 
     /**
@@ -88,8 +104,8 @@ class Agendas extends Endpoint
     public function get(): Collection
     {
         $collection = new Collection(Agenda::class);
-        $uri = $this->getUri();
 
+        $uri = $this->getUri(__FUNCTION__);
         $response = OpenAgenda::getClient()->get($uri);
 
         $target = 'agendas';
