@@ -24,39 +24,34 @@ Search locations for an agenda.
 Return a [Collection](collections.md) of Location items.
 
 ```php
-// using endpoint
-$locations = $oa->get('/locations', $params);
+// Endpoint params
+$params = [
+    'agenda_id' => 123,
+];
 
-// using previous fetched OpenAgenda\Agenda object
+// Using endpoint
+$locations = $oa->get('/locations', $params);
+// Using previous fetched OpenAgenda\Agenda object
 $locations = $agenda->locations($params);
 ```
 
-**array $params**
+**Params**:
 
-The `/locations` endpoint or `$agenda->locations()` method accept a params array with this possible keys:
+| field       | type                         | Required | description                                                                                                                 |
+|-------------|------------------------------|:--------:|-----------------------------------------------------------------------------------------------------------------------------|
+| agenda_id   | integer                      |    Y     | Agenda id. Required if using endpoint.                                                                                      |
+| limit       | integer                      |    n     | How many results by request. Default `10`                                                                                   |
+| page        | integer                      |    n     | Pagination. Require a PSR-16 configured cache.<br/>You can only ask for next or previous page.<br/>**Not implemented yet**. |
+| detailed    | boolean                      |    n     | When `true`, get all locations fields. Default `false`                                                                      |
+| search      | string                       |    n     | Search terms in title, locations and agenda keywords.                                                                       |
+| state       | boolean                      |    n     | When `true`, only verified locations. Default `null`.                                                                       |
+| created_lte | DateTimeInterface or string* |    n     | Only locations created before or at.                                                                                        |
+| created_gte | DateTimeInterface or string* |    n     | Only locations created at or after.                                                                                         |
+| updated_lte | DateTimeInterface or string* |    n     | Only locations updated before or at.                                                                                        |n
+| updated_gte | DateTimeInterface or string* |    n     | Only locations updated at or after.                                                                                         |
+| sort        | string                       |    n     | Sort results.<br/>Allowed values are `name_asc`, `name_desc`, `created_asc`, `created_desc`                                 |
 
-* int `agenda_id`: Agenda id. **required** if using endpoint.
-* int `limit`: How many results by request. Default `10`
-* int `page`: Pagination. Require a PSR-16 configured cache.  
-  You can only ask for next or previous page.  
-  **Not implemented yet**.
-* bool `detailed`: When `true`, get all locations fields. Default `false`
-* string `search`: Search terms in title, locations and agenda keywords.
-* bool `state`: When `true`, only verified locations. Default `null`.
-* DateTimeInterface|string `created_lte`: Only locations created before or at.  
-  String date format: `2023-06-02T12:40:00+0100` or `2023-06-02`
-* DateTimeInterface|string `created_gte`: Only locations created at or after.  
-  String date format: `2023-06-02T12:40:00+0100` or `2023-06-02`
-* DateTimeInterface|string `updated_lte`: Only locations updated before or at.  
-  String date format: `2023-06-02T12:40:00+0100` or `2023-06-02`
-* DateTimeInterface|string `updated_gte`: Only locations updated at or after.  
-  String date format: `2023-06-02T12:40:00+0100` or `2023-06-02`
-* string `sort`: Sort results.  
-  Possible values are:
-    * `name_asc`: Sort by title ascending.
-    * `name_desc`: Sort by title descending.
-    * `created_asc`: Sort by creation date ascending.
-    * `created_desc`: Sort by creation date descending.
+**note**: For DateTime as string, could be atom string (`2024-12-23T12:34:56+00:00`) or any valid datetime format like `2023-06-02` or `2023-06-02 12:34:56`
 
 ### Get
 
@@ -84,11 +79,11 @@ $exists = $agenda->location($params)->exists();
 
 **Params**:
 
-| field     | type    | Required | description                             |
-|-----------|---------|:--------:|-----------------------------------------|
-| agenda_id | integer |    Y     | Agenda id. Required if using endpoint.  |
-| id        | integer |    n     | Location id.                            |
-| ext_id    | mixed   |    n     | Your internal location id.              |
+| field     | type    | Required | description                            |
+|-----------|---------|:--------:|----------------------------------------|
+| agenda_id | integer |    Y     | Agenda id. Required if using endpoint. |
+| id        | integer |    n     | Location id.                           |
+| ext_id    | mixed   |    n     | Your internal location id.             |
 
 ### Create
 
