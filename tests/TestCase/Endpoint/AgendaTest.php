@@ -16,7 +16,6 @@ declare(strict_types=1);
 namespace OpenAgenda\Test\TestCase\Endpoint;
 
 use Cake\Validation\Validator;
-use GuzzleHttp\Psr7\Response;
 use InvalidArgumentException;
 use OpenAgenda\Endpoint\Agenda;
 use OpenAgenda\Test\EndpointTestCase;
@@ -133,7 +132,7 @@ class AgendaTest extends EndpointTestCase
         $payload = FileResource::instance($this)->getContent('Response/agendas/agenda.json');
         $this->mockRequest(false, 'get', [
                 'https://api.openagenda.com/v2/agendas/12345',
-                ['headers' => ['key' => 'testing']]
+                ['headers' => ['key' => 'testing']],
         ], [200, $payload]);
 
         $endpoint = new Agenda(['id' => 12345]);

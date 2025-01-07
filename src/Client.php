@@ -1,16 +1,26 @@
 <?php
 declare(strict_types=1);
 
+/**
+ * OpenAgenda API client.
+ * Copyright (c) Erwane BRETON
+ * Licensed under The MIT License
+ * For full copyright and license information, please see the LICENSE.txt
+ * Redistributions of files must retain the above copyright notice.
+ *
+ * @copyright   Copyright (c) Erwane BRETON
+ * @see         https://github.com/Erwane/openagenda-api
+ * @license     https://opensource.org/licenses/mit-license.php MIT License
+ */
 namespace OpenAgenda;
 
-use Exception;
-use GuzzleHttp\Exception\GuzzleException;
-use GuzzleHttp\Exception\RequestException;
-use GuzzleHttp\Psr7\Uri;
+use Cake\Chronos\Chronos;
 use OpenAgenda\Wrapper\HttpWrapperInterface;
 use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\UriInterface;
 
+/**
+ * OpenAgenda client
+ */
 class Client
 {
     /**
@@ -70,22 +80,27 @@ class Client
      *
      * @param \Psr\Http\Message\ResponseInterface $response Http client response.
      * @return array
+     * @throws \OpenAgenda\OpenAgendaException
      */
     protected function payload(ResponseInterface $response): array
     {
         $status = $response->getStatusCode();
         $payload = [
             '_status' => $status,
-            '_success' => false,
+            '_success' => $status >= 200 && $status < 300,
         ];
 
-        if ($status >= 200 && $status < 300) {
-            $payload['_success'] = true;
-            $applicationJson = $response->hasHeader('Content-Type')
-                && $response->getHeader('Content-Type')[0] === 'application/json';
-            if ($applicationJson) {
-                $payload += json_decode((string)$response->getBody(), true);
-            }
+        $body = (string)$response->getBody();
+        $json = json_decode($body, true);
+        if ($json) {
+            $payload += $json;
+        }
+
+        if (!$payload['_success']) {
+            $exception = new OpenAgendaException($payload['message'] ?? 'Request error', $status);
+            $exception->setResponse($response);
+            $exception->setPayload($payload);
+            throw $exception;
         }
 
         return $payload;
@@ -97,6 +112,7 @@ class Client
      * @param \League\Uri\Uri|string $uri OpenAgenda uri
      * @param array $params Request params
      * @return array
+     * @throws \OpenAgenda\OpenAgendaException
      */
     public function get($uri, array $params = []): array
     {
@@ -109,85 +125,73 @@ class Client
     }
 
     /**
-     * @param callable $callable
-     * @param $uri
-     * @param $options
-     * @return \Psr\Http\Message\ResponseInterface
+     * POST to OpenAgenda endpoint and return Entity or payload.
+     *
+     * @param \League\Uri\Uri|string $uri OpenAgenda uri
+     * @param array $data Post data.
+     * @param array $params Request params.
+     * @return array
      * @throws \OpenAgenda\OpenAgendaException
-     * @noinspection PhpMultipleClassDeclarationsInspection
      */
-    protected function doRequest(callable $callable, $uri, $options): ResponseInterface
+    public function post($uri, array $data = [], array $params = []): array
     {
-        try {
-            if (!($uri instanceof UriInterface)) {
-                $uri = new Uri($this->url . $uri);
-            }
+        // Add Access-Token
+        $params['headers']['access-token'] = $this->getAccessToken();
+        $params['headers']['nonce'] = $this->nonce();
 
-            if (!isset($options['headers'])) {
-                $options['headers'] = [];
-            }
+        $response = $this->http->post((string)$uri, $data, $params);
 
-            $found = false;
-            foreach (array_keys($options['headers']) as $name) {
-                if (strtolower($name) === 'user-agent') {
-                    $options['headers'][$name] = $this->_userAgent;
-                    $found = true;
-
-                    break;
-                }
-            }
-            if (!$found) {
-                $options['headers']['User-Agent'] = $this->_userAgent;
-            }
-
-            return $callable($uri, $options);
-        } catch (RequestException $e) {
-            if ($e->hasResponse()) {
-                $response = $e->getResponse();
-                $json = json_decode((string)$response->getBody(), true);
-                $code = $response->getStatusCode();
-                $message = $json['message'];
-            } else {
-                $code = $e->getCode();
-                $message = $e->getMessage();
-            }
-
-            throw new OpenAgendaException($message, $code);
-        } catch (GuzzleException $e) {
-            throw new OpenAgendaException($e->getMessage(), $e->getCode());
-        }
+        return $this->payload($response);
     }
 
     /**
-     * do a post request and return object from json
+     * PATCH to OpenAgenda endpoint and return Entity or payload.
      *
-     * @param string $uri Openagenda endpoint
-     * @param array $options Client options
-     * @return \Psr\Http\Message\ResponseInterface
+     * @param \League\Uri\Uri|string $uri OpenAgenda uri
+     * @param array $data Post data.
+     * @param array $params Request params.
+     * @return array
      * @throws \OpenAgenda\OpenAgendaException
-     * @noinspection PhpMissingParentCallCommonInspection
      */
-    public function post($uri, array $options = []): ResponseInterface
+    public function patch($uri, array $data = [], array $params = []): array
     {
-        return $this->doRequest(function ($u, $o) {
-            $formData = $this->_optionsToMultipart($o['data'] ?? []);
-            unset($o['data']);
+        // Add Access-Token
+        $params['headers']['access-token'] = $this->getAccessToken();
+        $params['headers']['nonce'] = $this->nonce();
 
-            if ($this->_accessToken) {
-                $formData[] = [
-                    'name' => 'access_token',
-                    'contents' => $this->_accessToken,
-                ];
-                $formData[] = [
-                    'name' => 'nonce',
-                    'contents' => $this->nonce(),
-                ];
-            }
+        $response = $this->http->patch((string)$uri, $data, $params);
 
-            $o['multipart'] = $formData;
+        return $this->payload($response);
+    }
 
-            return $this->request('POST', $u, $o);
-        }, $uri, $options);
+    /**
+     * DELETE something in OpenAgenda endpoint and return Entity or payload.
+     *
+     * @param \League\Uri\Uri|string $uri OpenAgenda uri
+     * @param array $params Post data.
+     * @return array
+     * @throws \OpenAgenda\OpenAgendaException
+     */
+    public function delete($uri, array $params = []): array
+    {
+        // Add Access-Token
+        $params['headers']['access-token'] = $this->getAccessToken();
+        $params['headers']['nonce'] = $this->nonce();
+
+        $response = $this->http->delete((string)$uri, $params);
+
+        return $this->payload($response);
+    }
+
+    /**
+     * Get access token from cache or a fresh one.
+     *
+     * @return string|null
+     */
+    public function getAccessToken(): ?string
+    {
+        // todo
+        return 'accesstoken';
     }
 
     /**
@@ -211,42 +215,14 @@ class Client
     }
 
     /**
-     * Generate random int
+     * Generate nonce random int
      *
      * @return int
-     * @codeCoverageIgnore
      */
-    public function nonce()
+    public function nonce(): int
     {
-        try {
-            return random_int(1000000, 9999999);
-        } catch (Exception $e) {
-            return mt_rand(1000000, 9999999);
-        }
-    }
+        $time = Chronos::now();
 
-    /**
-     * do a delete request and return object from json
-     *
-     * @param string $uri Openagenda endpoint
-     * @param array $options Client options
-     * @return \Psr\Http\Message\ResponseInterface
-     * @throws \OpenAgenda\OpenAgendaException
-     * @noinspection PhpMissingParentCallCommonInspection
-     */
-    public function delete($uri, array $options = []): ResponseInterface
-    {
-        return $this->doRequest(function ($u, $o) {
-            $headers = $o['headers'] ?? [];
-
-            $headers += [
-                'nonce' => $this->nonce(),
-                'access-token' => $this->_accessToken,
-            ];
-
-            $o['headers'] = $headers;
-
-            return $this->request('DELETE', $u, $o);
-        }, $uri, $options);
+        return intval($time->timestamp . $time->microsecond);
     }
 }

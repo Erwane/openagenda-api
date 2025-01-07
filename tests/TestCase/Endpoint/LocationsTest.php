@@ -16,7 +16,6 @@ namespace OpenAgenda\Test\TestCase\Endpoint;
 
 use Cake\Validation\Validation;
 use Cake\Validation\Validator;
-use GuzzleHttp\Psr7\Response;
 use InvalidArgumentException;
 use OpenAgenda\Endpoint\Locations;
 use OpenAgenda\Entity\Location as LocationEntity;

@@ -56,7 +56,16 @@ class EndpointTestCase extends TestCase
         OpenAgenda::setClient($this->client);
     }
 
-    protected function mockRequest($auth = false, string $method, array $args, array $response)
+    /**
+     * Mock request.
+     *
+     * @param bool $auth getAccessToken return a fake token
+     * @param string $method Method to mock
+     * @param array $args Request `with` arguments
+     * @param array $response Response in array [code, 'body']
+     * @return void
+     */
+    protected function mockRequest(bool $auth, string $method, array $args, array $response)
     {
         if ($auth) {
             $this->client->expects($this->once())

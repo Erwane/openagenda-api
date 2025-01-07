@@ -18,7 +18,6 @@ use Cake\Validation\Validator;
 use OpenAgenda\Entity\Location as LocationEntity;
 use OpenAgenda\OpenAgenda;
 use OpenAgenda\Validation;
-use Psr\Http\Message\ResponseInterface;
 
 /**
  * Location endpoint

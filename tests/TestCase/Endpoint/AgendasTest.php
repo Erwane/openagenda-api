@@ -15,7 +15,6 @@ declare(strict_types=1);
 namespace OpenAgenda\Test\TestCase\Endpoint;
 
 use Cake\Validation\Validator;
-use GuzzleHttp\Psr7\Response;
 use OpenAgenda\Endpoint\Agendas;
 use OpenAgenda\Entity\Agenda as AgendaEntity;
 use OpenAgenda\Test\EndpointTestCase;
