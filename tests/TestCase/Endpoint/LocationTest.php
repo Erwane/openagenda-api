@@ -367,7 +367,7 @@ class LocationTest extends EndpointTestCase
 
     public function testCreate()
     {
-        $payload = FileResource::instance($this)->getContent('Response/locations/location-post.json');
+        $payload = FileResource::instance($this)->getContent('Response/locations/post.json');
 
         $this->client->expects($this->once())
             ->method('getAccessToken')
@@ -400,7 +400,7 @@ class LocationTest extends EndpointTestCase
 
     public function testUpdate()
     {
-        $payload = FileResource::instance($this)->getContent('Response/locations/location-post.json');
+        $payload = FileResource::instance($this)->getContent('Response/locations/post.json');
 
         $this->client->expects($this->once())
             ->method('getAccessToken')
