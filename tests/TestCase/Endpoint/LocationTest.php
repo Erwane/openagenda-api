@@ -15,7 +15,6 @@ declare(strict_types=1);
 namespace OpenAgenda\Test\TestCase\Endpoint;
 
 use Cake\Validation\Validator;
-use GuzzleHttp\Psr7\Response;
 use InvalidArgumentException;
 use OpenAgenda\Endpoint\Location;
 use OpenAgenda\Entity\Location as LocationEntity;
@@ -349,14 +348,10 @@ class LocationTest extends EndpointTestCase
     public function testGet()
     {
         $payload = FileResource::instance($this)->getContent('Response/locations/location.json');
-
-        $this->wrapper->expects($this->once())
-            ->method('get')
-            ->with(
-                'https://api.openagenda.com/v2/agendas/123/locations/456',
-                ['headers' => ['key' => 'testing']]
-            )
-            ->willReturn(new Response(200, ['Content-Type' => 'application/json'], $payload));
+        $this->mockRequest(false, 'get', [
+            'https://api.openagenda.com/v2/agendas/123/locations/456',
+            ['headers' => ['key' => 'testing']],
+        ], [200, $payload]);
 
         $endpoint = new Location(['agenda_id' => 123, 'id' => 456]);
 
@@ -368,23 +363,15 @@ class LocationTest extends EndpointTestCase
     public function testCreate()
     {
         $payload = FileResource::instance($this)->getContent('Response/locations/post.json');
-
-        $this->client->expects($this->once())
-            ->method('getAccessToken')
-            ->willReturn('authorization-key');
-
-        $this->wrapper->expects($this->once())
-            ->method('post')
-            ->with(
-                'https://api.openagenda.com/v2/agendas/123/locations',
-                [
-                    'name' => 'My location',
-                    'address' => '1, place liberté, 75001 Paris, France',
-                    'countryCode' => 'FR',
-                ],
-                ['headers' => ['access-token' => 'authorization-key', 'nonce' => 1734957296123456]]
-            )
-            ->willReturn(new Response(200, ['Content-Type' => 'application/json'], $payload));
+        $this->mockRequest(true, 'post', [
+            'https://api.openagenda.com/v2/agendas/123/locations',
+            [
+                'name' => 'My location',
+                'address' => '1, place liberté, 75001 Paris, France',
+                'countryCode' => 'FR',
+            ],
+            ['headers' => ['access-token' => 'authorization-key', 'nonce' => 1734957296123456]],
+        ], [200, $payload]);
 
         $endpoint = new Location([
             'agenda_id' => 123,
@@ -401,21 +388,13 @@ class LocationTest extends EndpointTestCase
     public function testUpdate()
     {
         $payload = FileResource::instance($this)->getContent('Response/locations/post.json');
-
-        $this->client->expects($this->once())
-            ->method('getAccessToken')
-            ->willReturn('authorization-key');
-
-        $this->wrapper->expects($this->once())
-            ->method('patch')
-            ->with(
-                'https://api.openagenda.com/v2/agendas/123/locations/456',
-                [
-                    'state' => 1,
-                ],
-                ['headers' => ['access-token' => 'authorization-key', 'nonce' => 1734957296123456]]
-            )
-            ->willReturn(new Response(200, ['Content-Type' => 'application/json'], $payload));
+        $this->mockRequest(true, 'patch', [
+            'https://api.openagenda.com/v2/agendas/123/locations/456',
+            [
+                'state' => 1,
+            ],
+            ['headers' => ['access-token' => 'authorization-key', 'nonce' => 1734957296123456]],
+        ], [200, $payload]);
 
         $endpoint = new Location([
             'agenda_id' => 123,
@@ -426,4 +405,6 @@ class LocationTest extends EndpointTestCase
         $entity = $endpoint->update();
         $this->assertInstanceOf(LocationEntity::class, $entity);
     }
+
+    public function testDelete() {}
 }

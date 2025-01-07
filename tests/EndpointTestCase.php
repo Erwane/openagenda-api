@@ -14,6 +14,7 @@ declare(strict_types=1);
  */
 namespace OpenAgenda\Test;
 
+use GuzzleHttp\Psr7\Response;
 use OpenAgenda\Client;
 use OpenAgenda\OpenAgenda;
 use OpenAgenda\Wrapper\HttpWrapper;
@@ -53,5 +54,19 @@ class EndpointTestCase extends TestCase
         // $this->client = new Client();
 
         OpenAgenda::setClient($this->client);
+    }
+
+    protected function mockRequest($auth = false, string $method, array $args, array $response)
+    {
+        if ($auth) {
+            $this->client->expects($this->once())
+                ->method('getAccessToken')
+                ->willReturn('authorization-key');
+        }
+
+        $this->wrapper->expects($this->once())
+            ->method($method)
+            ->with(...$args)
+            ->willReturn(new Response($response[0], ['Content-Type' => 'application/json'], $response[1]));
     }
 }
