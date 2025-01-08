@@ -11,6 +11,7 @@ use OpenAgenda\Test\Utility\FileResource;
 use OpenAgenda\Wrapper\HttpWrapper;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
+use Psr\SimpleCache\CacheInterface;
 
 /**
  * Client tests
@@ -46,6 +47,7 @@ class ClientTest extends TestCase
 
         $this->client = new Client([
             'public_key' => 'testing',
+            'secret_key' => 'secret',
             'wrapper' => $this->wrapper,
         ]);
     }
@@ -104,6 +106,101 @@ class ClientTest extends TestCase
         ], $response);
     }
 
+    public function testGetAccessTokenFailed(): void
+    {
+        $this->wrapper->expects($this->once())
+            ->method('post')
+            ->with(
+                'https://api.openagenda.com/v2/requestAccessToken',
+                [
+                    'grant_type' => 'authorization_code',
+                    'code' => 'secret',
+                ],
+                ['headers' => ['key' => 'testing']]
+            )
+            ->willReturn(new Response(401, [], json_encode([
+                'message' => 'Invalid key',
+            ])));
+
+        $this->expectExceptionCode(401);
+        $this->client->getAccessToken();
+    }
+
+    public function testGetAccessTokenNoCache(): void
+    {
+        $this->wrapper->expects($this->once())
+            ->method('post')
+            ->with(
+                'https://api.openagenda.com/v2/requestAccessToken',
+                [
+                    'grant_type' => 'authorization_code',
+                    'code' => 'secret',
+                ],
+                ['headers' => ['key' => 'testing']]
+            )->willReturn(new Response(200, [], json_encode([
+                'access_token' => 'my authorization token',
+                'expires_in' => 3600,
+            ])));
+
+        $token = $this->client->getAccessToken();
+
+        $this->assertEquals('my authorization token', $token);
+    }
+
+    public function testGetAccessTokenWriteCache(): void
+    {
+        $cache = $this->createMock(CacheInterface::class);
+        $client = new Client([
+            'public_key' => 'testing',
+            'secret_key' => 'secret',
+            'wrapper' => $this->wrapper,
+            'cache' => $cache,
+        ]);
+
+        $this->wrapper->expects($this->once())
+            ->method('post')
+            ->willReturn(new Response(200, [], json_encode([
+                'access_token' => 'my authorization token',
+                'expires_in' => 3600,
+            ])));
+
+        $cache->expects($this->once())
+            ->method('set')
+            ->with(
+                'openagenda_api_access_token',
+                'my authorization token',
+                3600
+            );
+        $client->getAccessToken();
+    }
+
+    public function testGetAccessTokenFromCache(): void
+    {
+        $cache = $this->createMock(CacheInterface::class);
+        $client = new Client([
+            'public_key' => 'testing',
+            'secret_key' => 'secret',
+            'wrapper' => $this->wrapper,
+            'cache' => $cache,
+        ]);
+
+        $this->wrapper->expects($this->never())
+            ->method('post');
+
+        $cache->expects($this->once())
+            ->method('get')
+            ->with(
+                'openagenda_api_access_token',
+                null
+            )->willReturn('my authorization cache');
+
+        $cache->expects($this->never())
+            ->method('set');
+
+        $token = $client->getAccessToken();
+        $this->assertEquals('my authorization cache', $token);
+    }
+
     public function testPostNoToken(): void
     {
         $this->markTestSkipped();
@@ -122,12 +219,6 @@ class ClientTest extends TestCase
         $this->assertInstanceOf(ResponseInterface::class, $response);
     }
 
-    /**
-     * @test
-     * @covers ::post
-     * @covers ::setAccessToken
-     * @covers ::_optionsToMultipart
-     */
     public function testPostWithToken(): void
     {
         $this->markTestSkipped();
@@ -159,10 +250,6 @@ class ClientTest extends TestCase
         $this->assertInstanceOf(ResponseInterface::class, $response);
     }
 
-    /**
-     * @test
-     * @covers ::delete
-     */
     public function testDelete(): void
     {
         $this->markTestSkipped();
@@ -192,28 +279,5 @@ class ClientTest extends TestCase
         $response = $client->delete('/agendas/1/events/1', ['headers' => ['Content-Type' => 'text/plain']]);
 
         $this->assertInstanceOf(ResponseInterface::class, $response);
-    }
-
-    /**
-     * @test
-     * @covers ::doRequest
-     */
-    public function testUserAgent(): void
-    {
-        $this->markTestSkipped();
-        $client = $this->createPartialMock(Client::class, ['request']);
-        $client->expects(self::once())
-            ->method('request')
-            ->with(
-                'GET',
-                'https://api.openagenda.com/v2/agendas',
-                [
-                    'headers' => ['USER-agent' => 'Openagenda-api/2.1.0'],
-                    'query' => ['key' => null],
-                ]
-            )
-            ->willReturn(new Response(200, [], '{"json":"object"}'));
-
-        $client->get('/agendas', ['headers' => ['USER-agent' => 'testing']]);
     }
 }

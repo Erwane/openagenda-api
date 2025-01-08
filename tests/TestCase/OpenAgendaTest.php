@@ -14,10 +14,9 @@ use OpenAgenda\OpenAgendaException;
 use OpenAgenda\Test\Utility\FileResource;
 use OpenAgenda\Wrapper\HttpWrapper;
 use PHPUnit\Framework\TestCase;
+use Psr\SimpleCache\CacheInterface;
 use Ramsey\Collection\Collection;
 use stdClass;
-use Symfony\Component\Cache\Adapter\ArrayAdapter;
-use Symfony\Component\Cache\Psr16Cache;
 
 /**
  * @uses   \OpenAgenda\OpenAgenda
@@ -85,7 +84,7 @@ class OpenAgendaTest extends TestCase
 
     public function testConstruct()
     {
-        $cache = new Psr16Cache(new ArrayAdapter());
+        $cache = $this->createMock(CacheInterface::class);
         $oa = new OpenAgenda([
             'public_key' => 'testing',
             'private_key' => 'private',

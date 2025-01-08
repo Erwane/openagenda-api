@@ -196,41 +196,6 @@ class OpenAgenda
     }
 
     /**
-     * get access token from API or local cache
-     *
-     * @return string|null
-     */
-    public function getAccessToken(): ?string
-    {
-        $accessToken = Cache::get('openagenda-token');
-
-        if (empty($accessToken)) {
-            try {
-                $response = $this->getClient()->post('/requestAccessToken', [
-                    'json' => [
-                        'grant-type' => 'authorization_code',
-                        'code' => $this->secret,
-                    ],
-                ]);
-
-                $data = json_decode((string)$response->getBody(), true);
-
-                if ($response->getStatusCode() !== 200 || empty($data['access_token'])) {
-                    return null;
-                }
-
-                $accessToken = $data['access_token'];
-
-                Cache::set('openagenda-token', $accessToken, $data['expires_in']);
-            } catch (OpenAgendaException $e) {
-                return null;
-            }
-        }
-
-        return $accessToken;
-    }
-
-    /**
      * get Location object with uid
      *
      * @param array|int $datas location id or datas

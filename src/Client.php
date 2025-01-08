@@ -15,6 +15,7 @@ declare(strict_types=1);
 namespace OpenAgenda;
 
 use Cake\Chronos\Chronos;
+use OpenAgenda\Endpoint\Auth;
 use OpenAgenda\Wrapper\HttpWrapperInterface;
 use Psr\Http\Message\ResponseInterface;
 
@@ -34,6 +35,11 @@ class Client
      * @var \OpenAgenda\Wrapper\HttpWrapper|null
      */
     protected $http;
+
+    /**
+     * @var \Psr\SimpleCache\CacheInterface|null
+     */
+    protected $cache;
 
     /**
      * OpenAgenda api access token
@@ -65,6 +71,7 @@ class Client
         $this->publicKey = $config['public_key'] ?? null;
         $this->secretKey = $config['secret_key'] ?? null;
         $this->http = $config['wrapper'] ?? null;
+        $this->cache = $config['cache'] ?? null;
 
         if (!$this->publicKey) {
             throw new OpenAgendaException('Missing `public_key`.');
@@ -132,13 +139,11 @@ class Client
      * @param array $params Request params.
      * @return array
      * @throws \OpenAgenda\OpenAgendaException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function post($uri, array $data = [], array $params = []): array
     {
-        // Add Access-Token
-        $params['headers']['access-token'] = $this->getAccessToken();
-        $params['headers']['nonce'] = $this->nonce();
-
+        $params = $this->_addAuthenticationHeaders($params);
         $response = $this->http->post((string)$uri, $data, $params);
 
         return $this->payload($response);
@@ -152,13 +157,11 @@ class Client
      * @param array $params Request params.
      * @return array
      * @throws \OpenAgenda\OpenAgendaException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function patch($uri, array $data = [], array $params = []): array
     {
-        // Add Access-Token
-        $params['headers']['access-token'] = $this->getAccessToken();
-        $params['headers']['nonce'] = $this->nonce();
-
+        $params = $this->_addAuthenticationHeaders($params);
         $response = $this->http->patch((string)$uri, $data, $params);
 
         return $this->payload($response);
@@ -171,27 +174,65 @@ class Client
      * @param array $params Post data.
      * @return array
      * @throws \OpenAgenda\OpenAgendaException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function delete($uri, array $params = []): array
     {
-        // Add Access-Token
-        $params['headers']['access-token'] = $this->getAccessToken();
-        $params['headers']['nonce'] = $this->nonce();
-
+        $params = $this->_addAuthenticationHeaders($params);
         $response = $this->http->delete((string)$uri, $params);
 
         return $this->payload($response);
     }
 
     /**
+     * Add write authentication headers.
+     *
+     * @param array $params Request params
+     * @return array
+     * @throws \OpenAgenda\OpenAgendaException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     */
+    protected function _addAuthenticationHeaders(array $params)
+    {
+        $params['headers']['access-token'] = $this->getAccessToken();
+        $params['headers']['nonce'] = $this->nonce();
+
+        return $params;
+    }
+
+    /**
      * Get access token from cache or a fresh one.
      *
      * @return string|null
+     * @throws \OpenAgenda\OpenAgendaException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function getAccessToken(): ?string
     {
-        // todo
-        return 'accesstoken';
+        $token = null;
+        $cacheKey = 'openagenda_api_access_token';
+        if ($this->cache) {
+            $token = $this->cache->get($cacheKey);
+        }
+        if (!$token) {
+            $endpoint = new Auth();
+            $uri = $endpoint->getUri('post');
+            $response = $this->http->post((string)$uri, [
+                'grant_type' => 'authorization_code',
+                'code' => $this->secretKey,
+            ], [
+                'headers' => ['key' => $this->publicKey],
+            ]);
+
+            $payload = $this->payload($response);
+
+            $token = $payload['access_token'] ?? null;
+            if ($this->cache && !empty($payload['expires_in'])) {
+                $this->cache->set($cacheKey, $token, $payload['expires_in']);
+            }
+        }
+
+        return $token;
     }
 
     /**
