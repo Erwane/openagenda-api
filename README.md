@@ -16,9 +16,9 @@ composer require erwane/openagenda-wrapper-guzzle:"^2.2"
 ## Documentations and examples
 
 * [Basics](docs/basics.md)
-* [Agendas](docs/agendas.md)
-* [Events](docs/events.md)
-* [Locations](docs/locations.md)
+* [Agendas](docs/agenda.md)
+* [Events](docs/event.md)
+* [Locations](docs/location.md)
 * [Cache](docs/cache.md)
 
 ## Quick start
@@ -38,6 +38,6 @@ $oa = new OpenAgenda([
  ]);
 ```
 
-See [wrappers](docs/wrappers.md) for more details and options.
+See [wrappers](docs/wrapper.md) for more details and options.
 
 ## Contributing

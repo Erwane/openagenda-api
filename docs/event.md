@@ -1,4 +1,4 @@
-# Events
+# Event
 
 _You must create an OpenAgenda client object before querying locations._  
 _See [basics](basics.md) of how to do this._
@@ -18,19 +18,19 @@ _See [basics](basics.md) of how to do this._
 
 List events for an agenda.
 
-Return a [Collection](collections.md) of Event items.
+Return a [Collection](collection.md) of Event items.
 
 ```php
-// using endpoint
-$events = $oa->get('/agendas/events', $options);
+// Using endpoint
+$events = $oa->get('/events', $options);
 
-// using previous fetched OpenAgenda\Agenda object
+// Using previous fetched OpenAgenda\Entity\Agenda object
 $events = $agenda->events($options);
 ```
 
 **array $options**
 
-The `/agendas/events` endpoint or `$agenda->events()` method accept an options array with this possible keys:
+The `/events` endpoint or `$agenda->events()` method accept an options array with this possible keys:
 
 * int `agenda`: Agenda id. **required** if using endpoint.
 * int `limit`: How many results by request. Default `20`. Max `300`
@@ -99,10 +99,10 @@ The `/agendas/events` endpoint or `$agenda->events()` method accept an options a
 Get an Event
 
 ```php
-// using endpoint
-$event = $oa->get('/agendas/event', $options);
+// Using endpoint
+$event = $oa->get('/event', $options);
 
-// using previous fetched OpenAgenda\Agenda object
+// Using previous fetched OpenAgenda\Entity\Agenda object
 $event = $agenda->event($options)->get();
 ```
 
@@ -122,10 +122,10 @@ Create an event in an agenda.
 Return an event object with the new id.
 
 ```php
-// using endpoint
-$event = $oa->post('/agendas/event', $data);
+// Using endpoint
+$event = $oa->post('/event', $data);
 
-// using previous fetched OpenAgenda\Agenda object
+// Using previous fetched OpenAgenda\Entity\Agenda object
 $event = $agenda->event($data)->post();
 ```
 
@@ -143,11 +143,11 @@ If using `post`, all accessible update fields should be sets in `$data`.
 If using `patch` only passed (or changed) fields will be updated.
 
 ```php
-// using endpoint
-$event = $oa->post('/agendas/event', $data);
-$event = $oa->patch('/agendas/event', $data);
+// Using endpoint
+$event = $oa->post('/event', $data);
+$event = $oa->patch('/event', $data);
 
-// using previous fetched OpenAgenda\Event object
+// Using previous fetched OpenAgenda\Entity\Event object
 $event = $event->post($data);
 $event = $event->patch($data);
 ```
@@ -162,10 +162,10 @@ Delete an event.
 Return the deleted Event object.
 
 ```php
-// using endpoint
-$event = $oa->delete('/agendas/event', $data);
+// Using endpoint
+$event = $oa->delete('/event', $data);
 
-// using previous fetched OpenAgenda\Location object
+// Using previous fetched OpenAgenda\Entity\Location object
 $event = $event->delete($id);
 // you can chain from Agenda too
 $event = $agenda->event($eventId)->delete();

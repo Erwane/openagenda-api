@@ -103,7 +103,7 @@ class Client
             $payload += $json;
         }
 
-        if (!$payload['_success']) {
+        if (!$payload['_success'] || (isset($payload['success']) && !$payload['success'])) {
             $exception = new OpenAgendaException($payload['message'] ?? 'Request error', $status);
             $exception->setResponse($response);
             $exception->setPayload($payload);
@@ -111,6 +111,23 @@ class Client
         }
 
         return $payload;
+    }
+
+    /**
+     * Query OpenAgenda endpoint with a HEAD request and return Response status code.
+     *
+     * @param \League\Uri\Uri|string $uri OpenAgenda uri
+     * @param array $params Request params
+     * @return int
+     * @throws \OpenAgenda\Wrapper\HttpWrapperException
+     */
+    public function head($uri, array $params = []): int
+    {
+        $params['headers']['key'] = $this->publicKey;
+
+        $response = $this->http->head((string)$uri, $params);
+
+        return $response->getStatusCode();
     }
 
     /**
@@ -223,8 +240,6 @@ class Client
             $response = $this->http->post((string)$uri, [
                 'grant_type' => 'authorization_code',
                 'code' => $this->secretKey,
-            ], [
-                'headers' => ['key' => $this->publicKey],
             ]);
 
             $payload = $this->payload($response);

@@ -27,7 +27,7 @@ $oa = new OpenAgenda([
 
 ## Getting agendas
 
-See [agendas](agendas.md) for more details.
+See [agendas](agenda.md) for more details.
 
 ```php
 $agenda = $oa->agendas(['slug' => 'agenda-slug'])->first();

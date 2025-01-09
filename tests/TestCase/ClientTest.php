@@ -46,8 +46,8 @@ class ClientTest extends TestCase
         );
 
         $this->client = new Client([
-            'public_key' => 'testing',
-            'secret_key' => 'secret',
+            'public_key' => 'publicKey',
+            'secret_key' => 'secretKey',
             'wrapper' => $this->wrapper,
         ]);
     }
@@ -63,7 +63,7 @@ class ClientTest extends TestCase
     {
         $this->expectException(OpenAgendaException::class);
         $this->expectExceptionMessage('Invalid or missing `wrapper`.');
-        new Client(['public_key' => 'testing']);
+        new Client(['public_key' => 'publicKey']);
     }
 
     public function testResponseFailed(): void
@@ -79,18 +79,29 @@ class ClientTest extends TestCase
         $this->client->get('https://api.openagenda.com/v2/agendas');
     }
 
+    public function testHead(): void
+    {
+        $this->wrapper->expects($this->once())
+            ->method('head')
+            ->with(
+                'https://api.openagenda.com/v2/agendas/123/locations/456',
+                ['headers' => ['key' => 'publicKey']]
+            )
+            ->willReturn(new Response(201, ['content-type' => 'application/json'], ''));
+
+        $response = $this->client->head(
+            'https://api.openagenda.com/v2/agendas/123/locations/456'
+        );
+        $this->assertEquals(201, $response);
+    }
+
     public function testGet(): void
     {
         $this->wrapper->expects($this->once())
             ->method('get')
             ->with(
                 'https://api.openagenda.com/v2/agendas',
-                [
-                    'headers' => [
-                        'key' => 'testing',
-                        'X-Custom' => 'testing',
-                    ],
-                ]
+                ['headers' => ['key' => 'publicKey', 'X-Custom' => 'testing']]
             )
             ->willReturn(new Response(201, ['content-type' => 'application/json'], '{"json":"object"}'));
 
@@ -106,6 +117,96 @@ class ClientTest extends TestCase
         ], $response);
     }
 
+    public function testPost(): void
+    {
+        $this->wrapper->expects($this->exactly(2))
+            ->method('post')
+            ->withConsecutive(
+                [
+                    'https://api.openagenda.com/v2/requestAccessToken',
+                    ['grant_type' => 'authorization_code', 'code' => 'secretKey'],
+                ],
+                [
+                    'https://api.openagenda.com/v2/agendas',
+                    ['id' => 123],
+                    ['headers' => ['access-token' => 'my authorization token', 'nonce' => 1734957296123456]],
+                ]
+            )
+            ->willReturnOnConsecutiveCalls(
+                new Response(200, [], '{"access_token": "my authorization token"}'),
+                new Response(200, ['content-type' => 'application/json'], '{"json":"object"}')
+            );
+
+        $response = $this->client->post(
+            'https://api.openagenda.com/v2/agendas',
+            ['id' => 123]
+        );
+
+        $this->assertEquals([
+            '_status' => 200,
+            '_success' => true,
+            'json' => 'object',
+        ], $response);
+    }
+
+    public function testPatch(): void
+    {
+        $this->wrapper->expects($this->once())
+            ->method('post')
+            ->with(
+                'https://api.openagenda.com/v2/requestAccessToken',
+                ['grant_type' => 'authorization_code', 'code' => 'secretKey']
+            )
+            ->willReturn(new Response(200, [], '{"access_token": "my authorization token"}'));
+        $this->wrapper->expects($this->once())
+            ->method('patch')
+            ->with(
+                'https://api.openagenda.com/v2/agendas/123/locations/456',
+                ['id' => 123, 'title' => 'My agenda'],
+                ['headers' => ['access-token' => 'my authorization token', 'nonce' => 1734957296123456]]
+            )
+            ->willReturn(new Response(200, ['content-type' => 'application/json'], '{"json":"object"}'));
+
+        $response = $this->client->patch(
+            'https://api.openagenda.com/v2/agendas/123/locations/456',
+            ['id' => 123, 'title' => 'My agenda']
+        );
+
+        $this->assertEquals([
+            '_status' => 200,
+            '_success' => true,
+            'json' => 'object',
+        ], $response);
+    }
+
+    public function testDelete(): void
+    {
+        $this->wrapper->expects($this->once())
+            ->method('post')
+            ->with(
+                'https://api.openagenda.com/v2/requestAccessToken',
+                ['grant_type' => 'authorization_code', 'code' => 'secretKey']
+            )
+            ->willReturn(new Response(200, [], '{"access_token": "my authorization token"}'));
+        $this->wrapper->expects($this->once())
+            ->method('delete')
+            ->with(
+                'https://api.openagenda.com/v2/agendas/123/locations/456',
+                ['headers' => ['access-token' => 'my authorization token', 'nonce' => 1734957296123456]]
+            )
+            ->willReturn(new Response(200, ['content-type' => 'application/json'], '{"json":"object"}'));
+
+        $response = $this->client->delete(
+            'https://api.openagenda.com/v2/agendas/123/locations/456'
+        );
+
+        $this->assertEquals([
+            '_status' => 200,
+            '_success' => true,
+            'json' => 'object',
+        ], $response);
+    }
+
     public function testGetAccessTokenFailed(): void
     {
         $this->wrapper->expects($this->once())
@@ -114,9 +215,8 @@ class ClientTest extends TestCase
                 'https://api.openagenda.com/v2/requestAccessToken',
                 [
                     'grant_type' => 'authorization_code',
-                    'code' => 'secret',
-                ],
-                ['headers' => ['key' => 'testing']]
+                    'code' => 'secretKey',
+                ]
             )
             ->willReturn(new Response(401, [], json_encode([
                 'message' => 'Invalid key',
@@ -134,9 +234,8 @@ class ClientTest extends TestCase
                 'https://api.openagenda.com/v2/requestAccessToken',
                 [
                     'grant_type' => 'authorization_code',
-                    'code' => 'secret',
-                ],
-                ['headers' => ['key' => 'testing']]
+                    'code' => 'secretKey',
+                ]
             )->willReturn(new Response(200, [], json_encode([
                 'access_token' => 'my authorization token',
                 'expires_in' => 3600,
@@ -151,8 +250,8 @@ class ClientTest extends TestCase
     {
         $cache = $this->createMock(CacheInterface::class);
         $client = new Client([
-            'public_key' => 'testing',
-            'secret_key' => 'secret',
+            'public_key' => 'publicKey',
+            'secret_key' => 'secretKey',
             'wrapper' => $this->wrapper,
             'cache' => $cache,
         ]);
@@ -178,8 +277,8 @@ class ClientTest extends TestCase
     {
         $cache = $this->createMock(CacheInterface::class);
         $client = new Client([
-            'public_key' => 'testing',
-            'secret_key' => 'secret',
+            'public_key' => 'publicKey',
+            'secret_key' => 'secretKey',
             'wrapper' => $this->wrapper,
             'cache' => $cache,
         ]);
@@ -199,85 +298,5 @@ class ClientTest extends TestCase
 
         $token = $client->getAccessToken();
         $this->assertEquals('my authorization cache', $token);
-    }
-
-    public function testPostNoToken(): void
-    {
-        $this->markTestSkipped();
-        $client = $this->createPartialMock(Client::class, ['request']);
-
-        $client->expects(self::once())
-            ->method('request')
-            ->with(
-                'POST',
-                'https://api.openagenda.com/v2/agendas/1/events'
-            )
-            ->willReturn(new Response(200, [], '{"json":"object"}'));
-
-        $response = $client->post('/agendas/1/events');
-
-        $this->assertInstanceOf(ResponseInterface::class, $response);
-    }
-
-    public function testPostWithToken(): void
-    {
-        $this->markTestSkipped();
-        $client = $this->createPartialMock(Client::class, ['request', 'nonce']);
-
-        $client->expects(self::once())
-            ->method('nonce')
-            ->willReturn(1234567);
-
-        $client->expects(self::once())
-            ->method('request')
-            ->with(
-                'POST',
-                'https://api.openagenda.com/v2/agendas/1/events',
-                [
-                    'multipart' => [
-                        ['name' => 'data', 'contents' => json_encode(['key' => 'value', 'array' => ['input']])],
-                        ['name' => 'access_token', 'contents' => 'testing'],
-                        ['name' => 'nonce', 'contents' => 1234567],
-                    ],
-                    'headers' => ['User-Agent' => 'Openagenda-api/2.1.0'],
-                ]
-            )
-            ->willReturn(new Response(200, [], '{"json":"object"}'));
-
-        $client->setAccessToken('testing');
-        $response = $client->post('/agendas/1/events', ['data' => ['key' => 'value', 'array' => ['input']]]);
-
-        $this->assertInstanceOf(ResponseInterface::class, $response);
-    }
-
-    public function testDelete(): void
-    {
-        $this->markTestSkipped();
-        $client = $this->createPartialMock(Client::class, ['request', 'nonce']);
-
-        $client->expects(self::once())
-            ->method('nonce')
-            ->willReturn(1234567);
-
-        $client->expects(self::once())
-            ->method('request')
-            ->with(
-                'DELETE',
-                new Uri('https://api.openagenda.com/v2/agendas/1/events/1'),
-                [
-                    'headers' => [
-                        'Content-Type' => 'text/plain',
-                        'nonce' => 1234567,
-                        'access-token' => 'testing',
-                        'User-Agent' => 'Openagenda-api/2.1.0',
-                    ],
-                ]
-            )
-            ->willReturn(new Response(200, [], '{"json":"object"}'));
-
-        $client->setAccessToken('testing');
-        $response = $client->delete('/agendas/1/events/1', ['headers' => ['Content-Type' => 'text/plain']]);
-
-        $this->assertInstanceOf(ResponseInterface::class, $response);
     }
 }

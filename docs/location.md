@@ -1,4 +1,4 @@
-# Locations
+# Location
 
 A location is a physical "rendez-vous" place.
 
@@ -21,7 +21,7 @@ _See [basics](basics.md) of how to do this._
 
 Search locations for an agenda.
 
-Return a [Collection](collections.md) of Location items.
+Return a [Collection](collection.md) of Location items.
 
 ```php
 // Using OpenAgenda::locations() method
@@ -184,6 +184,8 @@ in [ISO 639-1](https://fr.wikipedia.org/wiki/Liste_des_codes_ISO_639-1) format.
     'fr' => "Le Château de Villeneuve La Comtesse est un château fort de plaine, situé au nord de la Saintonge",
 ]
 ```
+
+See [Entity](entity.md) for all entity methods.
 
 ### Latitude and Longitude precision
 
