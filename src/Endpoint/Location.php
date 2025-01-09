@@ -206,6 +206,17 @@ class Location extends Endpoint
     }
 
     /**
+     * @inheritDoc
+     */
+    public function exists(): bool
+    {
+        $status = OpenAgenda::getClient()
+            ->head($this->getUri(__FUNCTION__));
+
+        return $status >= 200 && $status < 300;
+    }
+
+    /**
      * Get location.
      *
      * @return \OpenAgenda\Entity\Location|null

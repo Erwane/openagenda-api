@@ -24,7 +24,7 @@ use League\Uri\Uri;
 /**
  * Abstract Endpoint
  *
- * @method mixed exists() Check entity exists
+ * @method bool exists() Check entity exists
  * @method mixed get() Get collection or entity
  * @method mixed create() Create entity
  * @method mixed update(bool $full) Update entity (full data or partial)

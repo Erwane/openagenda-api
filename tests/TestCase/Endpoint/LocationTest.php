@@ -350,7 +350,7 @@ class LocationTest extends EndpointTestCase
         $payload = FileResource::instance($this)->getContent('Response/locations/location.json');
         $this->mockRequest(false, 'get', [
             'https://api.openagenda.com/v2/agendas/123/locations/456',
-            ['headers' => ['key' => 'testing']],
+            ['headers' => ['key' => 'publicKey']],
         ], [200, $payload]);
 
         $endpoint = new Location(['agenda_id' => 123, 'id' => 456]);
@@ -358,6 +358,19 @@ class LocationTest extends EndpointTestCase
         $entity = $endpoint->get();
 
         $this->assertInstanceOf(LocationEntity::class, $entity);
+    }
+
+    public function testExists()
+    {
+        $this->mockRequest(false, 'head', [
+            'https://api.openagenda.com/v2/agendas/123/locations/456',
+            ['headers' => ['key' => 'publicKey']],
+        ], [200, '']);
+
+        $endpoint = new Location(['agenda_id' => 123, 'id' => 456]);
+        $exists = $endpoint->exists();
+
+        $this->assertTrue($exists);
     }
 
     public function testCreate()

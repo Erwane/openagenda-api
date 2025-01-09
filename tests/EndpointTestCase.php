@@ -44,7 +44,7 @@ class EndpointTestCase extends TestCase
         $this->client = $this->getMockBuilder(Client::class)
             ->setConstructorArgs([
                 [
-                    'public_key' => 'testing',
+                    'public_key' => 'publicKey',
                     'wrapper' => $this->wrapper,
                 ],
             ])

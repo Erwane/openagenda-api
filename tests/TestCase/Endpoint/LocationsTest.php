@@ -221,7 +221,7 @@ class LocationsTest extends EndpointTestCase
         $payload = FileResource::instance($this)->getContent('Response/locations/locations.json');
         $this->mockRequest(false, 'get', [
             'https://api.openagenda.com/v2/agendas/123/locations?size=2',
-            ['headers' => ['key' => 'testing']],
+            ['headers' => ['key' => 'publicKey']],
         ], [200, $payload]);
 
         $endpoint = new Locations(['agenda_id' => 123, 'limit' => 2]);

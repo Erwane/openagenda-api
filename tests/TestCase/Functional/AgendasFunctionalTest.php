@@ -19,20 +19,24 @@ use OpenAgenda\Entity\Agenda;
 use OpenAgenda\Test\FunctionalTestCase;
 use OpenAgenda\Test\Utility\FileResource;
 
-class AgendasFunctionalTestCase extends FunctionalTestCase
+class AgendasFunctionalTest extends FunctionalTestCase
 {
     /**
-     * Test getting one agenda fluently
+     * Test get agenda from id
      */
-    public function testSearchAgenda(): void
+    public function testGet(): void
     {
         [$oa, $wrapper] = $this->oa();
-        $payload = FileResource::instance($this)->getContent('Response/agendas/agendas.json');
+        $payload = FileResource::instance($this)->getContent('Response/agendas/agenda.json');
         $wrapper->expects($this->once())
             ->method('get')
+            ->with(
+                'https://api.openagenda.com/v2/agendas/123?detailed=1',
+                ['headers' => ['key' => 'publicKey']]
+            )
             ->willReturn(new Response(200, [], $payload));
 
-        $agenda = $oa->agendas(['search' => 'My Agenda'])->first();
+        $agenda = $oa->agenda(['id' => 123, 'detailed' => true])->get();
         $this->assertInstanceOf(Agenda::class, $agenda);
     }
 }

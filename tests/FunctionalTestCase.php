@@ -22,15 +22,15 @@ use PHPUnit\Framework\TestCase;
 class FunctionalTestCase extends TestCase
 {
     /**
-     * @return array<\OpenAgenda\OpenAgenda, \OpenAgenda\Wrapper\HttpWrapper|\PHPUnit\Framework\MockObject\MockObject>
+     * @return array{0: \OpenAgenda\OpenAgenda, 1: \OpenAgenda\Wrapper\HttpWrapper|\PHPUnit\Framework\MockObject\MockObject}
      */
     protected function oa(array $params = []): array
     {
         $wrapper = $this->getMockBuilder(HttpWrapper::class)->getMock();
 
         $params += [
-            'public_key' => 'public-key',
-            'secret_key' => 'secret-key',
+            'public_key' => 'publicKey',
+            'secret_key' => 'secretKey',
             'wrapper' => $wrapper,
         ];
 
@@ -48,8 +48,8 @@ class FunctionalTestCase extends TestCase
         $wrapper = $this->getMockBuilder(HttpWrapper::class)->getMock();
 
         $params += [
-            'public_key' => 'public-key',
-            'secret_key' => 'secret-key',
+            'public_key' => 'publicKey',
+            'secret_key' => 'secretKey',
             'wrapper' => $wrapper,
         ];
 

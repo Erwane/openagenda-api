@@ -20,27 +20,8 @@ use OpenAgenda\Entity\Location;
 use OpenAgenda\Test\FunctionalTestCase;
 use OpenAgenda\Test\Utility\FileResource;
 
-class LocationsFunctionalTestCase extends FunctionalTestCase
+class LocationsFunctionalTest extends FunctionalTestCase
 {
-    /**
-     * Test getting one location fluently
-     */
-    public function testSearchLocation(): void
-    {
-        [$oa, $wrapper] = $this->oa();
-
-        $payload = FileResource::instance($this)->getContent('Response/locations/locations.json');
-        $wrapper->expects($this->once())
-            ->method('get')
-            ->willReturn(new Response(200, [], $payload));
-
-        $location = $oa->locations([
-            'agenda_id' => 123,
-            'search' => 'My location',
-        ])->first();
-        $this->assertInstanceOf(Location::class, $location);
-    }
-
     /**
      * Test search one location from Agenda
      */
@@ -115,9 +96,12 @@ class LocationsFunctionalTestCase extends FunctionalTestCase
         [$oa, $wrapper] = $this->oa();
 
         $payload = FileResource::instance($this)->getContent('Response/locations/location.json');
-        $wrapper->expects($this->once())
+        $wrapper->expects($this->exactly(2))
             ->method('post')
-            ->willReturn(new Response(200, [], $payload));
+            ->willReturnOnConsecutiveCalls(
+                new Response(200, [], '{"access_token": "my authorization token"}'),
+                new Response(200, [], $payload)
+            );
 
         $data = ['agenda_id' => 123, 'name' => 'My location'];
         $location = $oa->location($data)->create();
@@ -132,9 +116,12 @@ class LocationsFunctionalTestCase extends FunctionalTestCase
         $wrapper = $this->clientWrapper();
 
         $payload = FileResource::instance($this)->getContent('Response/locations/location.json');
-        $wrapper->expects($this->once())
+        $wrapper->expects($this->exactly(2))
             ->method('post')
-            ->willReturn(new Response(200, [], $payload));
+            ->willReturnOnConsecutiveCalls(
+                new Response(200, [], '{"access_token": "my authorization token"}'),
+                new Response(200, [], $payload)
+            );
 
         $agenda = new Agenda(['id' => 123]);
 
@@ -152,6 +139,9 @@ class LocationsFunctionalTestCase extends FunctionalTestCase
 
         $payload = FileResource::instance($this)->getContent('Response/locations/location.json');
         $wrapper->expects($this->once())
+            ->method('post')
+            ->willReturn(new Response(200, [], '{"access_token": "my authorization token"}'));
+        $wrapper->expects($this->once())
             ->method('patch')
             ->willReturn(new Response(200, [], $payload));
 
@@ -168,6 +158,9 @@ class LocationsFunctionalTestCase extends FunctionalTestCase
         $wrapper = $this->clientWrapper();
 
         $payload = FileResource::instance($this)->getContent('Response/locations/location.json');
+        $wrapper->expects($this->once())
+            ->method('post')
+            ->willReturn(new Response(200, [], '{"access_token": "my authorization token"}'));
         $wrapper->expects($this->once())
             ->method('patch')
             ->willReturn(new Response(200, [], $payload));
@@ -187,6 +180,9 @@ class LocationsFunctionalTestCase extends FunctionalTestCase
 
         $payload = FileResource::instance($this)->getContent('Response/locations/location.json');
         $wrapper->expects($this->once())
+            ->method('post')
+            ->willReturn(new Response(200, [], '{"access_token": "my authorization token"}'));
+        $wrapper->expects($this->once())
             ->method('delete')
             ->willReturn(new Response(200, [], $payload));
 
@@ -203,6 +199,9 @@ class LocationsFunctionalTestCase extends FunctionalTestCase
         $wrapper = $this->clientWrapper();
 
         $payload = FileResource::instance($this)->getContent('Response/locations/location.json');
+        $wrapper->expects($this->once())
+            ->method('post')
+            ->willReturn(new Response(200, [], '{"access_token": "my authorization token"}'));
         $wrapper->expects($this->once())
             ->method('delete')
             ->willReturn(new Response(200, [], $payload));

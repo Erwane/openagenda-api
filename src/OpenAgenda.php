@@ -3,7 +3,9 @@ declare(strict_types=1);
 
 namespace OpenAgenda;
 
+use OpenAgenda\Endpoint\Endpoint;
 use OpenAgenda\Endpoint\EndpointFactory;
+use OpenAgenda\Endpoint\Location;
 use OpenAgenda\Entity\Agenda;
 use OpenAgenda\Wrapper\HttpWrapper;
 use Psr\SimpleCache\CacheInterface;
@@ -163,13 +165,13 @@ class OpenAgenda
      * Get one agenda from OpenAgenda.
      *
      * @param array $params Query params.
-     * @return \OpenAgenda\Entity\Agenda|null
+     * @return \OpenAgenda\Endpoint\Agenda|\OpenAgenda\Endpoint\Endpoint
      * @throws \OpenAgenda\Endpoint\UnknownEndpointException
      * @uses \OpenAgenda\Endpoint\Agendas
      */
-    public function agenda(array $params): ?Agenda
+    public function agenda(array $params): Endpoint
     {
-        return EndpointFactory::make('/agenda', $params)->get();
+        return EndpointFactory::make('/agenda', $params);
     }
 
     /**
@@ -182,5 +184,17 @@ class OpenAgenda
     public function locations(array $params = []): Collection
     {
         return EndpointFactory::make('/locations', $params)->get();
+    }
+
+    /**
+     * Get OpenAgenda location endpoint.
+     *
+     * @param array $params Endpoint params.
+     * @return \OpenAgenda\Endpoint\Location|\OpenAgenda\Endpoint\Endpoint
+     * @throws \OpenAgenda\Endpoint\UnknownEndpointException
+     */
+    public function location(array $params = []): Endpoint
+    {
+        return EndpointFactory::make('/location', $params);
     }
 }

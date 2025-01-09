@@ -16,4 +16,9 @@ namespace OpenAgenda\Wrapper;
 
 use OpenAgenda\OpenAgendaException;
 
-class HttpWrapperException extends OpenAgendaException {}
+/**
+ * HttpWrapper exception
+ */
+class HttpWrapperException extends OpenAgendaException
+{
+}
