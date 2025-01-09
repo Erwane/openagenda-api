@@ -16,10 +16,10 @@ namespace OpenAgenda\Test\TestCase\Functional;
 
 use GuzzleHttp\Psr7\Response;
 use OpenAgenda\Entity\Agenda;
-use OpenAgenda\Test\FunctionalTestCase;
+use OpenAgenda\Test\OpenAgendaTestCase;
 use OpenAgenda\Test\Utility\FileResource;
 
-class AgendasFunctionalTest extends FunctionalTestCase
+class AgendasOpenAgendaTest extends OpenAgendaTestCase
 {
     /**
      * Test get agenda from id

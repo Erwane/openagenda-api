@@ -14,9 +14,59 @@ declare(strict_types=1);
  */
 namespace OpenAgenda\Entity;
 
+use OpenAgenda\Endpoint\EndpointFactory;
+use OpenAgenda\OpenAgenda;
+use OpenAgenda\OpenAgendaException;
+use Ramsey\Collection\Collection;
+
 /**
  * @property int $id
  */
 class Agenda extends Entity
 {
+    /**
+     * A method require client sets.
+     *
+     * @return void
+     * @throws \OpenAgenda\OpenAgendaException
+     */
+    protected function _requireClient(): void
+    {
+        if (!OpenAgenda::getClient()) {
+            throw new OpenAgendaException('OpenAgenda object was not previously created or Client not set.');
+        }
+    }
+
+    /**
+     * Search locations for this agenda.
+     *
+     * @param array $params Endpoint params
+     * @return \Ramsey\Collection\Collection
+     * @throws \OpenAgenda\OpenAgendaException
+     */
+    public function locations(array $params = []): Collection
+    {
+        $this->_requireClient();
+
+        $params['agenda_id'] = $this->id;
+
+        return EndpointFactory::make('/locations', $params)->get();
+    }
+
+    /**
+     * Get Location endpoint with params.
+     *
+     * @param array $params Endpoint params
+     * @return \OpenAgenda\Endpoint\Location|\OpenAgenda\Endpoint\Endpoint|
+     * @throws \OpenAgenda\Endpoint\UnknownEndpointException
+     * @throws \OpenAgenda\OpenAgendaException
+     */
+    public function location(array $params = [])
+    {
+        $this->_requireClient();
+
+        $params['agenda_id'] = $this->id;
+
+        return EndpointFactory::make('/location', $params);
+    }
 }

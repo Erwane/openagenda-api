@@ -17,10 +17,10 @@ namespace OpenAgenda\Test\TestCase\Functional;
 use GuzzleHttp\Psr7\Response;
 use OpenAgenda\Entity\Agenda;
 use OpenAgenda\Entity\Location;
-use OpenAgenda\Test\FunctionalTestCase;
+use OpenAgenda\Test\OpenAgendaTestCase;
 use OpenAgenda\Test\Utility\FileResource;
 
-class LocationsFunctionalTest extends FunctionalTestCase
+class LocationsOpenAgendaTest extends OpenAgendaTestCase
 {
     /**
      * Test search one location from Agenda

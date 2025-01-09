@@ -82,7 +82,7 @@ class Agendas extends Endpoint
     /**
      * @inheritDoc
      */
-    public function uriPath(string $method): string
+    public function uriPath(string $method, bool $validate = true): string
     {
         parent::uriPath($method);
 

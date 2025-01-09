@@ -108,11 +108,11 @@ class Locations extends Endpoint
     /**
      * @inheritDoc
      */
-    public function uriPath(string $method): string
+    public function uriPath(string $method, bool $validate = true): string
     {
         parent::uriPath($method);
 
-        return sprintf('/agendas/%s/locations', $this->params['agenda_id']);
+        return sprintf('/agendas/%d/locations', $this->params['agenda_id'] ?? 0);
     }
 
     /**

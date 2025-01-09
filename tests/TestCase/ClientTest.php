@@ -4,13 +4,11 @@ declare(strict_types=1);
 namespace OpenAgenda\Test\TestCase;
 
 use GuzzleHttp\Psr7\Response;
-use GuzzleHttp\Psr7\Uri;
 use OpenAgenda\Client;
 use OpenAgenda\OpenAgendaException;
 use OpenAgenda\Test\Utility\FileResource;
 use OpenAgenda\Wrapper\HttpWrapper;
 use PHPUnit\Framework\TestCase;
-use Psr\Http\Message\ResponseInterface;
 use Psr\SimpleCache\CacheInterface;
 
 /**

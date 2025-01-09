@@ -19,7 +19,7 @@ use OpenAgenda\OpenAgenda;
 use OpenAgenda\Wrapper\HttpWrapper;
 use PHPUnit\Framework\TestCase;
 
-class FunctionalTestCase extends TestCase
+class OpenAgendaTestCase extends TestCase
 {
     /**
      * @return array{0: \OpenAgenda\OpenAgenda, 1: \OpenAgenda\Wrapper\HttpWrapper|\PHPUnit\Framework\MockObject\MockObject}

@@ -130,9 +130,10 @@ abstract class Endpoint implements ValidatorAwareInterface
      * Validate endpoint parameters.
      *
      * @param array $params Endpoint parameters.
+     * @param bool $validate Validate
      * @return array
      */
-    protected function validateParams(array $params): array
+    protected function validateParams(array $params, bool $validate = true): array
     {
         // Default to null
         $params += array_fill_keys(array_keys($this->queryFields), null);
@@ -140,13 +141,15 @@ abstract class Endpoint implements ValidatorAwareInterface
         // Keep-only valid fields
         $params = array_intersect_key($params, $this->queryFields);
 
-        // Validate
-        $errors = $this->getValidator('default')
-            ->validate($params);
+        if ($validate) {
+            // todo why default ?
+            $errors = $this->getValidator('default')
+                ->validate($params);
 
-        if ($errors) {
-            $message = '';
-            throw new InvalidArgumentException($message);
+            if ($errors) {
+                $message = '';
+                throw new InvalidArgumentException($message);
+            }
         }
 
         return $params;
@@ -195,13 +198,14 @@ abstract class Endpoint implements ValidatorAwareInterface
      * Get OpenAgenda endpoint uri.
      *
      * @param string $method Request method
+     * @param bool $validate Validate path parameters if true
      * @return \League\Uri\Uri
      */
-    public function getUri(string $method): Uri
+    public function getUri(string $method, bool $validate = true): Uri
     {
         $method = strtolower($method);
 
-        $path = $this->uriPath($method);
+        $path = $this->uriPath($method, $validate);
         $query = $this->uriQuery();
 
         $components = parse_url($this->baseUrl . $path);
@@ -217,22 +221,25 @@ abstract class Endpoint implements ValidatorAwareInterface
      * Endpoint SHOULD have an uriPath method and return endpoint path.
      *
      * @param string $method Request method (HEAD, GET, POST, PATCH, DELETE)
+     * @param bool $validate Validate path parameters if true
      * @return string
      */
-    public function uriPath(string $method): string
+    public function uriPath(string $method, bool $validate = true): string
     {
-        // validate Uri path params
-        $validator = 'uriPath' . ucfirst(strtolower($method));
-        if (method_exists($this, 'validation' . ucfirst($validator))) {
-            $validator = $this->getValidator($validator);
-        } else {
-            $validator = $this->getValidator('uriPath');
-        }
+        if ($validate) {
+            // validate Uri path params
+            $validator = 'uriPath' . ucfirst(strtolower($method));
+            if (method_exists($this, 'validation' . ucfirst($validator))) {
+                $validator = $this->getValidator($validator);
+            } else {
+                $validator = $this->getValidator('uriPath');
+            }
 
-        $errors = $validator->validate($this->params);
+            $errors = $validator->validate($this->params);
 
-        if ($errors) {
-            $this->throwException($errors);
+            if ($errors) {
+                $this->throwException($errors);
+            }
         }
 
         // Return no path. Endpoint method should set this
@@ -242,13 +249,14 @@ abstract class Endpoint implements ValidatorAwareInterface
     /**
      * Convert endpoint params to valid OpenAgenda endpoint query params.
      *
+     * @param bool $validate Validate path parameters if true
      * @return array
      */
-    protected function uriQuery(): array
+    protected function uriQuery(bool $validate = true): array
     {
         $query = [];
 
-        $params = $this->validateParams($this->params);
+        $params = $this->validateParams($this->params, $validate);
 
         foreach ($params as $param => $value) {
             if (!isset($this->queryFields[$param])) {
@@ -280,5 +288,22 @@ abstract class Endpoint implements ValidatorAwareInterface
         ];
 
         throw new InvalidArgumentException(json_encode($message, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+    }
+
+    /**
+     * Return endpoint params
+     *
+     * @return array
+     */
+    public function toArray()
+    {
+        return [
+            'head' => $this->getUri('head', false)->__toString(),
+            'get' => $this->getUri('get', false)->__toString(),
+            'post' => $this->getUri('post', false)->__toString(),
+            'patch' => $this->getUri('patch', false)->__toString(),
+            'delete' => $this->getUri('delete', false)->__toString(),
+            'params' => $this->params,
+        ];
     }
 }

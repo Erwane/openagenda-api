@@ -104,7 +104,7 @@ class Client
         }
 
         if (!$payload['_success'] || (isset($payload['success']) && !$payload['success'])) {
-            $exception = new OpenAgendaException($payload['message'] ?? 'Request error', $status);
+            $exception = new OpenAgendaException($payload['message'] ?? 'Request error', $status ?? 0);
             $exception->setResponse($response);
             $exception->setPayload($payload);
             throw $exception;

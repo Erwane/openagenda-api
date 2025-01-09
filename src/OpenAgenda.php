@@ -5,8 +5,6 @@ namespace OpenAgenda;
 
 use OpenAgenda\Endpoint\Endpoint;
 use OpenAgenda\Endpoint\EndpointFactory;
-use OpenAgenda\Endpoint\Location;
-use OpenAgenda\Entity\Agenda;
 use OpenAgenda\Wrapper\HttpWrapper;
 use Psr\SimpleCache\CacheInterface;
 use Ramsey\Collection\Collection;
@@ -19,9 +17,9 @@ class OpenAgenda
     /**
      * OpenAgenda client
      *
-     * @var \OpenAgenda\Client
+     * @var \OpenAgenda\Client|null
      */
-    protected static $client;
+    protected static $client = null;
 
     /**
      * OpenAgenda.
@@ -67,11 +65,21 @@ class OpenAgenda
     /**
      * Get OpenAgenda client.
      *
-     * @return \OpenAgenda\Client
+     * @return \OpenAgenda\Client|null
      */
-    public static function getClient(): Client
+    public static function getClient(): ?Client
     {
         return self::$client;
+    }
+
+    /**
+     * Reset client
+     *
+     * @return void
+     */
+    public static function resetClient()
+    {
+        self::$client = null;
     }
 
     /**

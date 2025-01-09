@@ -177,16 +177,20 @@ class Location extends Endpoint
     /**
      * @inheritDoc
      */
-    public function uriPath(string $method): string
+    public function uriPath(string $method, bool $validate = true): string
     {
         parent::uriPath($method);
 
         if ($method === 'create') {
-            $path = sprintf('/agendas/%s/locations', $this->params['agenda_id']);
+            $path = sprintf('/agendas/%d/locations', $this->params['agenda_id'] ?? 0);
         } elseif (!empty($this->params['id'])) {
-            $path = sprintf('/agendas/%s/locations/%s', $this->params['agenda_id'], $this->params['id']);
+            $path = sprintf('/agendas/%d/locations/%d', $this->params['agenda_id'] ?? 0, $this->params['id']);
         } else {
-            $path = sprintf('/agendas/%s/locations/ext/%s', $this->params['agenda_id'], $this->params['ext_id']);
+            $path = sprintf(
+                '/agendas/%d/locations/ext/%s',
+                $this->params['agenda_id'] ?? 0,
+                $this->params['ext_id'] ?? ''
+            );
         }
 
         return $path;
