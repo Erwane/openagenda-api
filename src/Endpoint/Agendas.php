@@ -31,7 +31,7 @@ class Agendas extends Endpoint
         'official' => ['name' => 'official'],
         'slug' => ['name' => 'slug', 'type' => 'array'],
         'id' => ['name' => 'uid', 'type' => 'array'],
-        'network' => ['name' => 'network'],
+        'network_id' => ['name' => 'network'],
         'sort' => [
             'name' => 'sort',
             'matching' => [
@@ -71,9 +71,9 @@ class Agendas extends Endpoint
             // id
             ->allowEmptyArray('id')
             ->isArray('id')
-            // network
-            ->allowEmptyString('network')
-            ->integer('network')
+            // network_id
+            ->allowEmptyString('network_id')
+            ->integer('network_id')
             // sort
             ->allowEmptyArray('sort')
             ->inList('sort', ['created_desc', 'recent_events']);

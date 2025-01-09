@@ -78,8 +78,8 @@ class AgendasTest extends EndpointTestCase
         $rules = $field->rules();
         $this->assertArrayHasKey('isArray', $rules);
 
-        // network
-        $field = $v->field('network');
+        // network_id
+        $field = $v->field('network_id');
         $this->assertTrue($field->isEmptyAllowed());
         $rules = $field->rules();
         $this->assertArrayHasKey('integer', $rules);
@@ -112,7 +112,7 @@ class AgendasTest extends EndpointTestCase
                     'official' => true,
                     'slug' => 'agenda',
                     'id' => 12,
-                    'network' => 34,
+                    'network_id' => 34,
                     'sort' => 'created_desc',
                 ],
                 [

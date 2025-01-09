@@ -14,6 +14,7 @@ declare(strict_types=1);
  */
 namespace OpenAgenda\Test\TestCase\Entity;
 
+use Cake\Chronos\Chronos;
 use GuzzleHttp\Psr7\Response;
 use OpenAgenda\Endpoint\Location as LocationEndpoint;
 use OpenAgenda\Entity\Agenda;
@@ -25,6 +26,64 @@ use Ramsey\Collection\Collection;
 
 class AgendaTest extends OpenAgendaTestCase
 {
+    public function testAliasesIn()
+    {
+        $json = FileResource::instance($this)->getContent('Response/agendas/agenda.json');
+        $payload = json_decode($json, true);
+        $ent = new Agenda($payload);
+        $result = $ent->toArray();
+        $this->assertEquals([
+            'id' => 41648,
+            'title' => 'La Semaine Nationale de la Petite Enfance',
+            'description' => "Du 15 au 24 mars 2025, tous ensemble pour l'éveil du tout-petit ! \nUne semaine d'ateliers & activités à travers toute la France, pour réunir le trio parent-enfant-professionnel.",
+            'slug' => 'semainepetiteenfance',
+            'url' => 'https://www.semainepetiteenfance.fr',
+            'image' => 'https://cdn.openagenda.com/main/agenda41648.jpg?__ts=1664443597781',
+            'official' => true,
+            'private' => false,
+            'indexed' => true,
+            'network_id' => null,
+            'location_set_id' => null,
+            'created_at' => Chronos::parse('2016-07-27T12:24:08.000Z'),
+            'updated_at' => Chronos::parse('2025-01-04T10:31:53.000Z'),
+        ], $result);
+    }
+
+    public function testAliasesOut()
+    {
+        $ent = new Agenda([
+            'id' => 41648,
+            'title' => 'La Semaine Nationale de la Petite Enfance',
+            'description' => "Du 15 au 24 mars 2025, tous ensemble pour l'éveil du tout-petit ! \nUne semaine d'ateliers & activités à travers toute la France, pour réunir le trio parent-enfant-professionnel.",
+            'slug' => 'semainepetiteenfance',
+            'url' => 'https://www.semainepetiteenfance.fr',
+            'image' => 'https://cdn.openagenda.com/main/agenda41648.jpg?__ts=1664443597781',
+            'official' => true,
+            'private' => false,
+            'indexed' => true,
+            'network_id' => null,
+            'location_set_id' => null,
+            'created_at' => Chronos::parse('2016-07-27T12:24:08.000Z'),
+            'updated_at' => Chronos::parse('2025-01-04T10:31:53.000Z'),
+        ]);
+
+        $this->assertSame([
+            'uid' => 41648,
+            'title' => 'La Semaine Nationale de la Petite Enfance',
+            'description' => "Du 15 au 24 mars 2025, tous ensemble pour l'éveil du tout-petit ! \nUne semaine d'ateliers & activités à travers toute la France, pour réunir le trio parent-enfant-professionnel.",
+            'slug' => 'semainepetiteenfance',
+            'url' => 'https://www.semainepetiteenfance.fr',
+            'image' => 'https://cdn.openagenda.com/main/agenda41648.jpg?__ts=1664443597781',
+            'official' => 1,
+            'private' => 0,
+            'indexed' => 1,
+            'network' => null,
+            'locationSet' => null,
+            'createdAt' => '2016-07-27T12:24:08',
+            'updatedAt' => '2025-01-04T10:31:53',
+        ], $ent->toOpenAgenda());
+    }
+
     public static function dataClientNotSet()
     {
         return [

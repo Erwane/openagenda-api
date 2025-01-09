@@ -24,6 +24,22 @@ use Ramsey\Collection\Collection;
  */
 class Agenda extends Entity
 {
+    protected $_aliases = [
+        'id' => ['field' => 'uid'],
+        'title' => ['field' => 'title'],
+        'description' => ['field' => 'description'],
+        'slug' => ['field' => 'slug'],
+        'url' => ['field' => 'url'],
+        'image' => ['field' => 'image'],
+        'official' => ['field' => 'official', 'type' => 'boolean'],
+        'private' => ['field' => 'private', 'type' => 'boolean'],
+        'indexed' => ['field' => 'indexed', 'type' => 'boolean'],
+        'network_id' => ['field' => 'network'],
+        'location_set_id' => ['field' => 'locationSet'],
+        'created_at' => ['field' => 'createdAt', 'type' => 'DateTime'],
+        'updated_at' => ['field' => 'updatedAt', 'type' => 'DateTime'],
+    ];
+
     /**
      * A method require client sets.
      *
@@ -63,8 +79,6 @@ class Agenda extends Entity
      */
     public function location(array $params = [])
     {
-        $this->_requireClient();
-
         $params['agenda_id'] = $this->id;
 
         return EndpointFactory::make('/location', $params);

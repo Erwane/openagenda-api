@@ -41,17 +41,17 @@ $agenda = $oa->agendas(['limit' => 1, 'slug' => 'my-agenda-slug'])->first();
 
 ### Params
 
-| field    | type               | description                                                                                                                 |
-|----------|--------------------|-----------------------------------------------------------------------------------------------------------------------------|
-| limit    | integer            | How many results by request. Default `100`                                                                                  |
-| page     | integer            | Pagination. Require a PSR-16 configured cache.<br/>You can only ask for next or previous page.<br/>**Not implemented yet**. |
-| fields   | string or string[] | Optional extra fields to get for agendas.<br/>Possible values are `['summary', 'schema']`.                                  |
-| search   | string             | Search terms in title, locations and agenda keywords                                                                        |
-| official | boolean            | Only officials agendas. Default `false`.                                                                                    |
-| slug     | string or string[] | Get agendas with this slug(s).                                                                                              |
-| id       | id or id[]         | Get agendas with this id(s)                                                                                                 |
-| network  | int                | Get only agendas in this network id                                                                                         |
-| sort     | string             | Sort results.<br/>Allowed values are `created_desc` and `recent_events`                                                     |
+| field      | type               | description                                                                                                                 |
+|------------|--------------------|-----------------------------------------------------------------------------------------------------------------------------|
+| limit      | integer            | How many results by request. Default `100`                                                                                  |
+| page       | integer            | Pagination. Require a PSR-16 configured cache.<br/>You can only ask for next or previous page.<br/>**Not implemented yet**. |
+| fields     | string or string[] | Optional extra fields to get for agendas.<br/>Possible values are `['summary', 'schema']`.                                  |
+| search     | string             | Search terms in title, locations and agenda keywords                                                                        |
+| official   | boolean            | Only officials agendas. Default `false`.                                                                                    |
+| slug       | string or string[] | Get agendas with this slug(s).                                                                                              |
+| id         | id or id[]         | Get agendas with this id(s)                                                                                                 |
+| network_id | int                | Get only agendas in this network id                                                                                         |
+| sort       | string             | Sort results.<br/>Allowed values are `created_desc` and `recent_events`                                                     |
 
 ## Results
 
@@ -88,7 +88,7 @@ $agenda = $oa->agenda(['id' => 12345, 'detailed' => true])->get();
 |   indexed    | boolean  | Is indexed          |
 |   settings   |  array   | Agenda settings     |
 |   summary    |  array   | Summary             |
-|   network    | integer  | Network id          |
+|  network_id  | integer  | Network id          |
 | location_set | integer  | Location set id     |
 |  created_at  | DateTime | Created at datetime |
 |  updated_at  | DateTime | Updated at datetime |
