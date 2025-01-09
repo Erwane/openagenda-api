@@ -160,7 +160,7 @@ class OpenAgendaTest extends TestCase
 
     public function testGetLocations()
     {
-        $payload = FileResource::instance($this)->getContent('Response/locations/locations-ok.json');
+        $payload = FileResource::instance($this)->getContent('Response/locations/locations.json');
         $this->wrapper->expects($this->once())
             ->method('get')
             ->with(

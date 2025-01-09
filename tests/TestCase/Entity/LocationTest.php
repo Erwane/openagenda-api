@@ -93,10 +93,10 @@ class LocationTest extends TestCase
             'links' => [],
             'timezone' => 'Europe/Paris',
             'ext_id' => null,
-            'state' => 0,
+            'state' => true,
         ]);
 
-        $this->assertEquals([
+        $this->assertSame([
             'name' => 'Centres sociaux de Wattrelos 59150',
             'address' => '4 rue Edouard Herriot 59150 Wattrelos',
             'access' => [],
@@ -120,7 +120,7 @@ class LocationTest extends TestCase
             'links' => [],
             'timezone' => 'Europe/Paris',
             'extId' => null,
-            'state' => 0,
+            'state' => 1,
         ], $ent->toOpenAgenda());
     }
 

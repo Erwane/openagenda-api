@@ -369,6 +369,7 @@ class LocationTest extends EndpointTestCase
                 'name' => 'My location',
                 'address' => '1, place liberté, 75001 Paris, France',
                 'countryCode' => 'FR',
+                'state' => '1',
             ],
             ['headers' => ['access-token' => 'authorization-key', 'nonce' => 1734957296123456]],
         ], [200, $payload]);
@@ -379,6 +380,7 @@ class LocationTest extends EndpointTestCase
             'name' => 'My location',
             'address' => '1, place liberté, 75001 Paris, France',
             'country' => 'FR',
+            'state' => true,
         ]);
 
         $entity = $endpoint->create();

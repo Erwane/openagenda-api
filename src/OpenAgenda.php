@@ -99,6 +99,7 @@ class OpenAgenda
     {
         // todo: allow passing raw OpenAgenda endpoint url and return ResponseInterface.
         // todo: return response or json payload
+        // todo: post request replaced by ::create()
         return EndpointFactory::make($path, $params)->post();
     }
 

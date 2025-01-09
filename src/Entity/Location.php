@@ -53,7 +53,7 @@ class Location extends Entity
         'links' => ['field' => 'links'],
         'timezone' => ['field' => 'timezone'],
         'ext_id' => ['field' => 'extId'],
-        'state' => ['field' => 'state'],
+        'state' => ['field' => 'state', 'type' => 'boolean'],
     ];
 
     /**

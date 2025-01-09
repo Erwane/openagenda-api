@@ -218,7 +218,7 @@ class LocationsTest extends EndpointTestCase
 
     public function testGet()
     {
-        $payload = FileResource::instance($this)->getContent('Response/locations/locations-ok.json');
+        $payload = FileResource::instance($this)->getContent('Response/locations/locations.json');
         $this->mockRequest(false, 'get', [
             'https://api.openagenda.com/v2/agendas/123/locations?size=2',
             ['headers' => ['key' => 'testing']],

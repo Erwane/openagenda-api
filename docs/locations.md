@@ -24,16 +24,14 @@ Search locations for an agenda.
 Return a [Collection](collections.md) of Location items.
 
 ```php
-// Endpoint params
-$params = [
-    'agenda_id' => 123,
-];
+// Using OpenAgenda::locations() method
+$locations = $oa->locations(['agenda_id' => 123, 'name' => 'My Location']);
 
-// Using endpoint
-$locations = $oa->get('/locations', $params);
 // Using previous fetched OpenAgenda\Entity\Agenda object
-$locations = $agenda->locations($params);
+$locations = $agenda->locations(['name' => 'My Location']);
 ```
+**note** for `$agenda->locations()` way, an OpenAgenda object should be created before. See [basics](basics.md).
+
 
 **Params**:
 
@@ -59,22 +57,13 @@ Get one location.
 If you want to check a location exists, you can use `head()` method instead of `get()`.
 
 ```php
-// Endpoint params
-$params = [
-    'agenda_id' => 12345,
-    'id' => 67890, // location id
-    'ext_id' => 'my-uuid-v4', // OR external id
-];
-
 // Using endpoint
-$location = $oa->get('/location', $params);
+$location = $oa->location(['id' => 456, 'agenda_id' => 123])->get();
+$exists = $oa->location(['id' => 456, 'agenda_id' => 123])->exists();
 
 // Using previous fetched OpenAgenda\Entity\Agenda object
-$location = $agenda->location($id)->get();
-
-// Check location exists
-$exists = $oa->head('/location', $params);
-$exists = $agenda->location($params)->exists();
+$location = $agenda->location(['ext_id' => 'my-location-id'])->get();
+$exists = $agenda->location(['id' => 456])->exists();
 ```
 
 **Params**:
@@ -91,11 +80,11 @@ Create a location in an agenda.
 Return a Location object with the new id.
 
 ```php
-// Using endpoint
-$location = $oa->post('/location', $data);
+// Using OpenAgenda::location() method
+$location = $oa->location($data)->create();
 
 // Using previous fetched OpenAgenda\Entity\Agenda object
-$location = $agenda->location($data)->post();
+$location = $agenda->location($data)->create();
 ```
 
 #### Data
@@ -115,13 +104,14 @@ You can update a location with `ext_id` instead of `id`.
 In this case, `id` should not exist in `$data`.
 
 ```php
-// Using endpoint
-$location = $oa->post('/location', $data);
-$location = $oa->patch('/location', $data);
-
 // Using previous fetched OpenAgenda\Entity\Location object
-$location = $location->post($data);
-$location = $location->patch($data);
+$location = $oa->location(['id' => 456, 'agenda_id' => 123])->get();
+$location->state = true;
+$location = $location->update(); // Only changed fields. Recommended
+$location = $location->update(true); // Full update
+
+// Or pushing data directly to OpenAgenda::location() method
+$location = $oa->location(['agenda_id' => 123, 'id' => 456, 'state' => true])->update();
 ```
 
 #### Data
@@ -137,13 +127,13 @@ You can delete a location with `ext_id` instead of `id`.
 In this case, `id` should not exist in `$data`.
 
 ```php
-// Using endpoint
-$location = $oa->delete('/location', $data);
-
 // Using previous fetched OpenAgenda\Entity\Location object
-$location = $location->delete($id);
-// you can chain from Agenda too
-$location = $agenda->location($id)->delete();
+$location = $oa->location(['id' => 456, 'agenda_id' => 123])
+    ->get()
+    ->delete();
+
+// Or through OpenAgenda::location() method
+$location = $oa->location(['agenda_id' => 123, 'id' => 456])->delete();
 ```
 
 ## Schema

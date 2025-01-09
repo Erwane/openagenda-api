@@ -87,8 +87,8 @@ class EntityTest extends TestCase
             'unknownField' => 'value',
         ]);
 
-        $this->assertEquals([
-            'uid' => '1',
+        $this->assertSame([
+            'uid' => 1,
             'postalCode' => '12345',
             'createdAt' => '2024-12-23T12:34:56',
             'description' => ['fr' => 'Lorem ipsum'],
@@ -101,14 +101,14 @@ class EntityTest extends TestCase
         $ent = new ent([
             'id' => 1,
             'postal_code' => '12345',
-            'state' => false,
+            'state' => true,
         ], ['markClean' => true]);
 
-        $ent->set('state', true);
+        $ent->set('state', false);
 
-        $this->assertEquals([
-            'uid' => '1',
-            'state' => 1,
+        $this->assertSame([
+            'uid' => 1,
+            'state' => 0,
         ], $ent->toOpenAgenda(true));
     }
 }
