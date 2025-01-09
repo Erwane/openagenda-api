@@ -18,6 +18,7 @@ use OpenAgenda\Client;
 use OpenAgenda\OpenAgenda;
 use OpenAgenda\Wrapper\HttpWrapper;
 use PHPUnit\Framework\TestCase;
+use Psr\SimpleCache\CacheInterface;
 
 class OpenAgendaTestCase extends TestCase
 {
@@ -52,6 +53,13 @@ class OpenAgendaTestCase extends TestCase
             'secret_key' => 'secretKey',
             'wrapper' => $wrapper,
         ];
+        if (isset($params['auth'])) {
+            $cache = $this->createMock(CacheInterface::class);
+            $cache->expects($this->any())
+                ->method('get')
+                ->willReturn('my authorization cache');
+            $params['cache'] = $cache;
+        }
 
         $client = new Client($params);
         OpenAgenda::setClient($client);

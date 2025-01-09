@@ -14,19 +14,39 @@ declare(strict_types=1);
  */
 namespace OpenAgenda\Entity;
 
+use OpenAgenda\Endpoint\EndpointFactory;
+use OpenAgenda\OpenAgenda;
+use OpenAgenda\OpenAgendaException;
+
 /**
- * @property int $id
- * @property int $uid
- * @property float $latitude
- * @property float $longitude
- * @property string $pricing
- * @property string $pricingInfo
- * @property array $dates
+ * @property int|null $id
+ * @property int|null $agenda_id
+ * @property int|null $location_set_id
+ * @property int|string|null $ext_id
+ * @property string|null $slug
+ * @property string|null $name
+ * @property array|null $description
+ * @property bool|null $state
+ * @property array|null $access
+ * @property string|null $address
+ * @property string|null $city
+ * @property string|null $postal_code
+ * @property string|null $district
+ * @property string|null $department
+ * @property string|null $region
+ * @property string|null $country
+ * @property string|null $insee
+ * @property float|null $latitude
+ * @property float|null $longitude
+ * @property string|null $timezone
+ * @property \Cake\Chronos\Chronos|null $created_at
+ * @property \Cake\Chronos\Chronos|null $updated_at
  */
 class Location extends Entity
 {
     protected $_aliases = [
         'id' => ['field' => 'uid'],
+        'agenda_id' => ['field' => 'agendaId'],
         'name' => ['field' => 'name', 'required' => true],
         'address' => ['field' => 'address'], 'required' => true,
         'access' => ['field' => 'access'],
@@ -34,7 +54,7 @@ class Location extends Entity
         'image' => ['field' => 'image'],
         'image_credits' => ['field' => 'imageCredits'],
         'slug' => ['field' => 'slug'],
-        'set_id' => ['field' => 'setUid'],
+        'location_set_id' => ['field' => 'setUid'],
         'city' => ['field' => 'city'],
         'department' => ['field' => 'department'],
         'region' => ['field' => 'region'],
@@ -55,6 +75,61 @@ class Location extends Entity
         'ext_id' => ['field' => 'extId'],
         'state' => ['field' => 'state', 'type' => 'boolean'],
     ];
+
+    /**
+     * A method require client sets.
+     *
+     * @return void
+     * @throws \OpenAgenda\OpenAgendaException
+     */
+    protected function _requireClient(): void
+    {
+        if (!OpenAgenda::getClient()) {
+            throw new OpenAgendaException('OpenAgenda object was not previously created or Client not set.');
+        }
+    }
+
+    /**
+     * Update this location.
+     *
+     * @param array $params Endpoint params
+     * @return self
+     * @throws \OpenAgenda\OpenAgendaException
+     */
+    public function update(): Location
+    {
+        $this->_requireClient();
+
+        return EndpointFactory::make('/location', $this->toArray())->update();
+    }
+
+    /**
+     * Delete this location.
+     *
+     * @return self
+     * @throws \OpenAgenda\OpenAgendaException
+     */
+    public function delete(): Location
+    {
+        $this->_requireClient();
+
+        return EndpointFactory::make('/location', $this->toArray())->delete();
+    }
+
+    /**
+     * Get Agenda endpoint with params.
+     *
+     * @param array $params Endpoint params
+     * @return \OpenAgenda\Endpoint\Location|\OpenAgenda\Endpoint\Endpoint|
+     * @throws \OpenAgenda\Endpoint\UnknownEndpointException
+     * @throws \OpenAgenda\OpenAgendaException
+     */
+    public function agenda(array $params = [])
+    {
+        $params['id'] = $this->agenda_id;
+
+        return EndpointFactory::make('/agenda', $params);
+    }
 
     /**
      * Import data from openagenda
@@ -132,7 +207,7 @@ class Location extends Entity
     public function toOpenAgenda(bool $onlyChanged = false): array
     {
         $data = parent::toOpenAgenda($onlyChanged);
-        unset($data['uid']);
+        unset($data['uid'], $data['agendaId']);
 
         return $data;
     }

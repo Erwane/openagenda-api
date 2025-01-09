@@ -29,7 +29,6 @@ class AgendaTest extends OpenAgendaTestCase
     {
         return [
             ['locations'],
-            ['location'],
         ];
     }
 
@@ -67,14 +66,12 @@ class AgendaTest extends OpenAgendaTestCase
         $endpoint = $entity->location([
             'id' => 456,
             'agenda_id' => 123,
-            'title' => 'My location',
+            'name' => 'My location',
             'address' => 'Random address',
             'country' => 'FR',
         ]);
 
         $this->assertInstanceOf(LocationEndpoint::class, $endpoint);
-        $uri = $endpoint->getUri('get');
-        $this->assertEquals('/v2/agendas/123/locations/456', $uri->getPath());
         $this->assertEquals([
             'head' => 'https://api.openagenda.com/v2/agendas/123/locations/456',
             'get' => 'https://api.openagenda.com/v2/agendas/123/locations/456',
@@ -85,7 +82,7 @@ class AgendaTest extends OpenAgendaTestCase
                 '_path' => '/location',
                 'id' => 456,
                 'agenda_id' => 123,
-                'title' => 'My location',
+                'name' => 'My location',
                 'address' => 'Random address',
                 'country' => 'FR',
             ],

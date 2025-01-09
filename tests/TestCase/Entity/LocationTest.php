@@ -15,9 +15,13 @@ declare(strict_types=1);
 namespace OpenAgenda\Test\TestCase\Entity;
 
 use Cake\Chronos\Chronos;
+use GuzzleHttp\Psr7\Response;
+use OpenAgenda\Endpoint\Agenda as AgendaEndpoint;
 use OpenAgenda\Entity\Location;
+use OpenAgenda\OpenAgenda;
+use OpenAgenda\OpenAgendaException;
+use OpenAgenda\Test\OpenAgendaTestCase;
 use OpenAgenda\Test\Utility\FileResource;
-use PHPUnit\Framework\TestCase;
 
 /**
  * Entity\Location tests
@@ -25,7 +29,7 @@ use PHPUnit\Framework\TestCase;
  * @uses   \OpenAgenda\Entity\Location
  * @covers \OpenAgenda\Entity\Location
  */
-class LocationTest extends TestCase
+class LocationTest extends OpenAgendaTestCase
 {
     public function testAliasesIn()
     {
@@ -42,7 +46,7 @@ class LocationTest extends TestCase
             // 'image' => null,
             'image_credits' => null,
             'slug' => 'centres-sociaux-de-wattrelos-59150_6977111',
-            'set_id' => null,
+            'location_set_id' => null,
             'city' => 'Wattrelos',
             'department' => 'Nord',
             'region' => 'Hauts-de-France',
@@ -75,7 +79,7 @@ class LocationTest extends TestCase
             // 'image' => null,
             'image_credits' => null,
             'slug' => 'centres-sociaux-de-wattrelos-59150_6977111',
-            'set_id' => null,
+            'location_set_id' => null,
             'city' => 'Wattrelos',
             'department' => 'Nord',
             'region' => 'Hauts-de-France',
@@ -124,28 +128,89 @@ class LocationTest extends TestCase
         ], $ent->toOpenAgenda());
     }
 
-    public function testExists()
+    public static function dataClientNotSet()
     {
-        $this->markTestIncomplete();
+        return [
+            ['update'],
+            ['delete'],
+        ];
     }
 
-    public function testGet()
+    /**
+     * @dataProvider dataClientNotSet
+     */
+    public function testClientNotSet($method): void
     {
-        $this->markTestIncomplete();
-    }
-
-    public function testCreate()
-    {
-        $this->markTestIncomplete();
+        OpenAgenda::resetClient();
+        $entity = new Location(['id' => 123]);
+        $this->expectException(OpenAgendaException::class);
+        $this->expectExceptionMessage('OpenAgenda object was not previously created or Client not set.');
+        $entity->{$method}();
     }
 
     public function testUpdate()
     {
-        $this->markTestIncomplete();
+        $wrapper = $this->clientWrapper(['auth' => true]);
+
+        $entity = new Location([
+            'id' => 456,
+            'agenda_id' => 123,
+            'name' => 'My location',
+            'address' => 'Random address',
+            'country' => 'FR',
+            'state' => true,
+        ]);
+
+        $payload = FileResource::instance($this)->getContent('Response/locations/location.json');
+        $wrapper->expects($this->once())
+            ->method('patch')
+            ->willReturn(new Response(200, [], $payload));
+
+        $entity->state = false;
+        $new = $entity->update();
+
+        $this->assertInstanceOf(Location::class, $new);
+        $this->assertFalse($new->state);
     }
 
     public function testDelete()
     {
-        $this->markTestIncomplete();
+        $wrapper = $this->clientWrapper(['auth' => true]);
+
+        $entity = new Location([
+            'id' => 456,
+            'agenda_id' => 123,
+        ]);
+
+        $payload = FileResource::instance($this)->getContent('Response/locations/location.json');
+        $wrapper->expects($this->once())
+            ->method('delete')
+            ->willReturn(new Response(200, [], $payload));
+
+        $new = $entity->delete();
+        $this->assertInstanceOf(Location::class, $new);
+    }
+
+    public function testAgenda()
+    {
+        $entity = new Location([
+            'id' => 456,
+            'agenda_id' => 123,
+        ]);
+
+        $endpoint = $entity->agenda();
+
+        $this->assertInstanceOf(AgendaEndpoint::class, $endpoint);
+        $this->assertEquals([
+            'head' => 'https://api.openagenda.com/v2/agendas/123',
+            'get' => 'https://api.openagenda.com/v2/agendas/123',
+            'post' => 'https://api.openagenda.com/v2/agendas/123',
+            'patch' => 'https://api.openagenda.com/v2/agendas/123',
+            'delete' => 'https://api.openagenda.com/v2/agendas/123',
+            'params' => [
+                '_path' => '/agenda',
+                'id' => 123,
+            ],
+        ], $endpoint->toArray());
     }
 }

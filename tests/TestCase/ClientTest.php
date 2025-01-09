@@ -160,14 +160,14 @@ class ClientTest extends TestCase
             ->method('patch')
             ->with(
                 'https://api.openagenda.com/v2/agendas/123/locations/456',
-                ['id' => 123, 'title' => 'My agenda'],
+                ['id' => 123, 'name' => 'My agenda'],
                 ['headers' => ['access-token' => 'my authorization token', 'nonce' => 1734957296123456]]
             )
             ->willReturn(new Response(200, ['content-type' => 'application/json'], '{"json":"object"}'));
 
         $response = $this->client->patch(
             'https://api.openagenda.com/v2/agendas/123/locations/456',
-            ['id' => 123, 'title' => 'My agenda']
+            ['id' => 123, 'name' => 'My agenda']
         );
 
         $this->assertEquals([
