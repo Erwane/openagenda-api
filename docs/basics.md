@@ -9,7 +9,8 @@ use OpenAgenda\OpenAgenda;
 use Nimbly\Shuttle\Shuttle;
 
 // PSR-18 Http client.
-$http = new Shuttle();
+$guzzleOptions = ['timeout'  => 2.0];
+$wrapper = new GuzzleWrapper($guzzleOptions);
 
 // PSR-16 Simple cache. Optional
 $cache = new Psr16Cache();
@@ -18,8 +19,8 @@ $cache = new Psr16Cache();
 // The private key is optional and only needed for writing data (POST, PUT, DELETE)
 $oa = new OpenAgenda([
     'public_key' => 'my public key', // Required
-    'client' => $http, // Required
-    'secret_key' => 'my secret key', // Optional, only for write/delete actions
+    'secret_key' => 'my secret key', // Optional, only for create/update/delete
+    'wrapper' => $wrapper, // Required
     'cache' => $cache, // Optional
 ]);
 ```

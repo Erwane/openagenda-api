@@ -16,7 +16,6 @@ namespace OpenAgenda\Wrapper;
 
 use League\Uri\Contracts\UriInterface;
 use League\Uri\Uri;
-use Psr\Http\Client\ClientInterface;
 
 /**
  * Abstract HttpWrapper
@@ -32,12 +31,14 @@ abstract class HttpWrapper implements HttpWrapperInterface
 
     /**
      * Create the wrapper for this $http client.
+     * The HttpWrapper SHOULD set PSR-18 Http client in $this->http
      *
-     * @param \Psr\Http\Client\ClientInterface $http PSR-18 http client.
+     * @param array $params The PSR-18 Http client params.
      */
-    public function __construct(ClientInterface $http)
+    public function __construct(array $params = [])
     {
-        $this->http = $http;
+        // Create PSR-18 Http client and store it.
+        // $this->http = new Psr18Client(params)
     }
 
     /**

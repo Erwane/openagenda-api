@@ -215,6 +215,9 @@ class Client
             $token = $this->cache->get($cacheKey);
         }
         if (!$token) {
+            if (!$this->secretKey) {
+                throw new OpenAgendaException('Missing secret_key');
+            }
             $endpoint = new Auth();
             $uri = $endpoint->getUri('post');
             $response = $this->http->post((string)$uri, [
