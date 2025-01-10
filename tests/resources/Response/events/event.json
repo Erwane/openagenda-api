@@ -1,0 +1,143 @@
+{
+    "success": true,
+    "event": {
+        "firstTiming": {
+            "end": "2025-01-06T15:00:00.000+01:00",
+            "begin": "2025-01-06T11:00:00.000+01:00"
+        },
+        "nextTiming": null,
+        "lastTiming": {
+            "end": "2025-01-06T18:00:00.000+01:00",
+            "begin": "2025-01-06T15:00:00.000+01:00"
+        },
+        "member": {},
+        "dateRange": {
+            "ar": "الإثنين ٦ يناير, 11:00, 15:00",
+            "de": "Montag 6 Januar, 11:00, 15:00",
+            "en": "Monday 6 January, 11:00, 15:00",
+            "it": "Lunedì 6 gennaio, 11:00, 15:00",
+            "fr": "Lundi 6 janvier, 11h00, 15h00",
+            "es": "Lunes 6 enero, 11:00, 15:00"
+        },
+        "state": 0,
+        "featured": false,
+        "motive": null,
+        "originAgenda": {
+            "uid": 123,
+            "image": null,
+            "description": "My agenda",
+            "official": false,
+            "title": "My agenda",
+            "slug": "my-agenda",
+            "url": null,
+            "_agg": "eyJ"
+        },
+        "location": {
+            "disqualifiedDuplicates": null,
+            "access": {},
+            "city": "Paris",
+            "timezone": "Europe/Paris",
+            "postalCode": "75011",
+            "latitude": 48.854969,
+            "imageCredits": null,
+            "description": {},
+            "setUid": null,
+            "uid": 456,
+            "createdAt": "2025-01-06T18:09:50.000Z",
+            "duplicateCandidates": null,
+            "countryCode": "FR",
+            "adminLevel5": "Paris 11e Arrondissement",
+            "links": [],
+            "state": 1,
+            "extId": null,
+            "department": "Paris",
+            "slug": "my-location_2426083",
+            "email": null,
+            "longitude": 2.386696,
+            "updatedAt": "2025-01-09T08:56:52.000Z",
+            "image": null,
+            "website": null,
+            "address": "122 rue de charonne, 75011 Paris, France",
+            "adminLevel3": "Métropole du Grand Paris",
+            "agendaUid": 123,
+            "adminLevel4": "Paris",
+            "adminLevel1": "Île-de-France",
+            "adminLevel2": "Paris",
+            "mergedIn": null,
+            "_agg": "eyJ",
+            "tags": null,
+            "insee": null,
+            "phone": null,
+            "district": "Quartier Sainte-Marguerite",
+            "name": "My location",
+            "region": "Île-de-France"
+        },
+        "sourceAgendas": [],
+        "type": [
+            41
+        ],
+        "image": null,
+        "imageCredits": null,
+        "title": {
+            "en": "My event",
+            "fr": "Mon évènement"
+        },
+        "description": {
+            "en": "Short description",
+            "fr": "Description courte"
+        },
+        "longDescription": {
+            "en": "Long description",
+            "fr": "Description longue"
+        },
+        "keywords": {
+            "en": [
+                "my",
+                "event"
+            ],
+            "fr": [
+                "mon",
+                "évènement"
+            ]
+        },
+        "conditions": {
+            "en": "price en",
+            "fr": "price fr"
+        },
+        "age": {
+            "min": 7,
+            "max": 121
+        },
+        "registration": [],
+        "accessibility": {
+            "ii": false,
+            "hi": true,
+            "vi": false,
+            "pi": true,
+            "mi": false
+        },
+        "attendanceMode": 1,
+        "onlineAccessLink": null,
+        "timings": [
+            {
+                "begin": "2025-01-06T11:00:00+01:00",
+                "end": "2025-01-06T15:00:00+01:00"
+            },
+            {
+                "begin": "2025-01-06T15:00:00+01:00",
+                "end": "2025-01-06T18:00:00+01:00"
+            }
+        ],
+        "uid": 9906334,
+        "slug": "testing-6090479",
+        "private": false,
+        "timezone": "Europe/Paris",
+        "draft": false,
+        "createdAt": "2025-01-09T13:53:29.658Z",
+        "creatorUid": 64654720,
+        "ownerUid": 64654720,
+        "updatedAt": "2025-01-09T13:53:30.000Z",
+        "status": 1,
+        "links": []
+    }
+}

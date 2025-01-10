@@ -46,7 +46,7 @@ class Location extends Entity
 {
     protected $_aliases = [
         'id' => ['field' => 'uid'],
-        'agenda_id' => ['field' => 'agendaId'],
+        'agenda_id' => ['field' => 'agendaUid'],
         'name' => ['field' => 'name', 'required' => true],
         'address' => ['field' => 'address'], 'required' => true,
         'access' => ['field' => 'access'],
@@ -92,7 +92,6 @@ class Location extends Entity
     /**
      * Update this location.
      *
-     * @param array $params Endpoint params
      * @return self
      * @throws \OpenAgenda\OpenAgendaException
      */
@@ -129,43 +128,6 @@ class Location extends Entity
         $params['id'] = $this->agenda_id;
 
         return EndpointFactory::make('/agenda', $params);
-    }
-
-    /**
-     * Import data from openagenda
-     *
-     * @param array $locationData Location data
-     * @return void
-     * @deprecated Automatically sets from Entity::fromOpenAgenda()
-     */
-    public function import(array $locationData): void
-    {
-        $this->id = $locationData['uid'];
-        $this->uid = $this->id;
-        $this->latitude = $locationData['latitude'];
-        $this->longitude = $locationData['longitude'];
-
-        // Pricing
-        if (isset($locationData['pricingInfo'])) {
-            $this->pricing = $locationData['pricingInfo'];
-        }
-
-        // Dates
-        if (!empty($locationData['dates']) && is_array($locationData['dates'])) {
-            $this->dates = [];
-            foreach ($locationData['dates'] as $date) {
-                $this->dates[] = [
-                    'date' => $date['date'],
-                    'begin' => $date['timeStart'],
-                    'end' => $date['timeEnd'],
-                ];
-            }
-        }
-
-        // remove dirty state
-        foreach ($this->getDirty() as $key) {
-            $this->setDirty($key, false);
-        }
     }
 
     /**
@@ -207,7 +169,7 @@ class Location extends Entity
     public function toOpenAgenda(bool $onlyChanged = false): array
     {
         $data = parent::toOpenAgenda($onlyChanged);
-        unset($data['uid'], $data['agendaId']);
+        unset($data['uid'], $data['agendaId'], $data['agendaUid']);
 
         return $data;
     }

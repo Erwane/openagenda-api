@@ -21,6 +21,8 @@ class OpenAgenda
      */
     protected static $client = null;
 
+    protected static $defaultLang = 'fr';
+
     /**
      * OpenAgenda.
      *
@@ -34,6 +36,7 @@ class OpenAgenda
             'private_key' => null,
             'wrapper' => null,
             'cache' => null,
+            'defaultLang' => 'fr',
         ];
 
         if (!$params['public_key']) {
@@ -49,6 +52,7 @@ class OpenAgenda
         }
 
         self::$client = new Client($params);
+        self::$defaultLang = $params['defaultLang'];
     }
 
     /**
@@ -80,6 +84,16 @@ class OpenAgenda
     public static function resetClient()
     {
         self::$client = null;
+    }
+
+    /**
+     * OpenAgenda default lang
+     *
+     * @return string
+     */
+    public static function getDefaultLang(): string
+    {
+        return self::$defaultLang;
     }
 
     /**

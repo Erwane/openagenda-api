@@ -1,0 +1,15 @@
+meta {
+  name: Event exists
+  type: http
+  seq: 3
+}
+
+head {
+  url: {{baseUrl}}/agendas/{{agenda_id}}/events/{{event_id}}
+  body: none
+  auth: none
+}
+
+headers {
+  key: {{public_key}}
+}

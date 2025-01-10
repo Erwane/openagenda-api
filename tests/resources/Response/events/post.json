@@ -1,0 +1,117 @@
+{
+  "success": true,
+  "event": {
+    "uid": 41294774,
+    "slug": "my-event",
+    "private": false,
+    "timezone": "Europe/Paris",
+    "draft": false,
+    "updatedAt": "2025-01-10T08:49:38.000Z",
+    "createdAt": "2025-01-10T08:49:37.524Z",
+    "creatorUid": 64654720,
+    "ownerUid": 64654720,
+    "agendaUid": 41630080,
+    "fileKey": "8f332f1800414e2ba839031a983f9930",
+    "attendanceMode": 1,
+    "onlineAccessLink": null,
+    "locationUid": 42921249,
+    "image": null,
+    "imageCredits": null,
+    "title": {
+      "fr": "My event"
+    },
+    "description": {
+      "fr": "My event description"
+    },
+    "longDescription": {},
+    "keywords": {},
+    "conditions": {},
+    "age": {
+      "min": null,
+      "max": null
+    },
+    "registration": [],
+    "accessibility": {
+      "hi": false,
+      "ii": false,
+      "vi": false,
+      "mi": false,
+      "pi": false
+    },
+    "timings": [
+      {
+        "begin": "2025-01-06T11:00:00.000+01:00",
+        "end": "2025-01-06T15:00:00.000+01:00"
+      }
+    ],
+    "status": 1,
+    "links": [],
+    "location": {
+      "uid": 42921249,
+      "setUid": null,
+      "slug": "my-location_2426083",
+      "name": "My location",
+      "address": "122 rue de charonne, 75011 Paris, France",
+      "countryCode": "FR",
+      "adminLevel1": "Île-de-France",
+      "adminLevel2": "Paris",
+      "adminLevel3": "Métropole du Grand Paris",
+      "adminLevel4": "Paris",
+      "city": "Paris",
+      "adminLevel5": "Paris 11e Arrondissement",
+      "district": "Quartier Sainte-Marguerite",
+      "postalCode": "75011",
+      "insee": null,
+      "latitude": 48.854969,
+      "longitude": 2.386696,
+      "region": "Île-de-France",
+      "department": "Paris",
+      "timezone": "Europe/Paris",
+      "updatedAt": "2025-01-09T08:56:52.000Z",
+      "createdAt": "2025-01-06T18:09:50.000Z",
+      "image": null,
+      "description": {},
+      "tags": null,
+      "website": null,
+      "email": null,
+      "phone": null,
+      "links": [],
+      "access": {},
+      "state": 1,
+      "imageCredits": null,
+      "extId": null,
+      "duplicateCandidates": null,
+      "disqualifiedDuplicates": null,
+      "mergedIn": null,
+      "agendaUid": 41630080
+    },
+    "addMethod": "contribution",
+    "type": [],
+    "state": 0,
+    "featured": false,
+    "sourcePaths": [],
+    "aggregated": null,
+    "canEdit": true,
+    "motive": null,
+    "sourceAgendas": [],
+    "originAgenda": {
+      "uid": 41630080,
+      "slug": "agendatradwip",
+      "title": "AgendaTradWip",
+      "description": "Plateforme de développement AgendaTrad",
+      "image": null,
+      "url": null
+    },
+    "member": {
+      "userUid": 64654720,
+      "deletedUser": false,
+      "name": "Agenda Trad",
+      "phone": null,
+      "email": "contact@agendatrad.org",
+      "position": null,
+      "organization": null,
+      "role": 2,
+      "updatedAt": "2025-01-10T08:49:38.000Z"
+    }
+  }
+}

@@ -40,6 +40,10 @@ class EndpointFactory
                 return new Locations($params);
             case '/location':
                 return new Location($params);
+            case '/events':
+                return new Events($params);
+            case '/event':
+                return new Event($params);
             default:
                 throw new UnknownEndpointException($path);
         }

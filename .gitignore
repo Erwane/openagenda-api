@@ -7,6 +7,7 @@ composer.phar
 .phpunit.cache
 
 /coverage.xml
+/.bruno/tests/*
 
 # OS generated files #
 ######################

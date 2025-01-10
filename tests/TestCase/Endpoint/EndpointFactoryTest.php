@@ -6,6 +6,7 @@ namespace OpenAgenda\Test\TestCase\Endpoint;
 use OpenAgenda\Endpoint\Agenda;
 use OpenAgenda\Endpoint\Agendas;
 use OpenAgenda\Endpoint\EndpointFactory;
+use OpenAgenda\Endpoint\Event;
 use OpenAgenda\Endpoint\Location;
 use OpenAgenda\Endpoint\Locations;
 use OpenAgenda\Endpoint\UnknownEndpointException;
@@ -30,7 +31,7 @@ class EndpointFactoryTest extends TestCase
         return [
             ['/agendas', Agendas::class],
             ['/agenda', Agenda::class],
-            ['/events', Event::class],
+            ['/events', Events::class],
             ['/event', Event::class],
             ['/locations', Locations::class],
             ['/location', Location::class],

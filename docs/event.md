@@ -202,28 +202,28 @@ $event = $agenda->event($eventId)->delete();
 
 Event status:
 
-* `OpenAgenda\Event::STATUS_REFUSED` (`-1`): Refused.
-* `OpenAgenda\Event::STATUS_MODERATION` (`0`): To moderate.
-* `OpenAgenda\Event::STATUS_READY` (`1`): Ready to published.
-* `OpenAgenda\Event::STATUS_PUBLISHED` (`2`): Published. Event has public visibility.
+* `OpenAgenda\Entity\Event::STATUS_REFUSED` (`-1`): Refused.
+* `OpenAgenda\Entity\Event::STATUS_MODERATION` (`0`): To moderate.
+* `OpenAgenda\Entity\Event::STATUS_READY` (`1`): Ready to published.
+* `OpenAgenda\Entity\Event::STATUS_PUBLISHED` (`2`): Published. Event has public visibility.
 
 ### State
 
 Event state:
 
-* `OpenAgenda\Event::STATE_SCHEDULED` (`1`): Event scheduled (default).
-* `OpenAgenda\Event::STATE_RESCHEDULED` (`2`): The time slots changed and event is re-scheduled.
-* `OpenAgenda\Event::STATE_ONLINE` (`3`): The face-to-face event switched to an online event.
-* `OpenAgenda\Event::STATE_DEFERRED` (`4`): Event deferred, new timings unknowns.
-* `OpenAgenda\Event::STATE_FULL` (`5`): Event is full.
-* `OpenAgenda\Event::STATE_CANCELED` (`6`): Event canceled and not re-scheduled.
+* `OpenAgenda\Entity\Event::STATE_SCHEDULED` (`1`): Event scheduled (default).
+* `OpenAgenda\Entity\Event::STATE_RESCHEDULED` (`2`): The time slots changed and event is re-scheduled.
+* `OpenAgenda\Entity\Event::STATE_ONLINE` (`3`): The face-to-face event switched to an online event.
+* `OpenAgenda\Entity\Event::STATE_DEFERRED` (`4`): Event deferred, new timings unknowns.
+* `OpenAgenda\Entity\Event::STATE_FULL` (`5`): Event is full.
+* `OpenAgenda\Entity\Event::STATE_CANCELED` (`6`): Event canceled and not re-scheduled.
 
 ### Accessibility list
 
 Event accessibility:
 
-* `OpenAgenda\Event::ACCESS_HI` (`hi`): Hearing impairment.
-* `OpenAgenda\Event::ACCESS_II` (`ii`): Visual impairment.
-* `OpenAgenda\Event::ACCESS_VI` (`vi`): Psychic impairment.
-* `OpenAgenda\Event::ACCESS_MI` (`mi`): Motor impairment.
-* `OpenAgenda\Event::ACCESS_PI` (`pi`): Intellectual impairment.
+* `OpenAgenda\Entity\Event::ACCESS_HI` (`hi`): Hearing impairment.
+* `OpenAgenda\Entity\Event::ACCESS_II` (`ii`): Visual impairment.
+* `OpenAgenda\Entity\Event::ACCESS_VI` (`vi`): Psychic impairment.
+* `OpenAgenda\Entity\Event::ACCESS_MI` (`mi`): Motor impairment.
+* `OpenAgenda\Entity\Event::ACCESS_PI` (`pi`): Intellectual impairment.

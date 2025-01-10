@@ -1,0 +1,15 @@
+meta {
+  name: Event
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}/agendas/{{agenda_id}}/events/{{event_id}}
+  body: none
+  auth: none
+}
+
+headers {
+  key: {{public_key}}
+}

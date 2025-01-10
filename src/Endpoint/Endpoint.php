@@ -127,32 +127,14 @@ abstract class Endpoint implements ValidatorAwareInterface
     }
 
     /**
-     * Validate endpoint parameters.
+     * Validate URI query. ex /agendas?size=<size>&state=<state>
      *
-     * @param array $params Endpoint parameters.
-     * @param bool $validate Validate
-     * @return array
+     * @param \Cake\Validation\Validator $validator Validator
+     * @return \Cake\Validation\Validator
      */
-    protected function validateParams(array $params, bool $validate = true): array
+    public function validationUriQuery(Validator $validator): Validator
     {
-        // Default to null
-        $params += array_fill_keys(array_keys($this->queryFields), null);
-
-        // Keep-only valid fields
-        $params = array_intersect_key($params, $this->queryFields);
-
-        if ($validate) {
-            // todo why default ?
-            $errors = $this->getValidator('default')
-                ->validate($params);
-
-            if ($errors) {
-                $message = '';
-                throw new InvalidArgumentException($message);
-            }
-        }
-
-        return $params;
+        return $validator;
     }
 
     /**
@@ -206,7 +188,7 @@ abstract class Endpoint implements ValidatorAwareInterface
         $method = strtolower($method);
 
         $path = $this->uriPath($method, $validate);
-        $query = $this->uriQuery();
+        $query = $this->uriQuery($method, $validate);
 
         $components = parse_url($this->baseUrl . $path);
         if ($query) {
@@ -249,14 +231,36 @@ abstract class Endpoint implements ValidatorAwareInterface
     /**
      * Convert endpoint params to valid OpenAgenda endpoint query params.
      *
-     * @param bool $validate Validate path parameters if true
+     * @param string $method Validate path parameters if true
+     * @param bool $validate Do query validation
      * @return array
      */
-    protected function uriQuery(bool $validate = true): array
+    protected function uriQuery(string $method, bool $validate = true): array
     {
+        $params = $this->params;
         $query = [];
 
-        $params = $this->validateParams($this->params, $validate);
+        // Default to null
+        $params += array_fill_keys(array_keys($this->queryFields), null);
+
+        // Keep-only valid fields
+        $params = array_intersect_key($params, $this->queryFields);
+
+        if ($validate) {
+            // validate Uri path params
+            $validator = 'uriQuery' . ucfirst(strtolower($method));
+            if (method_exists($this, 'validation' . ucfirst($validator))) {
+                $validator = $this->getValidator($validator);
+            } else {
+                $validator = $this->getValidator('uriQuery');
+            }
+
+            $errors = $validator->validate($this->params);
+
+            if ($errors) {
+                $this->throwException($errors);
+            }
+        }
 
         foreach ($params as $param => $value) {
             if (!isset($this->queryFields[$param])) {

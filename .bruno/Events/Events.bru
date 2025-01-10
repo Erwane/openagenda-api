@@ -1,0 +1,20 @@
+meta {
+  name: Events
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/agendas/{{agenda_id}}/events/?size=2&state=0
+  body: none
+  auth: none
+}
+
+params:query {
+  size: 2
+  state: 0
+}
+
+headers {
+  key: {{public_key}}
+}

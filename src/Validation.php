@@ -42,13 +42,12 @@ class Validation
     }
 
     /**
-     * Check multilingual array.
+     * Check valid lang.
      *
-     * @param array $check Data.
-     * @param int|null $maxLength Value max length.
-     * @return string|bool
+     * @param string $lang Lang
+     * @return bool
      */
-    public static function multilingual(array $check, ?int $maxLength = null)
+    public static function lang(string $lang)
     {
         $valid = [
             'aa', 'ab', 'ae', 'af', 'ak', 'am', 'an', 'ar', 'as', 'av', 'ay', 'az', 'ba', 'be', 'bg', 'bh', 'bi',
@@ -64,8 +63,20 @@ class Validation
             'ty', 'ug', 'uk', 'ur', 'uz', 've', 'vi', 'vo', 'wa', 'wo', 'xh', 'yi', 'yo', 'za', 'zh', 'zu',
         ];
 
+        return in_array($lang, $valid);
+    }
+
+    /**
+     * Check multilingual array.
+     *
+     * @param array $check Data.
+     * @param int|null $maxLength Value max length.
+     * @return string|bool
+     */
+    public static function multilingual(array $check, ?int $maxLength = null)
+    {
         foreach ($check as $lang => $value) {
-            if (!in_array($lang, $valid)) {
+            if (!self::lang($lang)) {
                 return sprintf('`%s` is an invalid ISO 639-1 language code.', $lang);
             }
 

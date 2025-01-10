@@ -97,6 +97,7 @@ class LocationTest extends EndpointTestCase
     {
         $endpoint = new Location([]);
 
+        /** @var \Cake\Validation\Validator $v */
         $v = $endpoint->{$method}(new Validator());
 
         // agenda_id

@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace OpenAgenda\Entity;
 
+use ArrayAccess;
 use Cake\Chronos\Chronos;
 use InvalidArgumentException;
 use OpenAgenda\OpenAgendaException;
@@ -16,7 +17,7 @@ use OpenAgenda\OpenAgendaException;
  * @license     https://opensource.org/licenses/mit-license.php MIT License
  * @property int $id
  */
-abstract class Entity
+abstract class Entity implements ArrayAccess
 {
     /**
      * Holds all fields and their values for this entity
@@ -106,22 +107,14 @@ abstract class Entity
     }
 
     /**
-     * Get property/field.
+     * Magic getter to access fields that have been set in this entity
      *
-     * @param string $name Property (field) name.
-     * @return mixed|null
+     * @param string $field Name of the field to access
+     * @return mixed
      */
-    public function __get(string $name)
+    public function &__get(string $field)
     {
-        if ($name === '') {
-            throw new InvalidArgumentException('Cannot get an empty field');
-        }
-
-        if (isset($this->_fields[$name])) {
-            return $this->_fields[$name];
-        }
-
-        return null;
+        return $this->get($field);
     }
 
     /**
@@ -167,6 +160,15 @@ abstract class Entity
                         break;
                     case 'boolean':
                         $value = (bool)$value;
+                        break;
+                    case Agenda::class:
+                    case Location::class:
+                    case Event::class:
+                        if (is_array($value)) {
+                            $value = new $this->_aliases[$field]['type']($value);
+                        } elseif ($value instanceof Entity) {
+                            $value = new $this->_aliases[$field]['type']($value->toArray());
+                        }
                         break;
                 }
             }
@@ -222,6 +224,51 @@ abstract class Entity
     }
 
     /**
+     * Implements isset($entity);
+     *
+     * @param string $offset The offset to check.
+     * @return bool Success
+     */
+    public function offsetExists($offset): bool
+    {
+        return $this->has($offset);
+    }
+
+    /**
+     * Implements $entity[$offset];
+     *
+     * @param string $offset The offset to get.
+     * @return mixed
+     */
+    public function &offsetGet($offset)
+    {
+        return $this->get($offset);
+    }
+
+    /**
+     * Implements $entity[$offset] = $value;
+     *
+     * @param string $offset The offset to set.
+     * @param mixed $value The value to set.
+     * @return void
+     */
+    public function offsetSet($offset, $value): void
+    {
+        $this->set($offset, $value);
+    }
+
+    /**
+     * Implements unset($result[$offset]);
+     *
+     * @param string $offset The offset to remove.
+     * @return void
+     */
+    public function offsetUnset($offset): void
+    {
+        $this->unset($offset);
+    }
+
+    /**
      * Set property⋅ies value⋅s.
      *
      * @param string|array $fields Property name.
@@ -255,6 +302,61 @@ abstract class Entity
             }
 
             $this->_fields[$name] = $value;
+        }
+
+        return $this;
+    }
+
+    /**
+     * Returns the value of a field by name
+     *
+     * @param string $field the name of the field to retrieve
+     * @return mixed
+     * @throws \InvalidArgumentException if an empty field name is passed
+     */
+    public function &get(string $field)
+    {
+        if ($field === '') {
+            throw new InvalidArgumentException('Cannot get an empty field');
+        }
+
+        $value = null;
+
+        if (isset($this->_fields[$field])) {
+            $value = &$this->_fields[$field];
+        }
+
+        return $value;
+    }
+
+    /**
+     * Check field exists.
+     *
+     * @param array<string>|string $field The field or fields to check.
+     * @return bool
+     */
+    public function has($field): bool
+    {
+        foreach ((array)$field as $prop) {
+            if ($this->get($prop) === null) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Unset field
+     *
+     * @param array<string>|string $field The field to unset.
+     * @return $this
+     */
+    public function unset($field)
+    {
+        $field = (array)$field;
+        foreach ($field as $p) {
+            unset($this->_fields[$p], $this->_dirty[$p]);
         }
 
         return $this;
@@ -313,7 +415,6 @@ abstract class Entity
 
     /**
      * Set the status of this entity.
-     *
      * Using `true` means that the entity has not been persisted in the database,
      * `false` that it already is.
      *
