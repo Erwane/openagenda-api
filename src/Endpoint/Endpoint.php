@@ -189,7 +189,6 @@ abstract class Endpoint implements ValidatorAwareInterface
 
         $path = $this->uriPath($method, $validate);
         $query = $this->uriQuery($method, $validate);
-        dump($query);
 
         $components = parse_url($this->baseUrl . $path);
         if ($query) {

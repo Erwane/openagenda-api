@@ -80,8 +80,8 @@ class Event extends Endpoint
     public function validationUriQueryGet(Validator $validator): Validator
     {
         return $validator
-            ->allowEmptyString('long_description_format')
-            ->inList('long_description_format', ['markdown', 'HTML', 'HTMLWithEmbeds']);
+            ->allowEmptyString('longDescriptionFormat')
+            ->inList('longDescriptionFormat', ['markdown', 'HTML', 'HTMLWithEmbeds']);
     }
 
     /**

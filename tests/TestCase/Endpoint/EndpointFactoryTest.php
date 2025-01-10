@@ -7,12 +7,15 @@ use OpenAgenda\Endpoint\Agenda;
 use OpenAgenda\Endpoint\Agendas;
 use OpenAgenda\Endpoint\EndpointFactory;
 use OpenAgenda\Endpoint\Event;
+use OpenAgenda\Endpoint\Events;
 use OpenAgenda\Endpoint\Location;
 use OpenAgenda\Endpoint\Locations;
 use OpenAgenda\Endpoint\UnknownEndpointException;
 use PHPUnit\Framework\TestCase;
 
 /**
+ * Endpoint\EndpointFactor tests
+ *
  * @uses   \OpenAgenda\Endpoint\EndpointFactory
  * @covers \OpenAgenda\Endpoint\EndpointFactory
  */

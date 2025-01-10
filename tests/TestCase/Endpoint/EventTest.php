@@ -22,6 +22,12 @@ use OpenAgenda\Test\EndpointTestCase;
 use OpenAgenda\Test\Utility\FileResource;
 use OpenAgenda\Validation;
 
+/**
+ * Endpoint\Events tests
+ *
+ * @uses   \OpenAgenda\Endpoint\Event
+ * @covers \OpenAgenda\Endpoint\Event
+ */
 class EventTest extends EndpointTestCase
 {
     public function testValidationUriPathGet()
@@ -69,7 +75,7 @@ class EventTest extends EndpointTestCase
         $v = $endpoint->validationUriQueryGet(new Validator());
 
         // longDescriptionFormat
-        $field = $v->field('long_description_format');
+        $field = $v->field('longDescriptionFormat');
         $this->assertTrue($field->isEmptyAllowed());
         $rules = $field->rules();
         $this->assertArrayHasKey('inList', $rules);

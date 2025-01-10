@@ -27,7 +27,7 @@ use OpenAgenda\OpenAgendaException;
  * @property string|null $image_credits
  * @property array<string, string>|null $title
  * @property array<string, string>|null $description
- * @property array<string, string>|null $long_description
+ * @property array<string, string>|null $longDescription
  * @property array<string, string>|null $keywords
  * @property array<string, string>|null $conditions
  * @property array<string, int|null>|null $age
