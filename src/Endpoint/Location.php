@@ -36,26 +36,25 @@ class Location extends Endpoint
     }
 
     /**
-     * Validation rules for Uri path GET.
+     * Validate URI path contain id
      *
-     * @param \Cake\Validation\Validator $validator Validator.
+     * @param \Cake\Validation\Validator $validator Validator
      * @return \Cake\Validation\Validator
      */
-    public function validationUriPathGet(Validator $validator): Validator
+    public function validationUriPathWithId(Validator $validator): Validator
     {
         return $this->validationUriPath($validator)
             // id
             ->requirePresence(
                 'uid',
-                [$this, 'checkIdOrExtId'],
+                [$this, 'presenceIdOrExtId'],
                 'One of `id` or `extId` is required'
             )
             ->integer('uid')
-
             // extId
             ->requirePresence(
                 'extId',
-                [$this, 'checkIdOrExtId'],
+                [$this, 'presenceIdOrExtId'],
                 'One of `id` or `extId` is required'
             )
             ->scalar('extId');
@@ -69,7 +68,29 @@ class Location extends Endpoint
      */
     public function validationUriPathExists(Validator $validator): Validator
     {
-        return $this->validationUriPathGet($validator);
+        return $this->validationUriPathWithId($validator);
+    }
+
+    /**
+     * Validation rules for Uri path GET.
+     *
+     * @param \Cake\Validation\Validator $validator Validator.
+     * @return \Cake\Validation\Validator
+     */
+    public function validationUriPathGet(Validator $validator): Validator
+    {
+        return $this->validationUriPathWithId($validator);
+    }
+
+    /**
+     * Validation rules for Uri path UPDATE.
+     *
+     * @param \Cake\Validation\Validator $validator Validator.
+     * @return \Cake\Validation\Validator
+     */
+    public function validationUriPathUpdate(Validator $validator): Validator
+    {
+        return $this->validationUriPathWithId($validator);
     }
 
     /**
@@ -80,7 +101,7 @@ class Location extends Endpoint
      */
     public function validationUriPathDelete(Validator $validator): Validator
     {
-        return $this->validationUriPathGet($validator);
+        return $this->validationUriPathWithId($validator);
     }
 
     /**
@@ -202,11 +223,12 @@ class Location extends Endpoint
      * @param array $context Validation context.
      * @return bool
      */
-    public function checkIdOrExtId(array $context = [])
+    public static function presenceIdOrExtId(array $context = [])
     {
         $data = $context['data'];
+        $isNew = $context['newRecord'] ?? true;
 
-        return empty($data['uid']) && empty($data['extId']);
+        return !$isNew && empty($data['uid']) && empty($data['extId']);
     }
 
     /**

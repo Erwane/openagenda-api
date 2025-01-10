@@ -30,11 +30,11 @@ use OpenAgenda\Validation;
  */
 class LocationTest extends EndpointTestCase
 {
-    public function testValidationUriPathGet()
+    public function testValidationUriPath()
     {
         $endpoint = new Location([]);
 
-        $v = $endpoint->validationUriPathGet(new Validator());
+        $v = $endpoint->validationUriPath(new Validator());
 
         // agendaUid
         $this->assertTrue($v->hasField('agendaUid'));
@@ -42,37 +42,50 @@ class LocationTest extends EndpointTestCase
         $this->assertTrue($field->isPresenceRequired());
         $rules = $field->rules();
         $this->assertArrayHasKey('integer', $rules);
+    }
+
+    public function testValidationUriPathWithId()
+    {
+        $endpoint = new Location([]);
+
+        $v = $endpoint->validationUriPathWithId(new Validator());
+
+        // agendaUid
+        $this->assertTrue($v->hasField('agendaUid'));
 
         // id
         $field = $v->field('uid');
         $this->assertIsCallable($field->isPresenceRequired());
-        $this->assertEquals('checkIdOrExtId', $field->isPresenceRequired()[1]);
+        $this->assertEquals('presenceIdOrExtId', $field->isPresenceRequired()[1]);
         $rules = $field->rules();
         $this->assertArrayHasKey('integer', $rules);
 
         // extId
         $field = $v->field('extId');
         $this->assertIsCallable($field->isPresenceRequired());
-        $this->assertEquals('checkIdOrExtId', $field->isPresenceRequired()[1]);
+        $this->assertEquals('presenceIdOrExtId', $field->isPresenceRequired()[1]);
         $rules = $field->rules();
         $this->assertArrayHasKey('scalar', $rules);
     }
 
-    public function testValidationUriPathExists()
+    public static function dataValidationUriPath(): array
     {
-        $endpoint = new Location([]);
-
-        $v = $endpoint->validationUriPathExists(new Validator());
-        $this->assertTrue($v->hasField('agendaUid'));
-        $this->assertTrue($v->hasField('uid'));
-        $this->assertTrue($v->hasField('extId'));
+        return [
+            ['exists'],
+            ['get'],
+            ['update'],
+            ['delete'],
+        ];
     }
 
-    public function testValidationUriPathDelete()
+    /** @dataProvider dataValidationUriPath */
+    public function testValidationUriPathMethods($method)
     {
-        $endpoint = new Location([]);
+        $endpoint = new Location();
 
-        $v = $endpoint->validationUriPathDelete(new Validator());
+        $method = 'validationUriPath' . ucfirst($method);
+
+        $v = $endpoint->{$method}(new Validator());
         $this->assertTrue($v->hasField('agendaUid'));
         $this->assertTrue($v->hasField('uid'));
         $this->assertTrue($v->hasField('extId'));
@@ -101,20 +114,19 @@ class LocationTest extends EndpointTestCase
         $v = $endpoint->{$method}(new Validator());
 
         // agendaUid
-        // todo test agendaUid field ?
-        // $this->assertTrue($v->hasField('agendaUid'));
+        $this->assertTrue($v->hasField('agendaUid'));
 
         // id
         $field = $v->field('uid');
         $this->assertIsCallable($field->isPresenceRequired());
-        $this->assertEquals('checkIdOrExtId', $field->isPresenceRequired()[1]);
+        $this->assertEquals('presenceIdOrExtId', $field->isPresenceRequired()[1]);
         $rules = $field->rules();
         $this->assertArrayHasKey('integer', $rules);
 
         // extId
         $field = $v->field('extId');
         $this->assertIsCallable($field->isPresenceRequired());
-        $this->assertEquals('checkIdOrExtId', $field->isPresenceRequired()[1]);
+        $this->assertEquals('presenceIdOrExtId', $field->isPresenceRequired()[1]);
         $rules = $field->rules();
         $this->assertArrayHasKey('scalar', $rules);
 
@@ -253,11 +265,30 @@ class LocationTest extends EndpointTestCase
         $this->assertArrayHasKey('scalar', $rules);
     }
 
+    public static function dataPresenceIdOrExtId(): array
+    {
+        return [
+            [['data' => [], 'newRecord' => true], false],
+            [['data' => [], 'newRecord' => false], true],
+            [['data' => ['uid' => 1], 'newRecord' => true], false],
+            [['data' => ['extId' => 1], 'newRecord' => true], false],
+            [['data' => ['uid' => 1], 'newRecord' => false], false],
+            [['data' => ['extId' => 1], 'newRecord' => false], false],
+        ];
+    }
+
+    /** @dataProvider dataPresenceIdOrExtId */
+    public function testPresenceIdOrExtId($context, $expected): void
+    {
+        $success = Location::presenceIdOrExtId($context);
+        $this->assertSame($expected, $success);
+    }
+
     public static function dataGetUriErrors(): array
     {
         return [
             [
-                'get',
+                'exists',
                 [],
                 [
                     'agendaUid' => [
@@ -273,8 +304,11 @@ class LocationTest extends EndpointTestCase
             ],
             [
                 'get',
-                ['agendaUid' => 123],
+                [],
                 [
+                    'agendaUid' => [
+                        '_required' => 'This field is required',
+                    ],
                     'uid' => [
                         '_required' => 'One of `id` or `extId` is required',
                     ],
@@ -289,6 +323,36 @@ class LocationTest extends EndpointTestCase
                 [
                     'agendaUid' => [
                         '_required' => 'This field is required',
+                    ],
+                ],
+            ],
+            [
+                'update',
+                [],
+                [
+                    'agendaUid' => [
+                        '_required' => 'This field is required',
+                    ],
+                    'uid' => [
+                        '_required' => 'One of `id` or `extId` is required',
+                    ],
+                    'extId' => [
+                        '_required' => 'One of `id` or `extId` is required',
+                    ],
+                ],
+            ],
+            [
+                'delete',
+                [],
+                [
+                    'agendaUid' => [
+                        '_required' => 'This field is required',
+                    ],
+                    'uid' => [
+                        '_required' => 'One of `id` or `extId` is required',
+                    ],
+                    'extId' => [
+                        '_required' => 'One of `id` or `extId` is required',
                     ],
                 ],
             ],
@@ -314,6 +378,11 @@ class LocationTest extends EndpointTestCase
     {
         return [
             [
+                'exists',
+                ['agendaUid' => 123, 'uid' => 456, 'extId' => 'my-internal-id'],
+                'path' => '/v2/agendas/123/locations/456',
+            ],
+            [
                 'get',
                 ['agendaUid' => 123, 'uid' => 456, 'extId' => 'my-internal-id'],
                 'path' => '/v2/agendas/123/locations/456',
@@ -330,6 +399,21 @@ class LocationTest extends EndpointTestCase
             ],
             [
                 'update',
+                ['agendaUid' => 123, 'uid' => 456],
+                '/v2/agendas/123/locations/456',
+            ],
+            [
+                'update',
+                ['agendaUid' => 123, 'extId' => 'my-internal-id'],
+                '/v2/agendas/123/locations/ext/my-internal-id',
+            ],
+            [
+                'delete',
+                ['agendaUid' => 123, 'uid' => 456],
+                '/v2/agendas/123/locations/456',
+            ],
+            [
+                'delete',
                 ['agendaUid' => 123, 'extId' => 'my-internal-id'],
                 '/v2/agendas/123/locations/ext/my-internal-id',
             ],

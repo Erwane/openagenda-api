@@ -43,9 +43,9 @@ class Agendas extends Endpoint
      * @param \Cake\Validation\Validator $validator Validator.
      * @return \Cake\Validation\Validator
      */
-    public function validationUriPathGet(Validator $validator): Validator
+    public function validationUriQueryGet(Validator $validator): Validator
     {
-        return $this->validationUriPath($validator)
+        return $validator
             // limit
             ->allowEmptyString('size')
             ->integer('size')
@@ -95,6 +95,7 @@ class Agendas extends Endpoint
      * Get agendas.
      *
      * @return \OpenAgenda\Entity\Agenda[]|\Ramsey\Collection\Collection
+     * @throws \OpenAgenda\OpenAgendaException
      */
     public function get(): Collection
     {

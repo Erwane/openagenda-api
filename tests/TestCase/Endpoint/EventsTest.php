@@ -37,6 +37,8 @@ class EventsTest extends EndpointTestCase
 
         $v = $endpoint->validationUriPath(new Validator());
 
+        $this->assertCount(1, $v);
+
         // agendaUid
         $field = $v->field('agendaUid');
         $this->assertTrue($field->isPresenceRequired());
@@ -269,7 +271,7 @@ class EventsTest extends EndpointTestCase
     {
         return [
             [
-                'GET',
+                'get',
                 ['agendaUid' => 123],
                 [
                     'path' => '/v2/agendas/123/events',
@@ -277,7 +279,7 @@ class EventsTest extends EndpointTestCase
                 ],
             ],
             [
-                'GET',
+                'get',
                 [
                     'agendaUid' => 123,
                     'detailed' => 1,

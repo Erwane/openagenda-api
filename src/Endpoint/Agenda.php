@@ -44,7 +44,7 @@ class Agenda extends Endpoint
      * @param \Cake\Validation\Validator $validator Validator.
      * @return \Cake\Validation\Validator
      */
-    public function validationUriPathGet(Validator $validator)
+    public function validationUriQueryGet(Validator $validator)
     {
         return $this->validationUriPath($validator)
             // detailed
@@ -63,9 +63,10 @@ class Agenda extends Endpoint
     }
 
     /**
-     * Get agenda.
+     * {@inheritDoc}
      *
      * @return \OpenAgenda\Entity\Agenda|null
+     * @throws \OpenAgenda\OpenAgendaException
      */
     public function get(): ?AgendaEntity
     {
@@ -79,5 +80,18 @@ class Agenda extends Endpoint
         }
 
         return $agenda;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @throws \OpenAgenda\OpenAgendaException
+     */
+    public function exists(): bool
+    {
+        $status = OpenAgenda::getClient()
+            ->head($this->getUri(__FUNCTION__));
+
+        return $status >= 200 && $status < 300;
     }
 }

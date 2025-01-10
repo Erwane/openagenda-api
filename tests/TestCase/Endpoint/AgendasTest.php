@@ -29,11 +29,13 @@ use Ramsey\Collection\Collection;
  */
 class AgendasTest extends EndpointTestCase
 {
-    public function testValidationUriPathGet()
+    public function testValidationUriQueryGet()
     {
         $endpoint = new Agendas([]);
 
-        $v = $endpoint->validationUriPathGet(new Validator());
+        $v = $endpoint->validationUriQueryGet(new Validator());
+
+        $this->assertCount(9, $v);
 
         // size
         $field = $v->field('size');
@@ -51,7 +53,6 @@ class AgendasTest extends EndpointTestCase
         $field = $v->field('fields');
         $this->assertTrue($field->isEmptyAllowed());
         $rules = $field->rules();
-        $this->assertArrayHasKey('multipleOptions', $rules);
         $this->assertEquals(['summary', 'schema'], $rules['multipleOptions']->get('pass')[0]);
 
         // search
@@ -96,7 +97,7 @@ class AgendasTest extends EndpointTestCase
     {
         return [
             [
-                'GET',
+                'get',
                 [],
                 [
                     'path' => '/v2/agendas',
@@ -104,7 +105,7 @@ class AgendasTest extends EndpointTestCase
                 ],
             ],
             [
-                'GET',
+                'get',
                 [
                     'size' => 2,
                     'fields' => ['summary', 'schema'],
@@ -132,7 +133,7 @@ class AgendasTest extends EndpointTestCase
 
             // My agendas. _path is set by EndpointFactory::make()
             [
-                'GET',
+                'get',
                 [
                     '_path' => '/agendas/mines',
                 ],

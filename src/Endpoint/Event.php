@@ -14,7 +14,9 @@ declare(strict_types=1);
  */
 namespace OpenAgenda\Endpoint;
 
+use Cake\Chronos\Chronos;
 use Cake\Validation\Validator;
+use Exception;
 use OpenAgenda\Entity\Event as EventEntity;
 use OpenAgenda\OpenAgenda;
 use OpenAgenda\Validation;
@@ -45,7 +47,7 @@ class Event extends Endpoint
     {
         return $this->validationUriPath($validator)
             // id
-            ->requirePresence('uid', 'create')
+            ->requirePresence('uid')
             ->integer('uid');
     }
 
@@ -56,6 +58,28 @@ class Event extends Endpoint
      * @return \Cake\Validation\Validator
      */
     public function validationUriPathExists(Validator $validator): Validator
+    {
+        return $this->validationUriPathGet($validator);
+    }
+
+    /**
+     * Validation rules for Uri path POST.
+     *
+     * @param \Cake\Validation\Validator $validator Validator.
+     * @return \Cake\Validation\Validator
+     */
+    public function validationUriPathCreate(Validator $validator): Validator
+    {
+        return $this->validationUriPath($validator);
+    }
+
+    /**
+     * Validation rules for Uri path UPDATE.
+     *
+     * @param \Cake\Validation\Validator $validator Validator.
+     * @return \Cake\Validation\Validator
+     */
+    public function validationUriPathUpdate(Validator $validator): Validator
     {
         return $this->validationUriPathGet($validator);
     }
@@ -92,7 +116,10 @@ class Event extends Endpoint
      */
     public function validationCreate(Validator $validator): Validator
     {
-        return $this->validationUriPathGet($validator)
+        return $this->validationUriPath($validator)
+            // id
+            ->requirePresence('uid', 'update')
+            ->integer('uid')
             // title
             ->requirePresence('title', 'create')
             ->add('title', 'multilingual', [
@@ -133,16 +160,12 @@ class Event extends Endpoint
             ])
             // timings
             ->requirePresence('timings', 'create')
-            ->add('timings', 'timings', [
-                'rule' => [[Validation::class, 'timings']],
-            ])
-            // timings
+            ->add('timings', 'timings', ['rule' => [$this, 'checkTimings']])
+            // age
             ->allowEmptyArray('age')
-            ->add('age', 'age', [
-                'rule' => [[Validation::class, 'age']],
-            ])
+            ->add('age', 'age', ['rule' => [$this, 'checkAge']])
             // locationUid
-            ->requirePresence('locationUid', [$this, 'checkLocationId'])
+            ->requirePresence('locationUid', [$this, 'presenceLocationId'])
             ->integer('locationUid')
             // attendanceMode
             ->allowEmptyString('attendanceMode')
@@ -152,7 +175,7 @@ class Event extends Endpoint
                 EventEntity::ATTENDANCE_MIXED,
             ])
             // onlineAccessLink
-            ->requirePresence('onlineAccessLink', [$this, 'checkOnlineAccessLink'])
+            ->requirePresence('onlineAccessLink', [$this, 'presenceOnlineAccessLink'])
             ->url('onlineAccessLink')
             // status
             ->allowEmptyString('status')
@@ -186,21 +209,84 @@ class Event extends Endpoint
     }
 
     /**
+     * Check event timings
+     *
+     * @param array $check Timings
+     * @return bool
+     */
+    public static function checkTimings(array $check): bool
+    {
+        foreach ($check as $item) {
+            if (!array_key_exists('begin', $item) || !array_key_exists('end', $item)) {
+                return false;
+            }
+
+            try {
+                $begin = Chronos::parse($item['begin']);
+                $end = Chronos::parse($item['end']);
+            } catch (Exception $e) {
+                return false;
+            }
+
+            if ($begin->greaterThanOrEquals($end)) {
+                return false;
+            }
+        }
+
+        return !empty($check);
+    }
+
+    /**
+     * Check event ages
+     *
+     * @param array $check Ages
+     * @return bool
+     */
+    public static function checkAge(array $check): bool
+    {
+        if ($check) {
+            if (!array_key_exists('min', $check) || !array_key_exists('max', $check)) {
+                return false;
+            }
+
+            $min = $check['min'];
+            $max = $check['max'];
+
+            if ($min === null && $max === null) {
+                return true;
+            }
+
+            if ($min > $max) {
+                return false;
+            }
+
+            if ($min === null && $max !== null) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
      * Location is required only for offline and mixed events.
      *
      * @param array $context Validation context
      * @return false|string
      */
-    public function checkLocationId(array $context)
+    public static function presenceLocationId(array $context)
     {
         $data = $context['data'];
+        $isNew = $context['newRecord'] ?? true;
 
-        $locationId = $data['locationUid'] ?? null;
         $mode = $data['attendanceMode'] ?? null;
         $modes = [EventEntity::ATTENDANCE_OFFLINE, EventEntity::ATTENDANCE_MIXED];
 
-        if (in_array($mode, $modes) && !$locationId) {
-            return 'locationUid required if attendanceMode is offline or mixed';
+        if (
+            ($isNew && !$mode)
+            || (in_array($mode, $modes))
+        ) {
+            return true;
         }
 
         return false;
@@ -212,19 +298,13 @@ class Event extends Endpoint
      * @param array $context Validation context
      * @return false|string
      */
-    public function checkOnlineAccessLink(array $context)
+    public static function presenceOnlineAccessLink(array $context)
     {
         $data = $context['data'];
 
-        $link = $data['onlineAccessLink'] ?? null;
         $mode = $data['attendanceMode'] ?? null;
-        $modes = [EventEntity::ATTENDANCE_ONLINE, EventEntity::ATTENDANCE_MIXED];
 
-        if (in_array($mode, $modes) && !$link) {
-            return 'onlineAccessLink required if attendanceMode is online';
-        }
-
-        return false;
+        return $mode === EventEntity::ATTENDANCE_MIXED || $mode === EventEntity::ATTENDANCE_ONLINE;
     }
 
     /**
@@ -255,9 +335,9 @@ class Event extends Endpoint
     }
 
     /**
-     * Get location.
+     * Get event.
      *
-     * @return \OpenAgenda\Entity\Location|null
+     * @return \OpenAgenda\Entity\Event|null
      */
     public function get(): ?EventEntity
     {
@@ -274,15 +354,26 @@ class Event extends Endpoint
     }
 
     /**
-     * Create location
+     * Create event
      *
-     * @return \OpenAgenda\Entity\Location|null
+     * @param bool $validate Validate data
+     * @return \OpenAgenda\Entity\Event|null
+     * @throws \OpenAgenda\OpenAgendaException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
-    public function create()
+    public function create(bool $validate = true)
     {
         unset($this->params['uid']);
 
         $entity = new EventEntity($this->params);
+
+        if ($validate) {
+            $errors = $this->getValidator('create')
+                ->validate($entity->toArray());
+            if ($errors) {
+                $this->throwException($errors);
+            }
+        }
 
         $uri = $this->getUri(__FUNCTION__);
 
@@ -295,22 +386,27 @@ class Event extends Endpoint
     }
 
     /**
-     * Patch location
+     * Patch event
      *
-     * @return \OpenAgenda\Entity\Location|null
+     * @param bool $validate Validate data
+     * @return \OpenAgenda\Entity\Event|null
      * @throws \OpenAgenda\OpenAgendaException
      * @throws \Psr\SimpleCache\InvalidArgumentException
      */
-    public function update()
+    public function update(bool $validate = true)
     {
+        if ($validate) {
+            $errors = $this->getValidator('update')
+                ->validate($this->params, false);
+            if ($errors) {
+                dump($errors);
+                $this->throwException($errors);
+            }
+        }
+
         $entity = new EventEntity($this->params);
         $entity->setNew(false);
-        $errors = $this->getValidator('update')
-            ->validate($this->params, $entity->isNew());
 
-        if ($errors) {
-            $this->throwException($errors);
-        }
         $data = $entity->toOpenAgenda();
 
         // todo: no data to update, skip. Maybe an option ?
@@ -324,9 +420,11 @@ class Event extends Endpoint
     }
 
     /**
-     * Delete location
+     * Delete event
      *
-     * @return \OpenAgenda\Entity\Location|null
+     * @return \OpenAgenda\Entity\Event|null
+     * @throws \OpenAgenda\OpenAgendaException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function delete()
     {
@@ -343,7 +441,7 @@ class Event extends Endpoint
      * Parse client response.
      *
      * @param array $response Client response.
-     * @return \OpenAgenda\Entity\Location|null
+     * @return \OpenAgenda\Entity\Event|null
      */
     protected function _parseResponse(array $response): ?EventEntity
     {

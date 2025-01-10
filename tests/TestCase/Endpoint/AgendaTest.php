@@ -35,6 +35,8 @@ class AgendaTest extends EndpointTestCase
 
         $v = $endpoint->validationUriPath(new Validator());
 
+        $this->assertCount(1, $v);
+
         // uid
         $field = $v->field('uid');
         $this->assertTrue($field->isPresenceRequired());
@@ -42,11 +44,13 @@ class AgendaTest extends EndpointTestCase
         $this->assertArrayHasKey('integer', $rules);
     }
 
-    public function testValidationUriPathGet()
+    public function testValidationUriQueryGet()
     {
         $endpoint = new Agenda();
 
-        $v = $endpoint->validationUriPathGet(new Validator());
+        $v = $endpoint->validationUriQueryGet(new Validator());
+
+        $this->assertCount(2, $v);
 
         // agendaUid
         $this->assertTrue($v->hasField('uid'));
@@ -62,7 +66,7 @@ class AgendaTest extends EndpointTestCase
     {
         return [
             [
-                'GET',
+                'exists',
                 [],
                 [
                     'uid' => [
@@ -70,6 +74,16 @@ class AgendaTest extends EndpointTestCase
                     ],
                 ],
             ],
+            [
+                'get',
+                [],
+                [
+                    'uid' => [
+                        '_required' => 'This field is required',
+                    ],
+                ],
+            ],
+
         ];
     }
 
@@ -92,7 +106,7 @@ class AgendaTest extends EndpointTestCase
     {
         return [
             [
-                'GET',
+                'exists',
                 ['uid' => 12345],
                 [
                     'path' => '/v2/agendas/12345',
@@ -100,7 +114,15 @@ class AgendaTest extends EndpointTestCase
                 ],
             ],
             [
-                'GET',
+                'get',
+                ['uid' => 12345],
+                [
+                    'path' => '/v2/agendas/12345',
+                    'query' => [],
+                ],
+            ],
+            [
+                'get',
                 [
                     'uid' => 12345,
                     'detailed' => true,
@@ -112,6 +134,7 @@ class AgendaTest extends EndpointTestCase
                     ],
                 ],
             ],
+
         ];
     }
 
@@ -140,5 +163,17 @@ class AgendaTest extends EndpointTestCase
         $agenda = $endpoint->get();
 
         $this->assertInstanceOf(\OpenAgenda\Entity\Agenda::class, $agenda);
+    }
+
+    public function testExists()
+    {
+        $this->mockRequest(false, 'head', [
+                'https://api.openagenda.com/v2/agendas/12345',
+                ['headers' => ['key' => 'publicKey']],
+        ], [200, '']);
+
+        $endpoint = new Agenda(['uid' => 12345]);
+
+        $this->assertTrue($endpoint->exists());
     }
 }

@@ -139,7 +139,7 @@ class LocationsTest extends EndpointTestCase
     {
         return [
             [
-                'GET',
+                'get',
                 [],
                 [
                     'agendaUid' => [
@@ -169,7 +169,7 @@ class LocationsTest extends EndpointTestCase
     {
         return [
             [
-                'GET',
+                'get',
                 ['agendaUid' => 123],
                 [
                     'path' => '/v2/agendas/123/locations',
@@ -177,7 +177,7 @@ class LocationsTest extends EndpointTestCase
                 ],
             ],
             [
-                'GET',
+                'get',
                 [
                     'agendaUid' => 123,
                     'size' => 2,

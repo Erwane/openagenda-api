@@ -17,6 +17,12 @@ namespace OpenAgenda\Test\TestCase;
 use OpenAgenda\Validation;
 use PHPUnit\Framework\TestCase;
 
+/**
+ * OpenAgenda\Validation tests
+ *
+ * @uses \OpenAgenda\Validation
+ * @covers \OpenAgenda\Validation
+ */
 class ValidationTest extends TestCase
 {
     public function dataPhone()
@@ -36,6 +42,12 @@ class ValidationTest extends TestCase
         $success = Validation::phone(...$input);
 
         $this->assertSame($expected, $success);
+    }
+
+    public function testLang(): void
+    {
+        $this->assertTrue(Validation::lang('fr'));
+        $this->assertFalse(Validation::lang('ac'));
     }
 
     public function dataMultilingual()

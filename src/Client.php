@@ -152,7 +152,7 @@ class Client
      * POST to OpenAgenda endpoint and return Entity or payload.
      *
      * @param \League\Uri\Uri|string $uri OpenAgenda uri
-     * @param array $data Post data.
+     * @param array $data POST data.
      * @param array $params Request params.
      * @return array
      * @throws \OpenAgenda\OpenAgendaException
@@ -170,7 +170,7 @@ class Client
      * PATCH to OpenAgenda endpoint and return Entity or payload.
      *
      * @param \League\Uri\Uri|string $uri OpenAgenda uri
-     * @param array $data Post data.
+     * @param array $data PATCH data.
      * @param array $params Request params.
      * @return array
      * @throws \OpenAgenda\OpenAgendaException
@@ -188,7 +188,7 @@ class Client
      * DELETE something in OpenAgenda endpoint and return Entity or payload.
      *
      * @param \League\Uri\Uri|string $uri OpenAgenda uri
-     * @param array $params Post data.
+     * @param array $params Request params.
      * @return array
      * @throws \OpenAgenda\OpenAgendaException
      * @throws \Psr\SimpleCache\InvalidArgumentException

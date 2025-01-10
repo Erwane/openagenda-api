@@ -1,17 +1,13 @@
 meta {
-  name: Agenda
+  name: exists
   type: http
-  seq: 3
+  seq: 4
 }
 
-get {
+head {
   url: {{baseUrl}}/agendas/{{agenda_id}}
   body: none
   auth: none
-}
-
-params:query {
-  ~detailed: 1
 }
 
 headers {

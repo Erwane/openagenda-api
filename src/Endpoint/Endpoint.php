@@ -26,8 +26,8 @@ use League\Uri\Uri;
  *
  * @method bool exists() Check entity exists
  * @method mixed get() Get collection or entity
- * @method mixed create() Create entity
- * @method mixed update(bool $full) Update entity (full data or partial)
+ * @method mixed create(bool $validate) Create entity
+ * @method mixed update(bool $validate) Update entity (full data or partial)
  * @method mixed delete() Delete entity
  */
 abstract class Endpoint implements ValidatorAwareInterface
@@ -165,14 +165,6 @@ abstract class Endpoint implements ValidatorAwareInterface
             $value = $value->format('Y-m-d\TH:i:s');
         }
 
-        if (isset($map['matching'])) {
-            if (is_string($value) && isset($map['matching'][$value])) {
-                $value = $map['matching'][$value];
-            } elseif (is_array($value)) {
-                dump($map['matching'], $value);
-            }
-        }
-
         return $value;
     }
 
@@ -209,15 +201,16 @@ abstract class Endpoint implements ValidatorAwareInterface
     public function uriPath(string $method, bool $validate = true): string
     {
         if ($validate) {
+            $method = strtolower($method);
             // validate Uri path params
-            $validator = 'uriPath' . ucfirst(strtolower($method));
+            $validator = 'uriPath' . ucfirst($method);
             if (method_exists($this, 'validation' . ucfirst($validator))) {
                 $validator = $this->getValidator($validator);
             } else {
                 $validator = $this->getValidator('uriPath');
             }
 
-            $errors = $validator->validate($this->params);
+            $errors = $validator->validate($this->params, $method === 'create');
 
             if ($errors) {
                 $this->throwException($errors);
