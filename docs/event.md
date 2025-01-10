@@ -42,7 +42,7 @@ The `/events` endpoint or `$agenda->events()` method accept an options array wit
   Check [Schema](#schema) for possible fields.  
   You can use dot notation to query location parts (ex: `location.city`).  
   **Too much fields could slow down you requests.**
-* string `description_format`: `long_description` rendering format.  
+* string `description_format`: `longDescription` rendering format.  
   Possible values are:
     * `markdown`: Default. As markdown
     * `html`: As html.
@@ -89,7 +89,7 @@ The `/events` endpoint or `$agenda->events()` method accept an options array wit
     * array `geo`: Events in this square.  
       `ne`: `['lat' => 48.9527, 'lng' => 2.4484]`  
       `sw`: `['lat' => 48.8560, 'lng' => 2.1801]`
-    * string|array `location_id`: Event in those location's id.
+    * string|array `locationUid`: Event in those location's id.
     * string|array `accessibility`: Check [accessibility list](#accessibility-list) for detail
     * string|array `status`: Check [event status](#status) for detail
     * int `state`: Check [event state](#state) for detail
@@ -110,7 +110,7 @@ $event = $agenda->event($options)->get();
 
 * int `agenda` (**required**): Agenda id. _Endpoint method only_.
 * int `id` (**required**): Event id.
-* string `description_format`: `long_description` rendering format.    
+* string `description_format`: `longDescription` rendering format.    
   Possible values are:
     * `markdown`: Default.
     * `html`: As html.
@@ -177,24 +177,24 @@ $event = $agenda->event($eventId)->delete();
 |:------------------:|:-----------------:|:--------:|:-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 |         id         |        int        |    I     | OpenAgenda unique id. Can't be sets                                                                                                                                            |
 |        slug        |      string       |    I     | Unique string id                                                                                                                                                               |
-|     created_at     | DateTimeInterface |    I     | Creation date                                                                                                                                                                  |
-|     updated_at     | DateTimeInterface |    I     | Update date                                                                                                                                                                    |
+|     createdAt     | DateTimeInterface |    I     | Creation date                                                                                                                                                                  |
+|     updatedAt     | DateTimeInterface |    I     | Update date                                                                                                                                                                    |
 |       links        |                   |    I     |                                                                                                                                                                                |
 |      timezone      |      string       |    I     | Timezone [identifier](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones)                                                                                            |
 |       title        |   multilingual    |  **R**   | Event title. Max 140 characters                                                                                                                                                |
 |    description     |   multilingual    |  **R**   | Short description. Max 200 characters by lang                                                                                                                                  |
-|  long_description  |   multilingual    |    O     | Long description. Max 10000 characters by lang                                                                                                                                 |
+|  longDescription  |   multilingual    |    O     | Long description. Max 10000 characters by lang                                                                                                                                 |
 |     conditions     |   multilingual    |    O     | Event access conditions (price, reservation, ...). Max 255 characters by lang                                                                                                  |
 |      keywords      |   multilingual    |    O     | Keywords. List of words in one array by lang. Max 255 characters by lang.<br/>ex: `['fr' => ['musique', 'concert', 'rock']]`                                                   |
 |       image        |    file \| url    |    O     | Jpeg file or absolute url to image. Max 20Mo. _todo_                                                                                                                           |
-|   image_credits    |      string       |    O     | Image credits. Max 255 characters. _todo_                                                                                                                                      |
+|   imageCredits    |      string       |    O     | Image credits. Max 255 characters. _todo_                                                                                                                                      |
 |    registration    |     string[]      |    O     | List of registration methods like email, phone, form url, ... Max 2000 characters total                                                                                        |
 |   accessibility    |      bool[]       |    O     | List of event accessibility options. Check [accessibility list](#accessibility-list) for detail                                                                                |                                                                                
 |      timings       |       array       |  **R**   | Event time slots. Max 800 timings. Accept DateTimeInterface or iso datetime string.<br/>ex: `[['begin' => '2024-12-23T19:00:00+0200', 'end' => new DateTimeImmutable('now')]]` |
 |        age         |       int[]       |    O     | Min/max age range of targeted participants. ex `['min' => 13, 'max' => 120]`                                                                                                   |
-|    location_id     |        int        |  **R***  | Location id. Only required for face-to-face events                                                                                                                             |
-|  attendance_mode   |        int        |    O     | Event participation type.<br/>`1` (default): Offline, face-to-face.<br/>`2`: Online event, `online_access_link` is required.<br/>`3`: Mixed                                    |
-| online_access_link |        url        |  **R***  | Event online access link. Required if `attendance_mode` is 2 or 3.                                                                                                             |
+|    locationUid     |        int        |  **R***  | Location id. Only required for face-to-face events                                                                                                                             |
+|  attendanceMode   |        int        |    O     | Event participation type.<br/>`1` (default): Offline, face-to-face.<br/>`2`: Online event, `onlineAccessLink` is required.<br/>`3`: Mixed                                    |
+| onlineAccessLink |        url        |  **R***  | Event online access link. Required if `attendanceMode` is 2 or 3.                                                                                                             |
 |       status       |        int        |  **R**   | Event status. Check [event status](#status) for detail                                                                                                                         |
 |       state        |        int        |          | Event state. Check [event state](#state) for detail                                                                                                                            |
 

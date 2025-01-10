@@ -30,9 +30,9 @@ class Event extends Endpoint
     public function validationUriPath(Validator $validator): Validator
     {
         return parent::validationUriPath($validator)
-            // agenda_id
-            ->requirePresence('agenda_id')
-            ->integer('agenda_id');
+            // agendaUid
+            ->requirePresence('agendaUid')
+            ->integer('agendaUid');
     }
 
     /**
@@ -45,8 +45,8 @@ class Event extends Endpoint
     {
         return $this->validationUriPath($validator)
             // id
-            ->requirePresence('id', 'create')
-            ->integer('id');
+            ->requirePresence('uid', 'create')
+            ->integer('uid');
     }
 
     /**
@@ -104,8 +104,8 @@ class Event extends Endpoint
                 'rule' => [[Validation::class, 'multilingual'], 200],
             ])
             // longDescription
-            ->allowEmptyArray('long_description')
-            ->add('long_description', 'multilingual', [
+            ->allowEmptyArray('longDescription')
+            ->add('longDescription', 'multilingual', [
                 'rule' => [[Validation::class, 'multilingual'], 10000],
             ])
             // conditions
@@ -120,9 +120,9 @@ class Event extends Endpoint
             ])
             // image
             ->allowEmptyFile('image')
-            // image_credits
-            ->allowEmptyString('image_credits')
-            ->maxLength('image_credits', 255)
+            // imageCredits
+            ->allowEmptyString('imageCredits')
+            ->maxLength('imageCredits', 255)
             // registration
             ->allowEmptyArray('registration')
             ->isArray('registration')
@@ -142,18 +142,18 @@ class Event extends Endpoint
                 'rule' => [[Validation::class, 'age']],
             ])
             // locationUid
-            ->requirePresence('location_id', [$this, 'checkLocationId'])
-            ->integer('location_id')
+            ->requirePresence('locationUid', [$this, 'checkLocationId'])
+            ->integer('locationUid')
             // attendanceMode
-            ->allowEmptyString('attendance_mode')
-            ->inList('attendance_mode', [
+            ->allowEmptyString('attendanceMode')
+            ->inList('attendanceMode', [
                 EventEntity::ATTENDANCE_OFFLINE,
                 EventEntity::ATTENDANCE_ONLINE,
                 EventEntity::ATTENDANCE_MIXED,
             ])
             // onlineAccessLink
-            ->requirePresence('online_access_link', [$this, 'checkOnlineAccessLink'])
-            ->url('online_access_link')
+            ->requirePresence('onlineAccessLink', [$this, 'checkOnlineAccessLink'])
+            ->url('onlineAccessLink')
             // status
             ->allowEmptyString('status')
             ->inList('status', [
@@ -235,9 +235,9 @@ class Event extends Endpoint
         parent::uriPath($method);
 
         if ($method === 'create') {
-            $path = sprintf('/agendas/%d/events', $this->params['agenda_id'] ?? 0);
+            $path = sprintf('/agendas/%d/events', $this->params['agendaUid'] ?? 0);
         } else {
-            $path = sprintf('/agendas/%d/events/%d', $this->params['agenda_id'] ?? 0, $this->params['id']);
+            $path = sprintf('/agendas/%d/events/%d', $this->params['agendaUid'] ?? 0, $this->params['uid']);
         }
 
         return $path;
@@ -280,7 +280,7 @@ class Event extends Endpoint
      */
     public function create()
     {
-        unset($this->params['id']);
+        unset($this->params['uid']);
 
         $entity = new EventEntity($this->params);
 

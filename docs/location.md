@@ -25,7 +25,7 @@ Return a [Collection](collection.md) of Location items.
 
 ```php
 // Using OpenAgenda::locations() method
-$locations = $oa->locations(['agenda_id' => 123, 'name' => 'My Location']);
+$locations = $oa->locations(['agendaUid' => 123, 'name' => 'My Location']);
 
 // Using previous fetched OpenAgenda\Entity\Agenda object
 $locations = $agenda->locations(['name' => 'My Location']);
@@ -37,7 +37,7 @@ $locations = $agenda->locations(['name' => 'My Location']);
 
 | field       | type                         | Required | description                                                                                                                 |
 |-------------|------------------------------|:--------:|-----------------------------------------------------------------------------------------------------------------------------|
-| agenda_id   | integer                      |    Y     | Agenda id. Required if using endpoint.                                                                                      |
+| agendaUid   | integer                      |    Y     | Agenda id. Required if using endpoint.                                                                                      |
 | limit       | integer                      |    n     | How many results by request. Default `10`                                                                                   |
 | page        | integer                      |    n     | Pagination. Require a PSR-16 configured cache.<br/>You can only ask for next or previous page.<br/>**Not implemented yet**. |
 | detailed    | boolean                      |    n     | When `true`, get all locations fields. Default `false`                                                                      |
@@ -47,7 +47,7 @@ $locations = $agenda->locations(['name' => 'My Location']);
 | created_gte | DateTimeInterface or string* |    n     | Only locations created at or after.                                                                                         |
 | updated_lte | DateTimeInterface or string* |    n     | Only locations updated before or at.                                                                                        |n
 | updated_gte | DateTimeInterface or string* |    n     | Only locations updated at or after.                                                                                         |
-| sort        | string                       |    n     | Sort results.<br/>Allowed values are `name_asc`, `name_desc`, `created_asc`, `created_desc`                                 |
+| sort        | string                       |    n     | Sort results.<br/>Allowed values are `name.asc`, `name.desc`, `createdAt.asc`, `createdAt.desc`                                 |
 
 **note**: For DateTime as string, could be atom string (`2024-12-23T12:34:56+00:00`) or any valid datetime format like `2023-06-02` or `2023-06-02 12:34:56`
 
@@ -58,21 +58,21 @@ If you want to check a location exists, you can use `head()` method instead of `
 
 ```php
 // Using endpoint
-$location = $oa->location(['id' => 456, 'agenda_id' => 123])->get();
-$exists = $oa->location(['id' => 456, 'agenda_id' => 123])->exists();
+$location = $oa->location(['uid' => 456, 'agendaUid' => 123])->get();
+$exists = $oa->location(['uid' => 456, 'agendaUid' => 123])->exists();
 
 // Using previous fetched OpenAgenda\Entity\Agenda object
-$location = $agenda->location(['ext_id' => 'my-location-id'])->get();
-$exists = $agenda->location(['id' => 456])->exists();
+$location = $agenda->location(['extId' => 'my-location-id'])->get();
+$exists = $agenda->location(['uid' => 456])->exists();
 ```
 
 **Params**:
 
 | field     | type    | Required | description                            |
 |-----------|---------|:--------:|----------------------------------------|
-| agenda_id | integer |    Y     | Agenda id. Required if using endpoint. |
+| agendaUid | integer |    Y     | Agenda id. Required if using endpoint. |
 | id        | integer |    n     | Location id.                           |
-| ext_id    | mixed   |    n     | Your internal location id.             |
+| extId    | mixed   |    n     | Your internal location id.             |
 
 ### Create
 
@@ -100,18 +100,18 @@ You can use `post` or `patch` method.
 If using `post`, all required update fields should be sets in `$data`.  
 If using `patch` only passed (or changed) fields will be updated.
 
-You can update a location with `ext_id` instead of `id`.  
+You can update a location with `extId` instead of `id`.  
 In this case, `id` should not exist in `$data`.
 
 ```php
 // Using previous fetched OpenAgenda\Entity\Location object
-$location = $oa->location(['id' => 456, 'agenda_id' => 123])->get();
+$location = $oa->location(['uid' => 456, 'agendaUid' => 123])->get();
 $location->state = true;
 $location = $location->update(); // Only changed fields. Recommended
 $location = $location->update(true); // Full update
 
 // Or pushing data directly to OpenAgenda::location() method
-$location = $oa->location(['agenda_id' => 123, 'id' => 456, 'state' => true])->update();
+$location = $oa->location(['agendaUid' => 123, 'uid' => 456, 'state' => true])->update();
 ```
 
 #### Data
@@ -123,17 +123,17 @@ Check [Location object](#schema) for more details.
 Delete a location in an agenda.  
 Return the deleted Location object.
 
-You can delete a location with `ext_id` instead of `id`.  
+You can delete a location with `extId` instead of `id`.  
 In this case, `id` should not exist in `$data`.
 
 ```php
 // Using previous fetched OpenAgenda\Entity\Location object
-$location = $oa->location(['id' => 456, 'agenda_id' => 123])
+$location = $oa->location(['uid' => 456, 'agendaUid' => 123])
     ->get()
     ->delete();
 
 // Or through OpenAgenda::location() method
-$location = $oa->location(['agenda_id' => 123, 'id' => 456])->delete();
+$location = $oa->location(['agendaUid' => 123, 'uid' => 456])->delete();
 ```
 
 ## Schema
@@ -142,13 +142,13 @@ $location = $oa->location(['agenda_id' => 123, 'id' => 456])->delete();
 |:-------------:|:-----------------:|:--------:|:------------------------------------------------------------------------------------|
 |      id       |        int        |    I     | OpenAgenda unique id. Can't be sets                                                 |
 |     slug      |      string       |    I     | Unique string id                                                                    |
-|    set_id     |        int        |    I     | Associated location sets id                                                         |
-|  created_at   | DateTimeInterface |    I     | Creation date                                                                       |
-|  updated_at   | DateTimeInterface |    I     | Update date                                                                         |
-|    ext_id     |   string \| int   |    O     | External id (typically, your database location id)                                  |
+|    setUid     |        int        |    I     | Associated location sets id                                                         |
+|  createdAt   | DateTimeInterface |    I     | Creation date                                                                       |
+|  updatedAt   | DateTimeInterface |    I     | Update date                                                                         |
+|    extId     |   string \| int   |    O     | External id (typically, your database location id)                                  |
 |     name      |      string       |  **R**   | Location name. Max 100 characters                                                   |
 |    address    |      string       |  **R**   | Full address. Max 255 characters                                                    |
-|    country    |      string       |  **R**   | ISO 3166-1 Alpha 2 country code. ex: FR                                             |
+|    countryCode    |      string       |  **R**   | ISO 3166-1 Alpha 2 country code. ex: FR                                             |
 |     state     |       bool        |    O     | `true`: location is verified  <br/>`false`: location need to be verified            |
 |  description  |   multilingual    |    O     | Location description. Max 5000 characters                                           |
 |    access     |   multilingual    |    O     | Location access instruction. Max 1000 characters                                    |
@@ -157,12 +157,12 @@ $location = $oa->location(['agenda_id' => 123, 'id' => 456])->delete();
 |     phone     |      string       |    O     | Location principal contact phone                                                    |
 |     links     |       array       |    O     | Others location links (socials, ...)                                                |
 |     image     |      string       |    O     | _todo_                                                                              |
-| image_credits |      string       |    O     | _todo_                                                                              |
+| imageCredits |      string       |    O     | _todo_                                                                              |
 |    region     |      string       |    G     | Administrative area level 1                                                         |
 |  department   |      string       |    G     | Administrative area level 2                                                         |
 |   district    |      string       |    G     | Administrative area level 3                                                         |
 |     city      |      string       |    G     | Locality                                                                            |
-|  postal_code  |      string       |    G     | Postal code                                                                         |
+|  postalCode  |      string       |    G     | Postal code                                                                         |
 |     insee     |      string       |    G     | Insee code                                                                          |
 |   latitude    |      decimal      |    G     | Latitude. 7 digits precision                                                        |
 |   longitude   |      decimal      |    G     | Longitude. 7 digits precision                                                       |

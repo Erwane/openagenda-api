@@ -36,22 +36,22 @@ class LocationTest extends EndpointTestCase
 
         $v = $endpoint->validationUriPathGet(new Validator());
 
-        // agenda_id
-        $this->assertTrue($v->hasField('agenda_id'));
-        $field = $v->field('agenda_id');
+        // agendaUid
+        $this->assertTrue($v->hasField('agendaUid'));
+        $field = $v->field('agendaUid');
         $this->assertTrue($field->isPresenceRequired());
         $rules = $field->rules();
         $this->assertArrayHasKey('integer', $rules);
 
         // id
-        $field = $v->field('id');
+        $field = $v->field('uid');
         $this->assertIsCallable($field->isPresenceRequired());
         $this->assertEquals('checkIdOrExtId', $field->isPresenceRequired()[1]);
         $rules = $field->rules();
         $this->assertArrayHasKey('integer', $rules);
 
-        // ext_id
-        $field = $v->field('ext_id');
+        // extId
+        $field = $v->field('extId');
         $this->assertIsCallable($field->isPresenceRequired());
         $this->assertEquals('checkIdOrExtId', $field->isPresenceRequired()[1]);
         $rules = $field->rules();
@@ -63,9 +63,9 @@ class LocationTest extends EndpointTestCase
         $endpoint = new Location([]);
 
         $v = $endpoint->validationUriPathExists(new Validator());
-        $this->assertTrue($v->hasField('agenda_id'));
-        $this->assertTrue($v->hasField('id'));
-        $this->assertTrue($v->hasField('ext_id'));
+        $this->assertTrue($v->hasField('agendaUid'));
+        $this->assertTrue($v->hasField('uid'));
+        $this->assertTrue($v->hasField('extId'));
     }
 
     public function testValidationUriPathDelete()
@@ -73,9 +73,9 @@ class LocationTest extends EndpointTestCase
         $endpoint = new Location([]);
 
         $v = $endpoint->validationUriPathDelete(new Validator());
-        $this->assertTrue($v->hasField('agenda_id'));
-        $this->assertTrue($v->hasField('id'));
-        $this->assertTrue($v->hasField('ext_id'));
+        $this->assertTrue($v->hasField('agendaUid'));
+        $this->assertTrue($v->hasField('uid'));
+        $this->assertTrue($v->hasField('extId'));
     }
 
     public static function dataValidationCreateUpdate()
@@ -100,19 +100,19 @@ class LocationTest extends EndpointTestCase
         /** @var \Cake\Validation\Validator $v */
         $v = $endpoint->{$method}(new Validator());
 
-        // agenda_id
-        // todo test agenda_id field ?
-        // $this->assertTrue($v->hasField('agenda_id'));
+        // agendaUid
+        // todo test agendaUid field ?
+        // $this->assertTrue($v->hasField('agendaUid'));
 
         // id
-        $field = $v->field('id');
+        $field = $v->field('uid');
         $this->assertIsCallable($field->isPresenceRequired());
         $this->assertEquals('checkIdOrExtId', $field->isPresenceRequired()[1]);
         $rules = $field->rules();
         $this->assertArrayHasKey('integer', $rules);
 
-        // ext_id
-        $field = $v->field('ext_id');
+        // extId
+        $field = $v->field('extId');
         $this->assertIsCallable($field->isPresenceRequired());
         $this->assertEquals('checkIdOrExtId', $field->isPresenceRequired()[1]);
         $rules = $field->rules();
@@ -134,8 +134,8 @@ class LocationTest extends EndpointTestCase
         $this->assertArrayHasKey('maxLength', $rules);
         $this->assertEquals([255], $rules['maxLength']->get('pass'));
 
-        // country
-        $field = $v->field('country');
+        // countryCode
+        $field = $v->field('countryCode');
         $this->assertEquals('create', $field->isPresenceRequired());
         $rules = $field->rules();
         $this->assertArrayHasKey('scalar', $rules);
@@ -192,8 +192,8 @@ class LocationTest extends EndpointTestCase
         // image
         // todo
 
-        // image_credits
-        $field = $v->field('image_credits');
+        // imageCredits
+        $field = $v->field('imageCredits');
         $this->assertTrue($field->isEmptyAllowed());
         $rules = $field->rules();
         $this->assertArrayHasKey('scalar', $rules);
@@ -222,8 +222,8 @@ class LocationTest extends EndpointTestCase
         $rules = $field->rules();
         $this->assertArrayHasKey('scalar', $rules);
 
-        // postal_code
-        $field = $v->field('postal_code');
+        // postalCode
+        $field = $v->field('postalCode');
         $this->assertTrue($field->isEmptyAllowed());
         $rules = $field->rules();
         $this->assertArrayHasKey('scalar', $rules);
@@ -260,26 +260,26 @@ class LocationTest extends EndpointTestCase
                 'get',
                 [],
                 [
-                    'agenda_id' => [
+                    'agendaUid' => [
                         '_required' => 'This field is required',
                     ],
-                    'id' => [
-                        '_required' => 'One of `id` or `ext_id` is required',
+                    'uid' => [
+                        '_required' => 'One of `id` or `extId` is required',
                     ],
-                    'ext_id' => [
-                        '_required' => 'One of `id` or `ext_id` is required',
+                    'extId' => [
+                        '_required' => 'One of `id` or `extId` is required',
                     ],
                 ],
             ],
             [
                 'get',
-                ['agenda_id' => 123],
+                ['agendaUid' => 123],
                 [
-                    'id' => [
-                        '_required' => 'One of `id` or `ext_id` is required',
+                    'uid' => [
+                        '_required' => 'One of `id` or `extId` is required',
                     ],
-                    'ext_id' => [
-                        '_required' => 'One of `id` or `ext_id` is required',
+                    'extId' => [
+                        '_required' => 'One of `id` or `extId` is required',
                     ],
                 ],
             ],
@@ -287,7 +287,7 @@ class LocationTest extends EndpointTestCase
                 'create',
                 [],
                 [
-                    'agenda_id' => [
+                    'agendaUid' => [
                         '_required' => 'This field is required',
                     ],
                 ],
@@ -315,22 +315,22 @@ class LocationTest extends EndpointTestCase
         return [
             [
                 'get',
-                ['agenda_id' => 123, 'id' => 456, 'ext_id' => 'my-internal-id'],
+                ['agendaUid' => 123, 'uid' => 456, 'extId' => 'my-internal-id'],
                 'path' => '/v2/agendas/123/locations/456',
             ],
             [
                 'get',
-                ['agenda_id' => 123, 'ext_id' => 'my-internal-id'],
+                ['agendaUid' => 123, 'extId' => 'my-internal-id'],
                 '/v2/agendas/123/locations/ext/my-internal-id',
             ],
             [
                 'create',
-                ['agenda_id' => 123, 'id' => 456, 'ext_id' => 'my-internal-id'],
+                ['agendaUid' => 123, 'uid' => 456, 'extId' => 'my-internal-id'],
                 '/v2/agendas/123/locations',
             ],
             [
                 'update',
-                ['agenda_id' => 123, 'ext_id' => 'my-internal-id'],
+                ['agendaUid' => 123, 'extId' => 'my-internal-id'],
                 '/v2/agendas/123/locations/ext/my-internal-id',
             ],
         ];
@@ -354,7 +354,7 @@ class LocationTest extends EndpointTestCase
             ['headers' => ['key' => 'publicKey']],
         ], [200, $payload]);
 
-        $endpoint = new Location(['agenda_id' => 123, 'id' => 456]);
+        $endpoint = new Location(['agendaUid' => 123, 'uid' => 456]);
 
         $entity = $endpoint->get();
 
@@ -368,7 +368,7 @@ class LocationTest extends EndpointTestCase
             ['headers' => ['key' => 'publicKey']],
         ], [200, '']);
 
-        $endpoint = new Location(['agenda_id' => 123, 'id' => 456]);
+        $endpoint = new Location(['agendaUid' => 123, 'uid' => 456]);
         $exists = $endpoint->exists();
 
         $this->assertTrue($exists);
@@ -389,11 +389,11 @@ class LocationTest extends EndpointTestCase
         ], [200, $payload]);
 
         $endpoint = new Location([
-            'agenda_id' => 123,
-            'id' => 456,
+            'agendaUid' => 123,
+            'uid' => 456,
             'name' => 'My location',
             'address' => '1, place liberté, 75001 Paris, France',
-            'country' => 'FR',
+            'countryCode' => 'FR',
             'state' => true,
         ]);
 
@@ -413,8 +413,8 @@ class LocationTest extends EndpointTestCase
         ], [200, $payload]);
 
         $endpoint = new Location([
-            'agenda_id' => 123,
-            'id' => 456,
+            'agendaUid' => 123,
+            'uid' => 456,
             'state' => 1,
         ]);
 
@@ -430,7 +430,7 @@ class LocationTest extends EndpointTestCase
             ['headers' => ['access-token' => 'authorization-key', 'nonce' => 1734957296123456]],
         ], [200, $payload]);
 
-        $endpoint = new Location(['agenda_id' => 123, 'id' => 456]);
+        $endpoint = new Location(['agendaUid' => 123, 'uid' => 456]);
         $entity = $endpoint->delete();
         $this->assertInstanceOf(LocationEntity::class, $entity);
     }

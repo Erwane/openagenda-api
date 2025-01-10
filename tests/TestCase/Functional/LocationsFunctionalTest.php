@@ -20,7 +20,7 @@ use OpenAgenda\Entity\Location;
 use OpenAgenda\Test\OpenAgendaTestCase;
 use OpenAgenda\Test\Utility\FileResource;
 
-class LocationsOpenAgendaTest extends OpenAgendaTestCase
+class LocationsFunctionalTest extends OpenAgendaTestCase
 {
     /**
      * Test search one location from Agenda
@@ -34,7 +34,7 @@ class LocationsOpenAgendaTest extends OpenAgendaTestCase
             ->method('get')
             ->willReturn(new Response(200, [], $payload));
 
-        $agenda = new Agenda(['id' => 123]);
+        $agenda = new Agenda(['uid' => 123]);
 
         $location = $agenda->locations(['search' => 'My location'])->first();
         $this->assertInstanceOf(Location::class, $location);
@@ -56,8 +56,8 @@ class LocationsOpenAgendaTest extends OpenAgendaTestCase
             ->method('head')
             ->willReturn(new Response(200));
 
-        $location = $oa->location(['id' => 456, 'agenda_id' => 123])->get();
-        $exists = $oa->location(['id' => 456, 'agenda_id' => 123])->exists();
+        $location = $oa->location(['uid' => 456, 'agendaUid' => 123])->get();
+        $exists = $oa->location(['uid' => 456, 'agendaUid' => 123])->exists();
 
         $this->assertInstanceOf(Location::class, $location);
         $this->assertTrue($exists);
@@ -79,10 +79,10 @@ class LocationsOpenAgendaTest extends OpenAgendaTestCase
             ->method('head')
             ->willReturn(new Response(200));
 
-        $agenda = new Agenda(['id' => 123]);
+        $agenda = new Agenda(['uid' => 123]);
 
-        $location = $agenda->location(['ext_id' => 'my-location-id'])->get();
-        $exists = $agenda->location(['id' => 456])->exists();
+        $location = $agenda->location(['extId' => 'my-location-id'])->get();
+        $exists = $agenda->location(['uid' => 456])->exists();
 
         $this->assertInstanceOf(Location::class, $location);
         $this->assertTrue($exists);
@@ -103,7 +103,7 @@ class LocationsOpenAgendaTest extends OpenAgendaTestCase
                 new Response(200, [], $payload)
             );
 
-        $data = ['agenda_id' => 123, 'name' => 'My location'];
+        $data = ['agendaUid' => 123, 'name' => 'My location'];
         $location = $oa->location($data)->create();
         $this->assertInstanceOf(Location::class, $location);
     }
@@ -123,9 +123,9 @@ class LocationsOpenAgendaTest extends OpenAgendaTestCase
                 new Response(200, [], $payload)
             );
 
-        $agenda = new Agenda(['id' => 123]);
+        $agenda = new Agenda(['uid' => 123]);
 
-        $data = ['agenda_id' => 123, 'name' => 'My location'];
+        $data = ['agendaUid' => 123, 'name' => 'My location'];
         $location = $agenda->location($data)->create();
         $this->assertInstanceOf(Location::class, $location);
     }
@@ -145,7 +145,7 @@ class LocationsOpenAgendaTest extends OpenAgendaTestCase
             ->method('patch')
             ->willReturn(new Response(200, [], $payload));
 
-        $data = ['id' => 456, 'agenda_id' => 123, 'state' => true];
+        $data = ['uid' => 456, 'agendaUid' => 123, 'state' => true];
         $location = $oa->location($data)->update();
         $this->assertInstanceOf(Location::class, $location);
     }
@@ -165,7 +165,7 @@ class LocationsOpenAgendaTest extends OpenAgendaTestCase
             ->method('patch')
             ->willReturn(new Response(200, [], $payload));
 
-        $location = new Location(['id' => 456, 'agenda_id' => 123]);
+        $location = new Location(['uid' => 456, 'agendaUid' => 123]);
         $location->state = true;
         $location = $location->update();
         $this->assertInstanceOf(Location::class, $location);
@@ -186,7 +186,7 @@ class LocationsOpenAgendaTest extends OpenAgendaTestCase
             ->method('delete')
             ->willReturn(new Response(200, [], $payload));
 
-        $data = ['id' => 456, 'agenda_id' => 123];
+        $data = ['uid' => 456, 'agendaUid' => 123];
         $location = $oa->location($data)->delete();
         $this->assertInstanceOf(Location::class, $location);
     }
@@ -206,7 +206,7 @@ class LocationsOpenAgendaTest extends OpenAgendaTestCase
             ->method('delete')
             ->willReturn(new Response(200, [], $payload));
 
-        $location = new Location(['id' => 456, 'agenda_id' => 123]);
+        $location = new Location(['uid' => 456, 'agendaUid' => 123]);
         $location = $location->delete();
         $this->assertInstanceOf(Location::class, $location);
     }

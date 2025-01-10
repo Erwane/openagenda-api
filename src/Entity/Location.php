@@ -44,36 +44,36 @@ use OpenAgenda\OpenAgendaException;
  */
 class Location extends Entity
 {
-    protected $_aliases = [
-        'id' => ['field' => 'uid'],
-        'agenda_id' => ['field' => 'agendaUid'],
+    protected $_schema = [
+        'uid' => ['field' => 'uid'],
+        'agendaUid' => ['field' => 'agendaUid'],
         'name' => ['field' => 'name', 'required' => true],
         'address' => ['field' => 'address'], 'required' => true,
         'access' => ['field' => 'access'],
         'description' => ['field' => 'description'],
         'image' => ['field' => 'image'],
-        'image_credits' => ['field' => 'imageCredits'],
+        'imageCredits' => ['field' => 'imageCredits'],
         'slug' => ['field' => 'slug'],
         'location_set_id' => ['field' => 'setUid'],
         'city' => ['field' => 'city'],
         'department' => ['field' => 'department'],
         'region' => ['field' => 'region'],
-        'postal_code' => ['field' => 'postalCode'],
+        'postalCode' => ['field' => 'postalCode'],
         'insee' => ['field' => 'insee'],
-        'country' => ['field' => 'countryCode', 'required' => true],
+        'countryCode' => ['field' => 'countryCode', 'required' => true],
         'district' => ['field' => 'district'],
         'latitude' => ['field' => 'latitude'],
         'longitude' => ['field' => 'longitude'],
-        'created_at' => ['field' => 'createdAt', 'type' => 'DateTime'],
-        'updated_at' => ['field' => 'updatedAt', 'type' => 'DateTime'],
+        'createdAt' => ['field' => 'createdAt', 'type' => 'datetime'],
+        'updatedAt' => ['field' => 'updatedAt', 'type' => 'datetime'],
         // website exists in doc but not in API payload
         // 'website' => ['field' => 'website'],
         'email' => ['field' => 'email'],
         'phone' => ['field' => 'phone'],
         'links' => ['field' => 'links'],
         'timezone' => ['field' => 'timezone'],
-        'ext_id' => ['field' => 'extId'],
-        'state' => ['field' => 'state', 'type' => 'boolean'],
+        'extId' => ['field' => 'extId'],
+        'state' => ['type' => 'bool'],
     ];
 
     /**
@@ -125,7 +125,7 @@ class Location extends Entity
      */
     public function agenda(array $params = [])
     {
-        $params['id'] = $this->agenda_id;
+        $params['uid'] = $this->agendaUid;
 
         return EndpointFactory::make('/agenda', $params);
     }
@@ -169,7 +169,7 @@ class Location extends Entity
     public function toOpenAgenda(bool $onlyChanged = false): array
     {
         $data = parent::toOpenAgenda($onlyChanged);
-        unset($data['uid'], $data['agendaId'], $data['agendaUid']);
+        unset($data['uid'], $data['agendaUid']);
 
         return $data;
     }

@@ -30,15 +30,15 @@ class EventTest extends EndpointTestCase
 
         $v = $endpoint->validationUriPathGet(new Validator());
 
-        // agenda_id
-        $this->assertTrue($v->hasField('agenda_id'));
-        $field = $v->field('agenda_id');
+        // agendaUid
+        $this->assertTrue($v->hasField('agendaUid'));
+        $field = $v->field('agendaUid');
         $this->assertTrue($field->isPresenceRequired());
         $rules = $field->rules();
         $this->assertArrayHasKey('integer', $rules);
 
         // id
-        $field = $v->field('id');
+        $field = $v->field('uid');
         $this->assertSame('create', $field->isPresenceRequired());
         $rules = $field->rules();
         $this->assertArrayHasKey('integer', $rules);
@@ -49,8 +49,8 @@ class EventTest extends EndpointTestCase
         $endpoint = new Event([]);
 
         $v = $endpoint->validationUriPathExists(new Validator());
-        $this->assertTrue($v->hasField('agenda_id'));
-        $this->assertTrue($v->hasField('id'));
+        $this->assertTrue($v->hasField('agendaUid'));
+        $this->assertTrue($v->hasField('uid'));
     }
 
     public function testValidationUriPathDelete()
@@ -58,8 +58,8 @@ class EventTest extends EndpointTestCase
         $endpoint = new Event([]);
 
         $v = $endpoint->validationUriPathDelete(new Validator());
-        $this->assertTrue($v->hasField('agenda_id'));
-        $this->assertTrue($v->hasField('id'));
+        $this->assertTrue($v->hasField('agendaUid'));
+        $this->assertTrue($v->hasField('uid'));
     }
 
     public function testValidationUriQueryGet(): void
@@ -98,11 +98,11 @@ class EventTest extends EndpointTestCase
         /** @var \Cake\Validation\Validator $v */
         $v = $endpoint->{$method}(new Validator());
 
-        // agenda_id
-        $this->assertTrue($v->hasField('agenda_id'));
+        // agendaUid
+        $this->assertTrue($v->hasField('agendaUid'));
 
         // id
-        $field = $v->field('id');
+        $field = $v->field('uid');
         $this->assertSame('create', $field->isPresenceRequired());
         $rules = $field->rules();
         $this->assertArrayHasKey('integer', $rules);
@@ -124,7 +124,7 @@ class EventTest extends EndpointTestCase
         $this->assertEquals(200, $rules['multilingual']->get('pass')[0]);
 
         // longDescription
-        $field = $v->field('long_description');
+        $field = $v->field('longDescription');
         $this->assertTrue($field->isEmptyAllowed());
         $rules = $field->rules();
         $this->assertArrayHasKey('multilingual', $rules);
@@ -153,7 +153,7 @@ class EventTest extends EndpointTestCase
         // $rules = $field->rules();
 
         // imageCredits
-        $field = $v->field('image_credits');
+        $field = $v->field('imageCredits');
         $this->assertTrue($field->isEmptyAllowed());
         $rules = $field->rules();
         $this->assertArrayHasKey('maxLength', $rules);
@@ -187,14 +187,14 @@ class EventTest extends EndpointTestCase
         $this->assertEquals([Validation::class, 'age'], $rules['age']->get('rule'));
 
         // locationUid
-        $field = $v->field('location_id');
+        $field = $v->field('locationUid');
         $this->assertIsCallable($field->isPresenceRequired());
         $this->assertEquals('checkLocationId', $field->isPresenceRequired()[1]);
         $rules = $field->rules();
         $this->assertArrayHasKey('integer', $rules);
 
         // attendanceMode
-        $field = $v->field('attendance_mode');
+        $field = $v->field('attendanceMode');
         $this->assertTrue($field->isEmptyAllowed());
         $rules = $field->rules();
         $this->assertArrayHasKey('inList', $rules);
@@ -205,7 +205,7 @@ class EventTest extends EndpointTestCase
         ], $rules['inList']->get('pass')[0]);
 
         // onlineAccessLink
-        $field = $v->field('online_access_link');
+        $field = $v->field('onlineAccessLink');
         $this->assertIsCallable($field->isPresenceRequired());
         $this->assertEquals('checkOnlineAccessLink', $field->isPresenceRequired()[1]);
         $rules = $field->rules();
@@ -245,10 +245,10 @@ class EventTest extends EndpointTestCase
                 'get',
                 [],
                 [
-                    'agenda_id' => [
+                    'agendaUid' => [
                         '_required' => 'This field is required',
                     ],
-                    'id' => [
+                    'uid' => [
                         '_required' => 'This field is required',
                     ],
                 ],
@@ -257,7 +257,7 @@ class EventTest extends EndpointTestCase
                 'create',
                 [],
                 [
-                    'agenda_id' => [
+                    'agendaUid' => [
                         '_required' => 'This field is required',
                     ],
                 ],
@@ -285,17 +285,17 @@ class EventTest extends EndpointTestCase
         return [
             [
                 'get',
-                ['agenda_id' => 123, 'id' => 456],
+                ['agendaUid' => 123, 'uid' => 456],
                 'path' => '/v2/agendas/123/events/456',
             ],
             [
                 'create',
-                ['agenda_id' => 123, 'id' => 456],
+                ['agendaUid' => 123, 'uid' => 456],
                 '/v2/agendas/123/events',
             ],
             [
                 'update',
-                ['agenda_id' => 123, 'id' => 456],
+                ['agendaUid' => 123, 'uid' => 456],
                 '/v2/agendas/123/events/456',
             ],
         ];
@@ -319,7 +319,7 @@ class EventTest extends EndpointTestCase
             ['headers' => ['key' => 'publicKey']],
         ], [200, $payload]);
 
-        $endpoint = new Event(['agenda_id' => 123, 'id' => 456]);
+        $endpoint = new Event(['agendaUid' => 123, 'uid' => 456]);
 
         $entity = $endpoint->get();
 
@@ -333,7 +333,7 @@ class EventTest extends EndpointTestCase
             ['headers' => ['key' => 'publicKey']],
         ], [200, '']);
 
-        $endpoint = new Event(['agenda_id' => 123, 'id' => 456]);
+        $endpoint = new Event(['agendaUid' => 123, 'uid' => 456]);
         $exists = $endpoint->exists();
 
         $this->assertTrue($exists);
@@ -356,9 +356,9 @@ class EventTest extends EndpointTestCase
         ], [200, $payload]);
 
         $endpoint = new Event([
-            'agenda_id' => 123,
-            'id' => 456,
-            'location_id' => 789,
+            'agendaUid' => 123,
+            'uid' => 456,
+            'locationUid' => 789,
             'title' => 'My Event',
             'description' => 'Event description',
             'timings' => [['begin' => '2025-01-06T11:00:00.000+01:00', 'end' => '2025-01-06T15:00:00.000+01:00']],
@@ -380,8 +380,8 @@ class EventTest extends EndpointTestCase
         ], [200, $payload]);
 
         $endpoint = new Event([
-            'agenda_id' => 123,
-            'id' => 456,
+            'agendaUid' => 123,
+            'uid' => 456,
             'state' => EventEntity::STATE_PUBLISHED,
         ]);
 
@@ -397,7 +397,7 @@ class EventTest extends EndpointTestCase
             ['headers' => ['access-token' => 'authorization-key', 'nonce' => 1734957296123456]],
         ], [200, $payload]);
 
-        $endpoint = new Event(['agenda_id' => 123, 'id' => 456]);
+        $endpoint = new Event(['agendaUid' => 123, 'uid' => 456]);
         $entity = $endpoint->delete();
         $this->assertInstanceOf(EventEntity::class, $entity);
     }

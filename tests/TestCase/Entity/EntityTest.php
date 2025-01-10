@@ -41,9 +41,9 @@ class EntityTest extends TestCase
         ]);
 
         $this->assertEquals([
-            'id' => 1,
-            'postal_code' => '12345',
-            'created_at' => Chronos::parse('2024-12-23T12:34:56+00:00'),
+            'uid' => 1,
+            'postalCode' => '12345',
+            'createdAt' => Chronos::parse('2024-12-23T12:34:56+00:00'),
             'state' => true,
             'description' => ['fr' => 'Lorem ipsum'],
         ], $ent->toArray());
@@ -58,30 +58,30 @@ class EntityTest extends TestCase
     public function testConstructNoSetter()
     {
         $ent = new ent(['uid' => '1'], ['useSetters' => false]);
-        $this->assertSame('1', $ent->id);
+        $this->assertSame('1', $ent->uid);
     }
 
     public function testSetter()
     {
-        /** @uses \OpenAgenda\Entity\Entity::_setId() */
+        /** @uses \OpenAgenda\Entity\Entity::_setUid() */
         $ent = new ent(['uid' => '1']);
-        $this->assertSame(1, $ent->id);
+        $this->assertSame(1, $ent->uid);
     }
 
     public function testSetProperty()
     {
         $ent = new Ent();
-        $ent->id = '1';
-        $this->assertSame(1, $ent->id);
+        $ent->uid = '1';
+        $this->assertSame(1, $ent->uid);
     }
 
     public function testToOpenAgenda()
     {
         $now = Chronos::now();
         $ent = new ent([
-            'id' => 1,
-            'postal_code' => '12345',
-            'created_at' => $now,
+            'uid' => 1,
+            'postalCode' => '12345',
+            'createdAt' => $now,
             'description' => ['fr' => 'Lorem ipsum'],
             'state' => true,
             'unknownField' => 'value',
@@ -99,8 +99,8 @@ class EntityTest extends TestCase
     public function testToOpenAgendaChanged(): void
     {
         $ent = new ent([
-            'id' => 1,
-            'postal_code' => '12345',
+            'uid' => 1,
+            'postalCode' => '12345',
             'state' => true,
         ], ['markClean' => true]);
 

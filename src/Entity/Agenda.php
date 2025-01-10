@@ -20,24 +20,36 @@ use OpenAgenda\OpenAgendaException;
 use Ramsey\Collection\Collection;
 
 /**
- * @property int $id
+ * @property int|null $uid
+ * @property string|null $title
+ * @property string|null $slug
+ * @property string|null $description
+ * @property string|null $url
+ * @property string|null $image
+ * @property bool|null $official
+ * @property bool|null $private
+ * @property bool|null $indexed
+ * @property int|null $networkUid
+ * @property int|null $locationSetUid
+ * @property \Cake\Chronos\Chronos|null $createdAt
+ * @property \Cake\Chronos\Chronos|null $updatedAt
  */
 class Agenda extends Entity
 {
-    protected $_aliases = [
-        'id' => ['field' => 'uid'],
-        'title' => ['field' => 'title'],
-        'description' => ['field' => 'description'],
-        'slug' => ['field' => 'slug'],
-        'url' => ['field' => 'url'],
-        'image' => ['field' => 'image'],
-        'official' => ['field' => 'official', 'type' => 'boolean'],
-        'private' => ['field' => 'private', 'type' => 'boolean'],
-        'indexed' => ['field' => 'indexed', 'type' => 'boolean'],
-        'network_id' => ['field' => 'network'],
-        'location_set_id' => ['field' => 'locationSet'],
-        'created_at' => ['field' => 'createdAt', 'type' => 'DateTime'],
-        'updated_at' => ['field' => 'updatedAt', 'type' => 'DateTime'],
+    protected $_schema = [
+        'uid' => ['type' => 'int'],
+        'title' => ['type' => 'string'],
+        'slug' => ['type' => 'string'],
+        'description' => ['type' => 'string'],
+        'url' => ['type' => 'string'],
+        'image' => ['type' => 'string'],
+        'official' => ['type' => 'bool'],
+        'private' => ['type' => 'bool'],
+        'indexed' => ['type' => 'bool'],
+        'networkUid' => ['type' => 'int'],
+        'locationSetUid' => ['type' => 'int'],
+        'createdAt' => ['type' => 'DateTime'],
+        'updatedAt' => ['type' => 'DateTime'],
     ];
 
     /**
@@ -64,7 +76,7 @@ class Agenda extends Entity
     {
         $this->_requireClient();
 
-        $params['agenda_id'] = $this->id;
+        $params['agendaUid'] = $this->uid;
 
         return EndpointFactory::make('/locations', $params)->get();
     }
@@ -79,7 +91,7 @@ class Agenda extends Entity
      */
     public function location(array $params = [])
     {
-        $params['agenda_id'] = $this->id;
+        $params['agendaUid'] = $this->uid;
 
         return EndpointFactory::make('/location', $params);
     }

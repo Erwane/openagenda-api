@@ -30,9 +30,9 @@ class Location extends Endpoint
     public function validationUriPath(Validator $validator): Validator
     {
         return parent::validationUriPath($validator)
-            // agenda_id
-            ->requirePresence('agenda_id')
-            ->integer('agenda_id');
+            // agendaUid
+            ->requirePresence('agendaUid')
+            ->integer('agendaUid');
     }
 
     /**
@@ -46,19 +46,19 @@ class Location extends Endpoint
         return $this->validationUriPath($validator)
             // id
             ->requirePresence(
-                'id',
+                'uid',
                 [$this, 'checkIdOrExtId'],
-                'One of `id` or `ext_id` is required'
+                'One of `id` or `extId` is required'
             )
-            ->integer('id')
+            ->integer('uid')
 
-            // ext_id
+            // extId
             ->requirePresence(
-                'ext_id',
+                'extId',
                 [$this, 'checkIdOrExtId'],
-                'One of `id` or `ext_id` is required'
+                'One of `id` or `extId` is required'
             )
-            ->scalar('ext_id');
+            ->scalar('extId');
     }
 
     /**
@@ -100,10 +100,10 @@ class Location extends Endpoint
             ->requirePresence('address', 'create')
             ->scalar('address')
             ->maxLength('address', 255)
-            // country
-            ->requirePresence('country', 'create')
-            ->scalar('country')
-            ->lengthBetween('country', [2, 2])
+            // countryCode
+            ->requirePresence('countryCode', 'create')
+            ->scalar('countryCode')
+            ->lengthBetween('countryCode', [2, 2])
             // state
             ->allowEmptyString('state')
             ->boolean('state')
@@ -131,9 +131,9 @@ class Location extends Endpoint
             ->isArray('links')
             // image
             ->allowEmptyFile('image')
-            // image_credits
-            ->allowEmptyString('image_credits')
-            ->scalar('image_credits')
+            // imageCredits
+            ->allowEmptyString('imageCredits')
+            ->scalar('imageCredits')
             // region
             ->allowEmptyString('region')
             ->scalar('region')
@@ -146,9 +146,9 @@ class Location extends Endpoint
             // city
             ->allowEmptyString('city')
             ->scalar('city')
-            // postal_code
-            ->allowEmptyString('postal_code')
-            ->scalar('postal_code')
+            // postalCode
+            ->allowEmptyString('postalCode')
+            ->scalar('postalCode')
             // insee
             ->allowEmptyString('insee')
             ->scalar('insee')
@@ -182,14 +182,14 @@ class Location extends Endpoint
         parent::uriPath($method);
 
         if ($method === 'create') {
-            $path = sprintf('/agendas/%d/locations', $this->params['agenda_id'] ?? 0);
-        } elseif (!empty($this->params['id'])) {
-            $path = sprintf('/agendas/%d/locations/%d', $this->params['agenda_id'] ?? 0, $this->params['id']);
+            $path = sprintf('/agendas/%d/locations', $this->params['agendaUid'] ?? 0);
+        } elseif (!empty($this->params['uid'])) {
+            $path = sprintf('/agendas/%d/locations/%d', $this->params['agendaUid'] ?? 0, $this->params['uid']);
         } else {
             $path = sprintf(
                 '/agendas/%d/locations/ext/%s',
-                $this->params['agenda_id'] ?? 0,
-                $this->params['ext_id'] ?? ''
+                $this->params['agendaUid'] ?? 0,
+                $this->params['extId'] ?? ''
             );
         }
 
@@ -197,7 +197,7 @@ class Location extends Endpoint
     }
 
     /**
-     * Validation check one of id or ext_id params is present.
+     * Validation check one of id or extId params is present.
      *
      * @param array $context Validation context.
      * @return bool
@@ -206,7 +206,7 @@ class Location extends Endpoint
     {
         $data = $context['data'];
 
-        return empty($data['id']) && empty($data['ext_id']);
+        return empty($data['uid']) && empty($data['extId']);
     }
 
     /**
@@ -246,7 +246,7 @@ class Location extends Endpoint
      */
     public function create()
     {
-        unset($this->params['id']);
+        unset($this->params['uid']);
 
         $entity = new LocationEntity($this->params);
 

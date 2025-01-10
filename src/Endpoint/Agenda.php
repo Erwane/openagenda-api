@@ -23,7 +23,7 @@ use OpenAgenda\OpenAgenda;
  */
 class Agenda extends Endpoint
 {
-    protected $queryFields = [
+    protected $_schema = [
         'detailed' => ['name' => 'detailed'],
     ];
 
@@ -34,8 +34,8 @@ class Agenda extends Endpoint
     {
         return parent::validationUriPath($validator)
             // id
-            ->requirePresence('id')
-            ->integer('id');
+            ->requirePresence('uid')
+            ->integer('uid');
     }
 
     /**
@@ -59,7 +59,7 @@ class Agenda extends Endpoint
     {
         parent::uriPath($method);
 
-        return sprintf('/agendas/%d', $this->params['id'] ?? 0);
+        return sprintf('/agendas/%d', $this->params['uid'] ?? 0);
     }
 
     /**

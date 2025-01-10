@@ -38,65 +38,64 @@ class LocationTest extends OpenAgendaTestCase
         $ent = new Location($payload['location']);
         $result = $ent->toArray();
         $this->assertEquals([
-            'id' => 35867424,
+            'uid' => 35867424,
             'name' => 'Centres sociaux de Wattrelos 59150',
             'address' => '4 rue Edouard Herriot 59150 Wattrelos',
             'access' => [],
             'description' => [],
             // 'image' => null,
-            'image_credits' => null,
+            'imageCredits' => null,
             'slug' => 'centres-sociaux-de-wattrelos-59150_6977111',
-            'location_set_id' => null,
             'city' => 'Wattrelos',
             'department' => 'Nord',
             'region' => 'Hauts-de-France',
-            'postal_code' => '59150',
+            'postalCode' => '59150',
             'insee' => '59650',
-            'country' => 'FR',
+            'countryCode' => 'FR',
             'district' => null,
             'latitude' => 50.70428,
             'longitude' => 3.235638,
-            'created_at' => Chronos::parse('2024-12-27T15:41:32.000Z'),
-            'updated_at' => Chronos::parse('2024-12-27T15:42:32.000Z'),
+            'createdAt' => Chronos::parse('2024-12-27T15:41:32.000Z'),
+            'updatedAt' => Chronos::parse('2024-12-27T15:42:32.000Z'),
             // 'website' => null,
             'email' => null,
             'phone' => null,
             'links' => [],
             'timezone' => 'Europe/Paris',
-            'ext_id' => null,
-            'state' => 0,
+            'extId' => null,
+            'state' => false,
         ], $result);
     }
 
     public function testAliasesOut()
     {
         $ent = new Location([
-            'id' => 35867424,
+            'uid' => 35867424,
             'name' => 'Centres sociaux de Wattrelos 59150',
             'address' => '4 rue Edouard Herriot 59150 Wattrelos',
             'access' => [],
             'description' => [],
             // 'image' => null,
-            'image_credits' => null,
+            'imageCredits' => null,
             'slug' => 'centres-sociaux-de-wattrelos-59150_6977111',
-            'location_set_id' => null,
+            'locationSetId' => null,
             'city' => 'Wattrelos',
             'department' => 'Nord',
             'region' => 'Hauts-de-France',
-            'postal_code' => '59150',
+            'postalCode' => '59150',
             'insee' => '59650',
-            'country' => 'FR',
+            'countryCode' => 'FR',
             'district' => null,
             'latitude' => 50.70428,
             'longitude' => 3.235638,
-            'created_at' => Chronos::parse('2024-12-27T15:41:32.000Z'),
-            'updated_at' => Chronos::parse('2024-12-27T15:42:32.000Z'),
+            'createdAt' => Chronos::parse('2024-12-27T15:41:32.000Z'),
+            'updatedAt' => Chronos::parse('2024-12-27T15:42:32.000Z'),
             // 'website' => null,
             'email' => null,
             'phone' => null,
             'links' => [],
             'timezone' => 'Europe/Paris',
-            'ext_id' => null,
+            'extId' => null,
             'state' => true,
         ]);
 
@@ -107,7 +106,6 @@ class LocationTest extends OpenAgendaTestCase
             'description' => [],
             'imageCredits' => null,
             'slug' => 'centres-sociaux-de-wattrelos-59150_6977111',
-            'setUid' => null,
             'city' => 'Wattrelos',
             'department' => 'Nord',
             'region' => 'Hauts-de-France',
@@ -142,7 +140,7 @@ class LocationTest extends OpenAgendaTestCase
     public function testClientNotSet($method): void
     {
         OpenAgenda::resetClient();
-        $entity = new Location(['id' => 123]);
+        $entity = new Location(['uid' => 123]);
         $this->expectException(OpenAgendaException::class);
         $this->expectExceptionMessage('OpenAgenda object was not previously created or Client not set.');
         $entity->{$method}();
@@ -153,11 +151,11 @@ class LocationTest extends OpenAgendaTestCase
         $wrapper = $this->clientWrapper(['auth' => true]);
 
         $entity = new Location([
-            'id' => 456,
-            'agenda_id' => 123,
+            'uid' => 456,
+            'agendaUid' => 123,
             'name' => 'My location',
             'address' => 'Random address',
-            'country' => 'FR',
+            'countryCode' => 'FR',
             'state' => true,
         ]);
 
@@ -178,8 +176,8 @@ class LocationTest extends OpenAgendaTestCase
         $wrapper = $this->clientWrapper(['auth' => true]);
 
         $entity = new Location([
-            'id' => 456,
-            'agenda_id' => 123,
+            'uid' => 456,
+            'agendaUid' => 123,
         ]);
 
         $payload = FileResource::instance($this)->getContent('Response/locations/location.json');
@@ -194,8 +192,8 @@ class LocationTest extends OpenAgendaTestCase
     public function testAgenda()
     {
         $entity = new Location([
-            'id' => 456,
-            'agenda_id' => 123,
+            'uid' => 456,
+            'agendaUid' => 123,
         ]);
 
         $endpoint = $entity->agenda();
@@ -209,7 +207,7 @@ class LocationTest extends OpenAgendaTestCase
             'delete' => 'https://api.openagenda.com/v2/agendas/123',
             'params' => [
                 '_path' => '/agenda',
-                'id' => 123,
+                'uid' => 123,
             ],
         ], $endpoint->toArray());
     }

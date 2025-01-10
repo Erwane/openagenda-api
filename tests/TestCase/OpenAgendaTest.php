@@ -166,7 +166,7 @@ class OpenAgendaTest extends TestCase
 
     public function testGetAgenda()
     {
-        $endpoint = $this->oa->agenda(['id' => 12345, 'detailed' => true]);
+        $endpoint = $this->oa->agenda(['uid' => 12345, 'detailed' => true]);
         $this->assertInstanceOf(Agenda::class, $endpoint);
         $uri = $endpoint->getUri('get');
         $this->assertEquals('/v2/agendas/12345', $uri->getPath());
@@ -184,13 +184,13 @@ class OpenAgendaTest extends TestCase
             )
             ->willReturn(new Response(200, ['Content-Type' => 'application/json'], $payload));
 
-        $locations = $this->oa->locations(['agenda_id' => 123456]);
+        $locations = $this->oa->locations(['agendaUid' => 123456]);
         $this->assertInstanceOf(LocationEntity::class, $locations->first());
     }
 
     public function testGetLocation()
     {
-        $endpoint = $this->oa->location(['id' => 123, 'agenda_id' => 456]);
+        $endpoint = $this->oa->location(['uid' => 123, 'agendaUid' => 456]);
         $this->assertInstanceOf(Location::class, $endpoint);
         $uri = $endpoint->getUri('get');
         $this->assertEquals('/v2/agendas/456/locations/123', $uri->getPath());

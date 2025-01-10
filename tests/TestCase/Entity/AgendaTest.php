@@ -24,6 +24,10 @@ use OpenAgenda\Test\OpenAgendaTestCase;
 use OpenAgenda\Test\Utility\FileResource;
 use Ramsey\Collection\Collection;
 
+/**
+ * @uses \OpenAgenda\Entity\Agenda
+ * @covers \OpenAgenda\Entity\Agenda
+ */
 class AgendaTest extends OpenAgendaTestCase
 {
     public function testAliasesIn()
@@ -33,7 +37,7 @@ class AgendaTest extends OpenAgendaTestCase
         $ent = new Agenda($payload);
         $result = $ent->toArray();
         $this->assertEquals([
-            'id' => 41648,
+            'uid' => 41648,
             'title' => 'La Semaine Nationale de la Petite Enfance',
             'description' => "Du 15 au 24 mars 2025, tous ensemble pour l'éveil du tout-petit ! \nUne semaine d'ateliers & activités à travers toute la France, pour réunir le trio parent-enfant-professionnel.",
             'slug' => 'semainepetiteenfance',
@@ -42,17 +46,17 @@ class AgendaTest extends OpenAgendaTestCase
             'official' => true,
             'private' => false,
             'indexed' => true,
-            'network_id' => null,
-            'location_set_id' => null,
-            'created_at' => Chronos::parse('2016-07-27T12:24:08.000Z'),
-            'updated_at' => Chronos::parse('2025-01-04T10:31:53.000Z'),
+            'networkUid' => null,
+            'locationSetUid' => null,
+            'createdAt' => Chronos::parse('2016-07-27T12:24:08.000Z'),
+            'updatedAt' => Chronos::parse('2025-01-04T10:31:53.000Z'),
         ], $result);
     }
 
     public function testAliasesOut()
     {
         $ent = new Agenda([
-            'id' => 41648,
+            'uid' => 41648,
             'title' => 'La Semaine Nationale de la Petite Enfance',
             'description' => "Du 15 au 24 mars 2025, tous ensemble pour l'éveil du tout-petit ! \nUne semaine d'ateliers & activités à travers toute la France, pour réunir le trio parent-enfant-professionnel.",
             'slug' => 'semainepetiteenfance',
@@ -61,10 +65,10 @@ class AgendaTest extends OpenAgendaTestCase
             'official' => true,
             'private' => false,
             'indexed' => true,
-            'network_id' => null,
-            'location_set_id' => null,
-            'created_at' => Chronos::parse('2016-07-27T12:24:08.000Z'),
-            'updated_at' => Chronos::parse('2025-01-04T10:31:53.000Z'),
+            'networkUid' => null,
+            'locationSetUid' => null,
+            'createdAt' => Chronos::parse('2016-07-27T12:24:08.000Z'),
+            'updatedAt' => Chronos::parse('2025-01-04T10:31:53.000Z'),
         ]);
 
         $this->assertSame([
@@ -77,8 +81,8 @@ class AgendaTest extends OpenAgendaTestCase
             'official' => 1,
             'private' => 0,
             'indexed' => 1,
-            'network' => null,
-            'locationSet' => null,
+            'networkUid' => null,
+            'locationSetUid' => null,
             'createdAt' => '2016-07-27T12:24:08',
             'updatedAt' => '2025-01-04T10:31:53',
         ], $ent->toOpenAgenda());
@@ -97,7 +101,7 @@ class AgendaTest extends OpenAgendaTestCase
     public function testClientNotSet($method): void
     {
         OpenAgenda::resetClient();
-        $entity = new Agenda(['id' => 123]);
+        $entity = new Agenda(['agendaUid' => 123]);
         $this->expectException(OpenAgendaException::class);
         $this->expectExceptionMessage('OpenAgenda object was not previously created or Client not set.');
         $entity->{$method}();
@@ -105,7 +109,7 @@ class AgendaTest extends OpenAgendaTestCase
 
     public function testGetLocations()
     {
-        $entity = new Agenda(['id' => 123]);
+        $entity = new Agenda(['uid' => 123]);
 
         $wrapper = $this->clientWrapper();
         $payload = FileResource::instance($this)->getContent('Response/locations/locations.json');
@@ -120,14 +124,14 @@ class AgendaTest extends OpenAgendaTestCase
 
     public function testLocation()
     {
-        $entity = new Agenda(['id' => 123]);
+        $entity = new Agenda(['uid' => 123]);
 
         $endpoint = $entity->location([
-            'id' => 456,
-            'agenda_id' => 123,
+            'uid' => 456,
+            'agendaUid' => 123,
             'name' => 'My location',
             'address' => 'Random address',
-            'country' => 'FR',
+            'countryCode' => 'FR',
         ]);
 
         $this->assertInstanceOf(LocationEndpoint::class, $endpoint);
@@ -139,11 +143,11 @@ class AgendaTest extends OpenAgendaTestCase
             'delete' => 'https://api.openagenda.com/v2/agendas/123/locations/456',
             'params' => [
                 '_path' => '/location',
-                'id' => 456,
-                'agenda_id' => 123,
+                'uid' => 456,
+                'agendaUid' => 123,
                 'name' => 'My location',
                 'address' => 'Random address',
-                'country' => 'FR',
+                'countryCode' => 'FR',
             ],
         ], $endpoint->toArray());
     }

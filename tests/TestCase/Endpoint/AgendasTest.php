@@ -35,8 +35,8 @@ class AgendasTest extends EndpointTestCase
 
         $v = $endpoint->validationUriPathGet(new Validator());
 
-        // limit
-        $field = $v->field('limit');
+        // size
+        $field = $v->field('size');
         $this->assertTrue($field->isEmptyAllowed());
         $rules = $field->rules();
         $this->assertArrayHasKey('integer', $rules);
@@ -72,14 +72,14 @@ class AgendasTest extends EndpointTestCase
         $rules = $field->rules();
         $this->assertArrayHasKey('isArray', $rules);
 
-        // id
-        $field = $v->field('id');
+        // uid
+        $field = $v->field('uid');
         $this->assertTrue($field->isEmptyAllowed());
         $rules = $field->rules();
         $this->assertArrayHasKey('isArray', $rules);
 
-        // network_id
-        $field = $v->field('network_id');
+        // network
+        $field = $v->field('network');
         $this->assertTrue($field->isEmptyAllowed());
         $rules = $field->rules();
         $this->assertArrayHasKey('integer', $rules);
@@ -89,7 +89,7 @@ class AgendasTest extends EndpointTestCase
         $this->assertTrue($field->isEmptyAllowed());
         $rules = $field->rules();
         $this->assertArrayHasKey('inList', $rules);
-        $this->assertEquals(['created_desc', 'recent_events'], $rules['inList']->get('pass')[0]);
+        $this->assertEquals(['createdAt.desc', 'recentlyAddedEvents.desc'], $rules['inList']->get('pass')[0]);
     }
 
     public static function dataGetUriSuccess(): array
@@ -106,14 +106,14 @@ class AgendasTest extends EndpointTestCase
             [
                 'GET',
                 [
-                    'limit' => 2,
+                    'size' => 2,
                     'fields' => ['summary', 'schema'],
                     'search' => 'Agenda',
                     'official' => true,
                     'slug' => 'agenda',
-                    'id' => 12,
-                    'network_id' => 34,
-                    'sort' => 'created_desc',
+                    'uid' => 12,
+                    'network' => 34,
+                    'sort' => 'createdAt.desc',
                 ],
                 [
                     'path' => '/v2/agendas',
@@ -164,7 +164,7 @@ class AgendasTest extends EndpointTestCase
             ['headers' => ['key' => 'publicKey']],
         ], [200, $payload]);
 
-        $endpoint = new Agendas(['limit' => 2]);
+        $endpoint = new Agendas(['size' => 2]);
 
         $agendas = $endpoint->get();
 

@@ -39,7 +39,7 @@ abstract class Entity implements ArrayAccess
      */
     protected $_new = true;
 
-    protected $_aliases = [];
+    protected $_schema = [];
 
     /**
      * Entity required fields for post/patch.
@@ -47,20 +47,6 @@ abstract class Entity implements ArrayAccess
      * @var array
      */
     protected $_required;
-
-    /**
-     * OpenAgenda field name to Entity field name.
-     *
-     * @var array
-     */
-    private $_oaToEntity = [];
-
-    /**
-     * Entity field name to OpenAgenda field name.
-     *
-     * @var array
-     */
-    private $_entityToOa = [];
 
     /**
      * constructor
@@ -124,12 +110,8 @@ abstract class Entity implements ArrayAccess
      */
     protected function _buildAliasesMaps(): void
     {
-        $this->_oaToEntity = [];
-        $this->_entityToOa = [];
         $this->_required = [];
-        foreach ($this->_aliases as $field => $info) {
-            $this->_oaToEntity[$info['field']] = $field;
-            $this->_entityToOa[$field] = $info['field'];
+        foreach ($this->_schema as $field => $info) {
             if (!empty($info['required'])) {
                 $this->_required[$field] = true;
             }
@@ -145,38 +127,36 @@ abstract class Entity implements ArrayAccess
      */
     protected function fromOpenAgenda(array $data): array
     {
-        $out = [];
-        foreach ($data as $name => $value) {
-            $field = $this->_oaToEntity[$name] ?? $name;
-            if (isset($this->_aliases[$field]['type'])) {
-                switch ($this->_aliases[$field]['type']) {
+        foreach ($data as $field => &$value) {
+            if (isset($this->_schema[$field]['type'])) {
+                switch ($this->_schema[$field]['type']) {
+                    case 'datetime':
                     case 'DateTime':
                         $value = Chronos::parse($value);
                         break;
+                    case 'array':
                     case 'json':
                         if (is_string($value)) {
                             $value = json_decode($value, true);
                         }
                         break;
-                    case 'boolean':
+                    case 'bool':
                         $value = (bool)$value;
                         break;
                     case Agenda::class:
                     case Location::class:
                     case Event::class:
                         if (is_array($value)) {
-                            $value = new $this->_aliases[$field]['type']($value);
+                            $value = new $this->_schema[$field]['type']($value);
                         } elseif ($value instanceof Entity) {
-                            $value = new $this->_aliases[$field]['type']($value->toArray());
+                            $value = new $this->_schema[$field]['type']($value->toArray());
                         }
                         break;
                 }
             }
-
-            $out[$field] = $value;
         }
 
-        return $out;
+        return $data;
     }
 
     /**
@@ -184,7 +164,7 @@ abstract class Entity implements ArrayAccess
      */
     public function toArray(): array
     {
-        return array_intersect_key($this->_fields, $this->_aliases);
+        return array_intersect_key($this->_fields, $this->_schema);
     }
 
     /**
@@ -195,8 +175,6 @@ abstract class Entity implements ArrayAccess
      */
     public function toOpenAgenda(bool $onlyChanged = false): array
     {
-        $out = [];
-
         if ($onlyChanged) {
             $fields = array_intersect_key($this->_fields, $this->_required);
             $fields += array_intersect_key($this->_fields, $this->_dirty);
@@ -204,23 +182,21 @@ abstract class Entity implements ArrayAccess
             $fields = $this->_fields;
         }
 
-        foreach ($fields as $field => $value) {
-            $name = $this->_entityToOa[$field] ?? $field;
-            if (isset($this->_aliases[$field]['type'])) {
-                switch ($this->_aliases[$field]['type']) {
+        foreach ($fields as $field => &$value) {
+            if (isset($this->_schema[$field]['type'])) {
+                switch ($this->_schema[$field]['type']) {
+                    case 'datetime':
                     case 'DateTime':
                         $value = $value->format('Y-m-d\TH:i:s');
                         break;
-                    case 'boolean':
+                    case 'bool':
                         $value = $value ? 1 : 0;
                         break;
                 }
             }
-
-            $out[$name] = $value;
         }
 
-        return array_intersect_key($out, $this->_oaToEntity);
+        return array_intersect_key($fields, $this->_schema);
     }
 
     /**
@@ -450,7 +426,7 @@ abstract class Entity implements ArrayAccess
      * @param int|string $value Field value
      * @return int
      */
-    protected function _setId($value): int
+    protected function _setUid($value): int
     {
         return (int)$value;
     }

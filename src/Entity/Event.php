@@ -62,37 +62,37 @@ class Event extends Entity
     public const ACCESS_PI = 'pi'; // Intellectual impairment.
 
     public const ATTENDANCE_OFFLINE = 1; // (default): Offline, face-to-face.
-    public const ATTENDANCE_ONLINE = 2; // Online event, `online_access_link` is required.
+    public const ATTENDANCE_ONLINE = 2; // Online event, `onlineAccessLink` is required.
     public const ATTENDANCE_MIXED = 3; // Mixed.
 
-    protected $_aliases = [
-        'id' => ['field' => 'uid'],
-        'agenda_id' => ['field' => 'agendaId'],
-        'location_id' => ['field' => 'locationUid'],
-        'slug' => ['field' => 'slug'],
-        'title' => ['field' => 'title', 'required' => true],
-        'description' => ['field' => 'description', 'type' => 'multilingual', 'required' => true],
-        'long_description' => ['field' => 'longDescription', 'type' => 'multilingual'],
-        'conditions' => ['field' => 'conditions', 'type' => 'multilingual'],
-        'keywords' => ['field' => 'keywords', 'type' => 'multilingual'],
-        'image' => ['field' => 'image'],
-        'image_credits' => ['field' => 'imageCredits'],
-        'registration' => ['field' => 'registration'],
-        'accessibility' => ['field' => 'accessibility'],
-        'timings' => ['field' => 'timings', 'required' => true],
-        'types' => ['field' => 'type'],
-        'age' => ['field' => 'age'],
-        'attendance_mode' => ['field' => 'attendanceMode'],
-        'online_access_link' => ['field' => 'onlineAccessLink'],
-        'links' => ['field' => 'links'],
-        'timezone' => ['field' => 'timezone'],
-        'status' => ['field' => 'status'],
-        'state' => ['field' => 'state'],
-        'featured' => ['field' => 'featured', 'type' => 'boolean'],
-        'created_at' => ['field' => 'createdAt', 'type' => 'DateTime'],
-        'updated_at' => ['field' => 'updatedAt', 'type' => 'DateTime'],
-        'agenda' => ['field' => 'originAgenda', 'type' => Agenda::class],
-        'location' => ['field' => 'location', 'type' => Location::class],
+    protected $_schema = [
+        'uid' => [],
+        'agendaUid' => [],
+        'locationUid' => [],
+        'slug' => [],
+        'title' => ['required' => true],
+        'description' => ['type' => 'multilingual', 'required' => true],
+        'longDescription' => ['type' => 'multilingual'],
+        'conditions' => ['type' => 'multilingual'],
+        'keywords' => ['type' => 'multilingual'],
+        'image' => [],
+        'imageCredits' => [],
+        'registration' => [],
+        'accessibility' => [],
+        'timings' => ['required' => true],
+        'type' => [],
+        'age' => [],
+        'attendanceMode' => [],
+        'onlineAccessLink' => [],
+        'links' => [],
+        'timezone' => [],
+        'status' => [],
+        'state' => [],
+        'featured' => ['type' => 'bool'],
+        'createdAt' => ['type' => 'datetime'],
+        'updatedAt' => ['type' => 'datetime'],
+        'originAgenda' => ['type' => Agenda::class],
+        'location' => ['type' => Location::class],
     ];
 
     /**
@@ -146,7 +146,7 @@ class Event extends Entity
      */
     public function agenda(array $params = [])
     {
-        $params['id'] = $this->agenda_id;
+        $params['uid'] = $this->agendaUid;
 
         return EndpointFactory::make('/agenda', $params);
     }
@@ -161,7 +161,7 @@ class Event extends Entity
      */
     public function location(array $params = [])
     {
-        $params['agenda_id'] = $this->agenda_id;
+        $params['agendaUid'] = $this->agendaUid;
 
         return EndpointFactory::make('/location', $params);
     }
@@ -195,7 +195,7 @@ class Event extends Entity
         $data = parent::toOpenAgenda($onlyChanged);
 
         if (isset($data['location']) && $data['location'] instanceof Location) {
-            $data['locationUid'] = $data['location']['id'];
+            $data['locationUid'] = $data['location']['uid'];
         }
 
         // Timings

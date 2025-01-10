@@ -24,20 +24,16 @@ use Ramsey\Collection\Collection;
  */
 class Agendas extends Endpoint
 {
-    protected $queryFields = [
-        'limit' => ['name' => 'size'],
-        'fields' => ['name' => 'fields', 'type' => 'array'],
-        'search' => ['name' => 'search'],
-        'official' => ['name' => 'official'],
-        'slug' => ['name' => 'slug', 'type' => 'array'],
-        'id' => ['name' => 'uid', 'type' => 'array'],
-        'network_id' => ['name' => 'network'],
+    protected $_schema = [
+        'size' => ['type' => 'int'],
+        'fields' => ['type' => 'array'],
+        'search' => ['type' => 'string'],
+        'official' => ['type' => 'bool'],
+        'slug' => ['type' => 'array'],
+        'uid' => ['type' => 'array'],
+        'network' => ['type' => 'int'],
         'sort' => [
-            'name' => 'sort',
-            'matching' => [
-                'created_desc' => 'createdAt.desc',
-                'recent_events' => 'recentlyAddedEvents.desc',
-            ],
+            'type' => 'string',
         ],
     ];
 
@@ -51,8 +47,8 @@ class Agendas extends Endpoint
     {
         return $this->validationUriPath($validator)
             // limit
-            ->allowEmptyString('limit')
-            ->integer('limit')
+            ->allowEmptyString('size')
+            ->integer('size')
             // page
             ->allowEmptyString('page')
             ->integer('page')
@@ -69,14 +65,14 @@ class Agendas extends Endpoint
             ->allowEmptyArray('slug')
             ->isArray('slug')
             // id
-            ->allowEmptyArray('id')
-            ->isArray('id')
+            ->allowEmptyArray('uid')
+            ->isArray('uid')
             // network_id
-            ->allowEmptyString('network_id')
-            ->integer('network_id')
+            ->allowEmptyString('network')
+            ->integer('network')
             // sort
             ->allowEmptyArray('sort')
-            ->inList('sort', ['created_desc', 'recent_events']);
+            ->inList('sort', ['createdAt.desc', 'recentlyAddedEvents.desc']);
     }
 
     /**

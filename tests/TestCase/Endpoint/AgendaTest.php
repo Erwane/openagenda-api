@@ -35,8 +35,8 @@ class AgendaTest extends EndpointTestCase
 
         $v = $endpoint->validationUriPath(new Validator());
 
-        // id
-        $field = $v->field('id');
+        // uid
+        $field = $v->field('uid');
         $this->assertTrue($field->isPresenceRequired());
         $rules = $field->rules();
         $this->assertArrayHasKey('integer', $rules);
@@ -48,8 +48,8 @@ class AgendaTest extends EndpointTestCase
 
         $v = $endpoint->validationUriPathGet(new Validator());
 
-        // id
-        $this->assertTrue($v->hasField('id'));
+        // agendaUid
+        $this->assertTrue($v->hasField('uid'));
 
         // detailed
         $field = $v->field('detailed');
@@ -65,7 +65,7 @@ class AgendaTest extends EndpointTestCase
                 'GET',
                 [],
                 [
-                    'id' => [
+                    'uid' => [
                         '_required' => 'This field is required',
                     ],
                 ],
@@ -93,7 +93,7 @@ class AgendaTest extends EndpointTestCase
         return [
             [
                 'GET',
-                ['id' => 12345],
+                ['uid' => 12345],
                 [
                     'path' => '/v2/agendas/12345',
                     'query' => [],
@@ -102,7 +102,7 @@ class AgendaTest extends EndpointTestCase
             [
                 'GET',
                 [
-                    'id' => 12345,
+                    'uid' => 12345,
                     'detailed' => true,
                 ],
                 [
@@ -135,7 +135,7 @@ class AgendaTest extends EndpointTestCase
                 ['headers' => ['key' => 'publicKey']],
         ], [200, $payload]);
 
-        $endpoint = new Agenda(['id' => 12345]);
+        $endpoint = new Agenda(['uid' => 12345]);
 
         $agenda = $endpoint->get();
 

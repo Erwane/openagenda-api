@@ -25,24 +25,16 @@ use Ramsey\Collection\Collection;
  */
 class Locations extends Endpoint
 {
-    protected $queryFields = [
-        'limit' => ['name' => 'size'],
-        'search' => ['name' => 'search'],
-        'detailed' => ['name' => 'detailed'],
-        'state' => ['name' => 'state'],
-        'created_lte' => ['name' => 'createdAt[lte]', 'type' => 'datetime'],
-        'created_gte' => ['name' => 'createdAt[gte]', 'type' => 'datetime'],
-        'updated_lte' => ['name' => 'updatedAt[lte]', 'type' => 'datetime'],
-        'updated_gte' => ['name' => 'updatedAt[gte]', 'type' => 'datetime'],
-        'sort' => [
-            'name' => 'sort',
-            'matching' => [
-                'created_asc' => 'createdAt.asc',
-                'created_desc' => 'createdAt.desc',
-                'name_asc' => 'name.asc',
-                'name_desc' => 'name.desc',
-            ],
-        ],
+    protected $_schema = [
+        'size' => [],
+        'search' => [],
+        'detailed' => [],
+        'state' => [],
+        'createdAt[lte]' => ['type' => 'datetime'],
+        'createdAt[gte]' => ['type' => 'datetime'],
+        'updatedAt[lte]' => ['type' => 'datetime'],
+        'updatedAt[gte]' => ['type' => 'datetime'],
+        'sort' => [],
     ];
 
     /**
@@ -51,9 +43,9 @@ class Locations extends Endpoint
     public function validationUriPath(Validator $validator): Validator
     {
         return parent::validationUriPath($validator)
-            // agenda_id
-            ->requirePresence('agenda_id')
-            ->integer('agenda_id');
+            // agendaUid
+            ->requirePresence('agendaUid')
+            ->integer('agendaUid');
     }
 
     /**
@@ -66,9 +58,9 @@ class Locations extends Endpoint
     {
         return $this->validationUriPath($validator)
             // limit
-            ->allowEmptyString('limit')
-            ->numeric('limit')
-            ->greaterThanOrEqual('limit', 1)
+            ->allowEmptyString('size')
+            ->numeric('size')
+            ->greaterThanOrEqual('size', 1)
 
             // detailed
             ->allowEmptyString('detailed')
@@ -83,25 +75,25 @@ class Locations extends Endpoint
             ->scalar('search')
 
             // created lte/gte
-            ->allowEmptyDateTime('created_lte')
-            ->allowEmptyDateTime('created_gte')
-            ->dateTime('created_lte', ['ymd', Validation::DATETIME_ISO8601])
-            ->dateTime('created_gte', ['ymd', Validation::DATETIME_ISO8601])
+            ->allowEmptyDateTime('createdAt[lte]')
+            ->allowEmptyDateTime('createdAt[gte]')
+            ->dateTime('createdAt[lte]', ['ymd', Validation::DATETIME_ISO8601])
+            ->dateTime('createdAt[gte]', ['ymd', Validation::DATETIME_ISO8601])
 
             // updated lte/gte
-            ->allowEmptyDateTime('updated_lte')
-            ->allowEmptyDateTime('updated_gte')
-            ->dateTime('updated_lte', ['ymd', Validation::DATETIME_ISO8601])
-            ->dateTime('updated_gte', ['ymd', Validation::DATETIME_ISO8601])
+            ->allowEmptyDateTime('updatedAt[lte]')
+            ->allowEmptyDateTime('updatedAt[gte]')
+            ->dateTime('updatedAt[lte]', ['ymd', Validation::DATETIME_ISO8601])
+            ->dateTime('updatedAt[gte]', ['ymd', Validation::DATETIME_ISO8601])
 
             // sort
             ->allowEmptyString('sort')
             ->scalar('sort')
             ->inList('sort', [
-                'name_asc',
-                'name_desc',
-                'created_asc',
-                'created_desc',
+                'name.asc',
+                'name.desc',
+                'createdAt.asc',
+                'createdAt.desc',
             ]);
     }
 
@@ -112,7 +104,7 @@ class Locations extends Endpoint
     {
         parent::uriPath($method);
 
-        return sprintf('/agendas/%d/locations', $this->params['agenda_id'] ?? 0);
+        return sprintf('/agendas/%d/locations', $this->params['agendaUid'] ?? 0);
     }
 
     /**

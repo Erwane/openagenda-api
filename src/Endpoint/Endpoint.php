@@ -58,7 +58,7 @@ abstract class Endpoint implements ValidatorAwareInterface
      *
      * @var array
      */
-    protected $queryFields = [];
+    protected $_schema = [];
 
     /**
      * Construct OpenAgenda endpoint.
@@ -101,8 +101,8 @@ abstract class Endpoint implements ValidatorAwareInterface
      */
     protected function _formatType(string $param, $value)
     {
-        if (!empty($this->queryFields[$param]['type'])) {
-            switch ($this->queryFields[$param]['type']) {
+        if (!empty($this->_schema[$param]['type'])) {
+            switch ($this->_schema[$param]['type']) {
                 case 'datetime':
                     $value = new DateTime($value);
                     break;
@@ -116,7 +116,7 @@ abstract class Endpoint implements ValidatorAwareInterface
     }
 
     /**
-     * Validate URI path params. ex /agendas/<agenda_id>/locations/<location_id>
+     * Validate URI path params. ex /agendas/<agendaUid>/locations/<locationUid>
      *
      * @param \Cake\Validation\Validator $validator Validator
      * @return \Cake\Validation\Validator
@@ -189,6 +189,7 @@ abstract class Endpoint implements ValidatorAwareInterface
 
         $path = $this->uriPath($method, $validate);
         $query = $this->uriQuery($method, $validate);
+        dump($query);
 
         $components = parse_url($this->baseUrl . $path);
         if ($query) {
@@ -241,10 +242,10 @@ abstract class Endpoint implements ValidatorAwareInterface
         $query = [];
 
         // Default to null
-        $params += array_fill_keys(array_keys($this->queryFields), null);
+        $params += array_fill_keys(array_keys($this->_schema), null);
 
         // Keep-only valid fields
-        $params = array_intersect_key($params, $this->queryFields);
+        $params = array_intersect_key($params, $this->_schema);
 
         if ($validate) {
             // validate Uri path params
@@ -263,12 +264,12 @@ abstract class Endpoint implements ValidatorAwareInterface
         }
 
         foreach ($params as $param => $value) {
-            if (!isset($this->queryFields[$param])) {
+            if (!isset($this->_schema[$param])) {
                 continue;
             }
 
-            $map = $this->queryFields[$param];
-            $query[$map['name']] = $this->convertQueryValue($map, $value);
+            $map = $this->_schema[$param];
+            $query[$param] = $this->convertQueryValue($map, $value);
         }
 
         // filter

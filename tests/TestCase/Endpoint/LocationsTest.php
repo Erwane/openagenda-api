@@ -37,9 +37,9 @@ class LocationsTest extends EndpointTestCase
 
         $v = $endpoint->validationUriPath(new Validator());
 
-        // agenda_id
-        $this->assertTrue($v->hasField('agenda_id'));
-        $field = $v->field('agenda_id');
+        // agendaUid
+        $this->assertTrue($v->hasField('agendaUid'));
+        $field = $v->field('agendaUid');
         $this->assertTrue($field->isPresenceRequired());
         $rules = $field->rules();
         $this->assertArrayHasKey('integer', $rules);
@@ -51,16 +51,16 @@ class LocationsTest extends EndpointTestCase
 
         $v = $endpoint->validationUriPathGet(new Validator());
 
-        // agenda_id
-        $this->assertTrue($v->hasField('agenda_id'));
-        $field = $v->field('agenda_id');
+        // agendaUid
+        $this->assertTrue($v->hasField('agendaUid'));
+        $field = $v->field('agendaUid');
         $this->assertTrue($field->isPresenceRequired());
         $rules = $field->rules();
         $this->assertArrayHasKey('integer', $rules);
 
         // limit
-        $this->assertTrue($v->hasField('limit'));
-        $field = $v->field('limit');
+        $this->assertTrue($v->hasField('size'));
+        $field = $v->field('size');
         $this->assertTrue($field->isEmptyAllowed());
         $rules = $field->rules();
         $this->assertArrayHasKey('numeric', $rules);
@@ -89,32 +89,32 @@ class LocationsTest extends EndpointTestCase
         $this->assertArrayHasKey('scalar', $rules);
 
         // created_lte
-        $this->assertTrue($v->hasField('created_lte'));
-        $field = $v->field('created_lte');
+        $this->assertTrue($v->hasField('createdAt[lte]'));
+        $field = $v->field('createdAt[lte]');
         $this->assertTrue($field->isEmptyAllowed());
         $rules = $field->rules();
         $this->assertArrayHasKey('dateTime', $rules);
         $this->assertEquals(['ymd', Validation::DATETIME_ISO8601], $rules['dateTime']->get('pass')[0]);
 
         // created_gte
-        $this->assertTrue($v->hasField('created_gte'));
-        $field = $v->field('created_gte');
+        $this->assertTrue($v->hasField('createdAt[gte]'));
+        $field = $v->field('createdAt[gte]');
         $this->assertTrue($field->isEmptyAllowed());
         $rules = $field->rules();
         $this->assertArrayHasKey('dateTime', $rules);
         $this->assertEquals(['ymd', Validation::DATETIME_ISO8601], $rules['dateTime']->get('pass')[0]);
 
         // updated_lte
-        $this->assertTrue($v->hasField('updated_lte'));
-        $field = $v->field('updated_lte');
+        $this->assertTrue($v->hasField('updatedAt[lte]'));
+        $field = $v->field('updatedAt[lte]');
         $this->assertTrue($field->isEmptyAllowed());
         $rules = $field->rules();
         $this->assertArrayHasKey('dateTime', $rules);
         $this->assertEquals(['ymd', Validation::DATETIME_ISO8601], $rules['dateTime']->get('pass')[0]);
 
         // updated_gte
-        $this->assertTrue($v->hasField('updated_gte'));
-        $field = $v->field('updated_gte');
+        $this->assertTrue($v->hasField('updatedAt[gte]'));
+        $field = $v->field('updatedAt[gte]');
         $this->assertTrue($field->isEmptyAllowed());
         $rules = $field->rules();
         $this->assertArrayHasKey('dateTime', $rules);
@@ -128,10 +128,10 @@ class LocationsTest extends EndpointTestCase
         $this->assertArrayHasKey('scalar', $rules);
         $this->assertArrayHasKey('inList', $rules);
         $this->assertEquals([
-            'name_asc',
-            'name_desc',
-            'created_asc',
-            'created_desc',
+            'name.asc',
+            'name.desc',
+            'createdAt.asc',
+            'createdAt.desc',
         ], $rules['inList']->get('pass')[0]);
     }
 
@@ -142,7 +142,7 @@ class LocationsTest extends EndpointTestCase
                 'GET',
                 [],
                 [
-                    'agenda_id' => [
+                    'agendaUid' => [
                         '_required' => 'This field is required',
                     ],
                 ],
@@ -170,7 +170,7 @@ class LocationsTest extends EndpointTestCase
         return [
             [
                 'GET',
-                ['agenda_id' => 123],
+                ['agendaUid' => 123],
                 [
                     'path' => '/v2/agendas/123/locations',
                     'query' => [],
@@ -179,14 +179,14 @@ class LocationsTest extends EndpointTestCase
             [
                 'GET',
                 [
-                    'agenda_id' => 123,
-                    'limit' => 2,
+                    'agendaUid' => 123,
+                    'size' => 2,
                     'search' => 'Location',
                     'detailed' => true,
                     'state' => true,
-                    'created_lte' => '2023-06-02',
-                    'updated_lte' => '2023-06-02T12:40:00+0100',
-                    'sort' => 'created_desc',
+                    'createdAt[lte]' => '2023-06-02',
+                    'updatedAt[lte]' => '2023-06-02T12:40:00+0100',
+                    'sort' => 'createdAt.desc',
                 ],
                 [
                     'path' => '/v2/agendas/123/locations',
@@ -224,7 +224,7 @@ class LocationsTest extends EndpointTestCase
             ['headers' => ['key' => 'publicKey']],
         ], [200, $payload]);
 
-        $endpoint = new Locations(['agenda_id' => 123, 'limit' => 2]);
+        $endpoint = new Locations(['agendaUid' => 123, 'size' => 2]);
 
         $locations = $endpoint->get();
 

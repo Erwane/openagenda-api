@@ -19,10 +19,10 @@ use OpenAgenda\Entity\Agenda;
 use OpenAgenda\Test\OpenAgendaTestCase;
 use OpenAgenda\Test\Utility\FileResource;
 
-class AgendasOpenAgendaTest extends OpenAgendaTestCase
+class AgendasFunctionalTest extends OpenAgendaTestCase
 {
     /**
-     * Test get agenda from id
+     * Test get agenda from uid
      */
     public function testGet(): void
     {
@@ -36,7 +36,7 @@ class AgendasOpenAgendaTest extends OpenAgendaTestCase
             )
             ->willReturn(new Response(200, [], $payload));
 
-        $agenda = $oa->agenda(['id' => 123, 'detailed' => true])->get();
+        $agenda = $oa->agenda(['uid' => 123, 'detailed' => true])->get();
         $this->assertInstanceOf(Agenda::class, $agenda);
     }
 }

@@ -15,43 +15,42 @@ _See [basics](basics.md) of how to do this._
 ## My agendas
 
 ```php
-$agendas = $oa->myAgendas(['limit' => 2]);
+$agendas = $oa->myAgendas(['size' => 2]);
 ```
 
 ### Params
 
-| field    | type               | description                                                                                                                 |
-|----------|--------------------|-----------------------------------------------------------------------------------------------------------------------------|
-| limit    | integer            | How many results by request. Default `100`                                                                                  |
-| page     | integer            | Pagination. Require a PSR-16 configured cache.<br/>You can only ask for next or previous page.<br/>**Not implemented yet**. |
-
+| field | type    | description                                                                                                                 |
+|-------|---------|-----------------------------------------------------------------------------------------------------------------------------|
+| size  | integer | How many results by request. Default `100`                                                                                  |
+| page  | integer | Pagination. Require a PSR-16 configured cache.<br/>You can only ask for next or previous page.<br/>**Not implemented yet**. |
 
 ## Search
 
 ```php
 // Using OpenAgenda::agenda() method
 $agendas = $oa->agendas([
-    'limit' => 5,
-    'id' => [12, 34, 56],
-    'sort' => 'recent_events',
+    'size' => 5,
+    'uid' => [12, 34, 56],
+    'sort' => 'recentlyAddedEvents.desc',
 ]);
 // one agenda by slug
-$agenda = $oa->agendas(['limit' => 1, 'slug' => 'my-agenda-slug'])->first();
+$agenda = $oa->agendas(['size' => 1, 'slug' => 'my-agenda-slug'])->first();
 ```
 
 ### Params
 
-| field      | type               | description                                                                                                                 |
-|------------|--------------------|-----------------------------------------------------------------------------------------------------------------------------|
-| limit      | integer            | How many results by request. Default `100`                                                                                  |
-| page       | integer            | Pagination. Require a PSR-16 configured cache.<br/>You can only ask for next or previous page.<br/>**Not implemented yet**. |
-| fields     | string or string[] | Optional extra fields to get for agendas.<br/>Possible values are `['summary', 'schema']`.                                  |
-| search     | string             | Search terms in title, locations and agenda keywords                                                                        |
-| official   | boolean            | Only officials agendas. Default `false`.                                                                                    |
-| slug       | string or string[] | Get agendas with this slug(s).                                                                                              |
-| id         | id or id[]         | Get agendas with this id(s)                                                                                                 |
-| network_id | int                | Get only agendas in this network id                                                                                         |
-| sort       | string             | Sort results.<br/>Allowed values are `created_desc` and `recent_events`                                                     |
+| field    | type               | description                                                                                                                 |
+|----------|--------------------|-----------------------------------------------------------------------------------------------------------------------------|
+| size     | integer            | How many results by request. Default `100`                                                                                  |
+| page     | integer            | Pagination. Require a PSR-16 configured cache.<br/>You can only ask for next or previous page.<br/>**Not implemented yet**. |
+| fields   | string or string[] | Optional extra fields to get for agendas.<br/>Possible values are `['summary', 'schema']`.                                  |
+| search   | string             | Search terms in title, locations and agenda keywords                                                                        |
+| official | boolean            | Only officials agendas. Default `false`.                                                                                    |
+| slug     | string or string[] | Get agendas with this slug(s).                                                                                              |
+| uid      | id or id[]         | Get agendas with this id(s)                                                                                                 |
+| network  | int                | Get only agendas in this network id                                                                                         |
+| sort     | string             | Sort results.<br/>Allowed values are `createdAt.desc` and `recentlyAddedEvents.desc`                                        |
 
 ## Results
 
@@ -63,34 +62,35 @@ Get one agenda.
 
 ```php
 // Using OpenAgenda::agenda() method
-$agenda = $oa->agenda(['id' => 12345, 'detailed' => true])->get();
+$agenda = $oa->agenda(['uid' => 12345, 'detailed' => true])->get();
 ```
 
 **Params**:
 
 | field    | type    | Required | description                             |
 |----------|---------|:--------:|-----------------------------------------|
-| id       | integer |    Y     | Agenda id                               |
+| uid      | integer |    Y     | Agenda uid                              |
 | detailed | boolean |    n     | Return detailed Agenda schema if `true` |
 
 ## Schema
 
-|    Field     |   Type   | Description         |
-|:------------:|:--------:|:--------------------|
-|      id      |   int    | Agenda id           |
-|    title     |  string  | Title               |
-|     slug     |  string  | Slug                |
-| description  |  string  | Description         |
-|     url      |  string  | External URL        |
-|   official   | boolean  | Is official         |
-|    image     |  string  | Image URL           |
-|   private    | boolean  | Is private          |
-|   indexed    | boolean  | Is indexed          |
-|   settings   |  array   | Agenda settings     |
-|   summary    |  array   | Summary             |
-|  network_id  | integer  | Network id          |
-| location_set | integer  | Location set id     |
-|  created_at  | DateTime | Created at datetime |
-|  updated_at  | DateTime | Updated at datetime |
+|     Field      |   Type   | Description         |
+|:--------------:|:--------:|:--------------------|
+|      uid       |   int    | Agenda uid          |
+|     title      |  string  | Title               |
+|      slug      |  string  | Slug                |
+|  description   |  string  | Description         |
+|      url       |  string  | External URL        |
+|    official    | boolean  | Is official         |
+|     image      |  string  | Image URL           |
+|    official    | boolean  | Is official         |
+|    private     | boolean  | Is private          |
+|    indexed     | boolean  | Is indexed          |
+|    settings    |  array   | Agenda settings     |
+|    summary     |  array   | Summary             |
+|   networkUid   | integer  | Network id          |
+| locationSetUid | integer  | Location set id     |
+|   createdAt    | DateTime | Created at datetime |
+|   updatedAt    | DateTime | Updated at datetime |
 
 See [Entity](entity.md) for all entity methods.

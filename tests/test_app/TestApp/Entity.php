@@ -16,14 +16,20 @@ namespace OpenAgenda\Test\test_app\TestApp;
 
 /**
  * Entity for tests
+ *
+ * @property int $uid
+ * @property string $postalCode
+ * @property \Cake\Chronos\Chronos $createdAt
+ * @property array $description
+ * @property bool $state
  */
 class Entity extends \OpenAgenda\Entity\Entity
 {
-    protected $_aliases = [
-        'id' => ['field' => 'uid', 'required' => true],
-        'postal_code' => ['field' => 'postalCode'],
-        'created_at' => ['field' => 'createdAt', 'type' => 'DateTime'],
-        'description' => ['field' => 'description', 'type' => 'json'],
-        'state' => ['field' => 'state', 'type' => 'boolean'],
+    protected $_schema = [
+        'uid' => ['required' => true],
+        'postalCode' => ['type' => 'string'],
+        'createdAt' => ['type' => 'datetime'],
+        'description' => ['type' => 'json'],
+        'state' => ['type' => 'bool'],
     ];
 }
