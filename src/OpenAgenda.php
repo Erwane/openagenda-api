@@ -4,8 +4,11 @@ declare(strict_types=1);
 namespace OpenAgenda;
 
 use Cake\Validation\Validation as CakeValidation;
+use OpenAgenda\Endpoint\Agenda;
 use OpenAgenda\Endpoint\Endpoint;
 use OpenAgenda\Endpoint\EndpointFactory;
+use OpenAgenda\Endpoint\Event;
+use OpenAgenda\Endpoint\Location;
 use OpenAgenda\Wrapper\HttpWrapper;
 use Psr\SimpleCache\CacheInterface;
 use Ramsey\Collection\Collection;
@@ -221,10 +224,10 @@ class OpenAgenda
      * Get one agenda from OpenAgenda.
      *
      * @param array $params Query params.
-     * @return \OpenAgenda\Endpoint\Agenda
+     * @return \OpenAgenda\Endpoint\Agenda|\OpenAgenda\Endpoint\Endpoint
      * @throws \OpenAgenda\Endpoint\UnknownEndpointException
      */
-    public function agenda(array $params): Endpoint
+    public function agenda(array $params): Agenda
     {
         return EndpointFactory::make('/agenda', $params);
     }
@@ -246,10 +249,10 @@ class OpenAgenda
      * Get OpenAgenda location endpoint.
      *
      * @param array $params Endpoint params.
-     * @return \OpenAgenda\Endpoint\Location
+     * @return \OpenAgenda\Endpoint\Location|\OpenAgenda\Endpoint\Endpoint
      * @throws \OpenAgenda\Endpoint\UnknownEndpointException
      */
-    public function location(array $params = []): Endpoint
+    public function location(array $params = []): Location
     {
         return EndpointFactory::make('/location', $params);
     }
@@ -271,10 +274,10 @@ class OpenAgenda
      * Get OpenAgenda event endpoint.
      *
      * @param array $params Endpoint params.
-     * @return \OpenAgenda\Endpoint\Event
+     * @return \OpenAgenda\Endpoint\Event|\OpenAgenda\Endpoint\Endpoint
      * @throws \OpenAgenda\Endpoint\UnknownEndpointException
      */
-    public function event(array $params = []): Endpoint
+    public function event(array $params = []): Event
     {
         return EndpointFactory::make('/event', $params);
     }

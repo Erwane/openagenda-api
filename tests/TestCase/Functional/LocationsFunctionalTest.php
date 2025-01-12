@@ -14,6 +14,7 @@ declare(strict_types=1);
  */
 namespace OpenAgenda\Test\TestCase\Functional;
 
+use Cake\Chronos\Chronos;
 use GuzzleHttp\Psr7\Response;
 use OpenAgenda\Entity\Agenda;
 use OpenAgenda\Entity\Location;
@@ -25,135 +26,321 @@ use OpenAgenda\Test\Utility\FileResource;
  */
 class LocationsFunctionalTest extends OpenAgendaTestCase
 {
+    /**
+     * $locations = $oa->locations(['agendaUid' => 123, 'name' => 'My Location']);
+     */
     public function testSearch()
     {
-        // $locations = $oa->locations(['agendaUid' => 123, 'name' => 'My Location']);
-        $this->markTestIncomplete();
+        [$oa, $client] = $this->oa();
+
+        $payload = json_decode(FileResource::instance($this)->getContent('Response/locations/locations.json'), true);
+        $payload += [
+            '_status' => 200,
+            '_success' => true,
+        ];
+
+        $this->assertClientCall(
+            $client,
+            $this->once(),
+            'get',
+            $payload,
+            [
+                'path' => '/v2/agendas/123/locations',
+                'query' => [
+                    'size' => '2',
+                    'detailed' => '1',
+                    'search' => 'my location',
+                    'state' => '1',
+                    'createdAt' => [
+                        'gte' => '2023-06-01T00:00:00',
+                        'lte' => '2023-06-30T23:59:59',
+                    ],
+                    'updatedAt' => [
+                        'gte' => '2023-06-10T00:00:00',
+                        'lte' => '2023-06-20T23:59:59',
+                    ],
+                    'order' => 'name.desc',
+                ],
+            ]
+        );
+
+        $locations = $oa->locations([
+            'agendaUid' => 123,
+            'size' => 2,
+            'detailed' => true,
+            'search' => 'my location',
+            'state' => true,
+            'createdAt[gte]' => Chronos::parse('2023-06-01'),
+            'createdAt[lte]' => Chronos::parse('2023-06-30T23:59:59'),
+            'updatedAt[gte]' => '2023-06-10',
+            'updatedAt[lte]' => Chronos::parse('2023-06-20T23:59:59'),
+            'order' => 'name.desc',
+        ]);
+        $this->assertCount(1, $locations);
     }
 
     /**
-     * Test search one location from Agenda
+     * Test search from Agenda
+     * $locations = $agenda->locations(['name' => 'My Location']);
      */
     public function testSearchFromAgenda(): void
     {
-        // $locations = $agenda->locations(['name' => 'My Location']);
-        $wrapper = $this->clientWrapper();
+        [, $client] = $this->oa();
 
-        $payload = FileResource::instance($this)->getContent('Response/locations/locations.json');
-        $wrapper->expects($this->once())
-            ->method('get')
-            ->willReturn(new Response(200, [], $payload));
+        $payload = json_decode(FileResource::instance($this)->getContent('Response/locations/locations.json'), true);
+        $payload += [
+            '_status' => 200,
+            '_success' => true,
+        ];
+
+        $this->assertClientCall(
+            $client,
+            $this->once(),
+            'get',
+            $payload,
+            [
+                'path' => '/v2/agendas/123/locations',
+                'query' => [
+                    'size' => '2',
+                    'detailed' => '1',
+                    'search' => 'my location',
+                    'state' => '1',
+                    'createdAt' => [
+                        'gte' => '2023-06-01T00:00:00',
+                        'lte' => '2023-06-30T23:59:59',
+                    ],
+                    'updatedAt' => [
+                        'gte' => '2023-06-10T00:00:00',
+                        'lte' => '2023-06-20T23:59:59',
+                    ],
+                    'order' => 'name.desc',
+                ],
+            ]
+        );
 
         $agenda = new Agenda(['uid' => 123]);
 
-        $location = $agenda->locations(['search' => 'My location'])->first();
-        $this->assertInstanceOf(Location::class, $location);
+        $locations = $agenda->locations([
+            'size' => 2,
+            'detailed' => true,
+            'search' => 'my location',
+            'state' => true,
+            'createdAt[gte]' => Chronos::parse('2023-06-01'),
+            'createdAt[lte]' => Chronos::parse('2023-06-30T23:59:59'),
+            'updatedAt[gte]' => '2023-06-10',
+            'updatedAt[lte]' => Chronos::parse('2023-06-20T23:59:59'),
+            'order' => 'name.desc',
+        ]);
+        $this->assertCount(1, $locations);
     }
 
+    /**
+     * Test location exists
+     * $exists = $oa->location(['uid' => 456, 'agendaUid' => 123])->exists();
+     */
     public function testExists(): void
     {
-        // $exists = $oa->location(['uid' => 456, 'agendaUid' => 123])->exists();
-        $this->markTestIncomplete();
+        [$oa, $client] = $this->oa();
+
+        $this->assertClientCall(
+            $client,
+            $this->once(),
+            'head',
+            200,
+            ['path' => '/v2/agendas/123/locations/456']
+        );
+        $exists = $oa->location(['uid' => 456, 'agendaUid' => 123])->exists();
+        $this->assertTrue($exists);
     }
 
+    /**
+     * Test location exists
+     * $exists = $oa->location(['extId' => 456, 'agendaUid' => 123])->exists();
+     */
+    public function testExistsExtId(): void
+    {
+        [$oa, $client] = $this->oa();
+        $this->assertClientCall(
+            $client,
+            $this->once(),
+            'head',
+            200,
+            ['path' => '/v2/agendas/123/locations/ext/my-id']
+        );
+        $exists = $oa->location(['extId' => 'my-id', 'agendaUid' => 123])->exists();
+        $this->assertTrue($exists);
+    }
+
+    /**
+     * Test location exists from Agenda
+     * $exists = $agenda->location(['uid' => 456])->exists();
+     */
     public function testExistsFromAgenda(): void
     {
-        // $exists = $agenda->location(['uid' => 456])->exists();
-        $this->markTestIncomplete();
+        [, $client] = $this->oa();
+        $this->assertClientCall(
+            $client,
+            $this->once(),
+            'head',
+            200,
+            ['path' => '/v2/agendas/123/locations/456']
+        );
+
+        $agenda = new Agenda(['uid' => 123]);
+        $exists = $agenda->location(['uid' => 456])->exists();
+        $this->assertTrue($exists);
     }
 
     /**
      * Test getting one location from id.
-     * Test location exists
+     * $location = $oa->location(['uid' => 456, 'agendaUid' => 123])->get();
      */
     public function testGet(): void
     {
-        // $location = $oa->location(['uid' => 456, 'agendaUid' => 123])->get();
-        [$oa, $wrapper] = $this->oa();
+        [$oa, $client] = $this->oa();
 
-        $payload = FileResource::instance($this)->getContent('Response/locations/location.json');
-        $wrapper->expects($this->once())
-            ->method('get')
-            ->willReturn(new Response(200, [], $payload));
-        $wrapper->expects($this->once())
-            ->method('head')
-            ->willReturn(new Response(200));
-
+        $payload = json_decode(FileResource::instance($this)->getContent('Response/locations/location.json'), true);
+        $payload += [
+            '_status' => 200,
+            '_success' => true,
+        ];
+        $this->assertClientCall(
+            $client,
+            $this->once(),
+            'get',
+            $payload,
+            ['path' => '/v2/agendas/123/locations/456']
+        );
         $location = $oa->location(['uid' => 456, 'agendaUid' => 123])->get();
-        $exists = $oa->location(['uid' => 456, 'agendaUid' => 123])->exists();
-
         $this->assertInstanceOf(Location::class, $location);
-        $this->assertTrue($exists);
     }
 
     /**
      * Test getting one location
-     * Test location exists
      */
     public function testGetFromAgenda(): void
     {
-        // $location = $agenda->location(['extId' => 'my-location-id'])->get();
+        [, $client] = $this->oa();
 
-        $wrapper = $this->clientWrapper();
-
-        $payload = FileResource::instance($this)->getContent('Response/locations/location.json');
-        $wrapper->expects($this->once())
-            ->method('get')
-            ->willReturn(new Response(200, [], $payload));
-        $wrapper->expects($this->once())
-            ->method('head')
-            ->willReturn(new Response(200));
+        $payload = json_decode(FileResource::instance($this)->getContent('Response/locations/location.json'), true);
+        $payload += [
+            '_status' => 200,
+            '_success' => true,
+        ];
+        $this->assertClientCall(
+            $client,
+            $this->once(),
+            'get',
+            $payload,
+            ['path' => '/v2/agendas/123/locations/ext/my-location-id']
+        );
 
         $agenda = new Agenda(['uid' => 123]);
 
         $location = $agenda->location(['extId' => 'my-location-id'])->get();
-        $exists = $agenda->location(['uid' => 456])->exists();
-
         $this->assertInstanceOf(Location::class, $location);
-        $this->assertTrue($exists);
     }
 
     /**
-     * Test create location from oa
+     * Test create location
+     * $location = $oa->location($data)->create();
      */
     public function testCreate(): void
     {
-        // $location = $oa->location($data)->create();
-        [$oa, $wrapper] = $this->oa();
+        [$oa, $client] = $this->oa();
 
-        $payload = FileResource::instance($this)->getContent('Response/locations/location.json');
-        $wrapper->expects($this->exactly(2))
-            ->method('post')
-            ->willReturnOnConsecutiveCalls(
-                new Response(200, [], '{"access_token": "my authorization token"}'),
-                new Response(200, [], $payload)
-            );
+        $payload = json_decode(FileResource::instance($this)->getContent('Response/locations/location.json'), true);
+        $payload += [
+            '_status' => 200,
+            '_success' => true,
+        ];
+        $this->assertClientCall(
+            $client,
+            $this->once(),
+            'post',
+            $payload,
+            ['path' => '/v2/agendas/123/locations'],
+            [
+                'extId' => 'my-id',
+                'name' => 'My location',
+                'address' => '122 rue de charonne, 75011 Paris, France',
+                'countryCode' => 'FR',
+                'state' => 1,
+                'description' => ['fr' => 'Location description'],
+                'access' => ['fr' => 'Location access'],
+                'website' => 'https://example.com',
+                'email' => 'email@example.com',
+                'phone' => '+33123456789',
+                'links' => ['https://www.louvre.fr', 'https://www.facebook.com/museedulouvre'],
+                // 'image' => '',
+                'imageCredits' => 'Image credits',
+                'region' => 'Normandie',
+                'department' => 'Oise',
+                'district' => '11 ème',
+                'city' => 'Paris',
+                'postalCode' => '75011',
+                'insee' => '75011',
+                'latitude' => '1.2345',
+                'longitude' => '6.7890',
+                'timezone' => 'Europe/Paris',
+            ]
+        );
 
         $data = [
             'agendaUid' => 123,
+            'extId' => 'my-id',
             'name' => 'My location',
             'address' => '122 rue de charonne, 75011 Paris, France',
             'countryCode' => 'fr',
+            'state' => true,
+            'description' => 'Location description',
+            'access' => 'Location access',
+            'website' => 'https://example.com',
+            'email' => 'email@example.com',
+            'phone' => '0123456789',
+            'links' => ['https://www.louvre.fr', 'https://www.facebook.com/museedulouvre'],
+            // 'image' => '',
+            'imageCredits' => 'Image credits',
+            'region' => 'Normandie',
+            'department' => 'Oise',
+            'district' => '11 ème',
+            'city' => 'Paris',
+            'postalCode' => '75011',
+            'insee' => '75011',
+            'latitude' => 1.2345,
+            'longitude' => 6.7890,
+            'timezone' => 'Europe/Paris',
         ];
+
         $location = $oa->location($data)->create();
         $this->assertInstanceOf(Location::class, $location);
     }
 
     /**
      * Test create location from Agenda
+     * $location = $agenda->location($data)->create();
      */
     public function testCreateFromAgenda(): void
     {
-        // location = $agenda->location($data)->create();
-        $wrapper = $this->clientWrapper();
+        [, $client] = $this->oa();
 
-        $payload = FileResource::instance($this)->getContent('Response/locations/location.json');
-        $wrapper->expects($this->exactly(2))
-            ->method('post')
-            ->willReturnOnConsecutiveCalls(
-                new Response(200, [], '{"access_token": "my authorization token"}'),
-                new Response(200, [], $payload)
-            );
+        $payload = json_decode(FileResource::instance($this)->getContent('Response/locations/location.json'), true);
+        $payload += [
+            '_status' => 200,
+            '_success' => true,
+        ];
+        $this->assertClientCall(
+            $client,
+            $this->once(),
+            'post',
+            $payload,
+            ['path' => '/v2/agendas/123/locations'],
+            [
+                'name' => 'My location',
+                'address' => '122 rue de charonne, 75011 Paris, France',
+                'countryCode' => 'FR',
+            ]
+        );
 
         $agenda = new Agenda(['uid' => 123]);
 
@@ -169,21 +356,30 @@ class LocationsFunctionalTest extends OpenAgendaTestCase
 
     /**
      * Test update location from oa
+     * $location = $oa->location(['agendaUid' => 123, 'uid' => 456, 'state' => true])->update();
      */
     public function testUpdate(): void
     {
-        // $location = $oa->location(['agendaUid' => 123, 'uid' => 456, 'state' => true])->update();
-        [$oa, $wrapper] = $this->oa();
+        [$oa, $client] = $this->oa();
 
-        $payload = FileResource::instance($this)->getContent('Response/locations/location.json');
-        $wrapper->expects($this->once())
-            ->method('post')
-            ->willReturn(new Response(200, [], '{"access_token": "my authorization token"}'));
-        $wrapper->expects($this->once())
-            ->method('patch')
-            ->willReturn(new Response(200, [], $payload));
+        $payload = json_decode(FileResource::instance($this)->getContent('Response/locations/location.json'), true);
+        $payload += [
+            '_status' => 200,
+            '_success' => true,
+        ];
+        $this->assertClientCall(
+            $client,
+            $this->once(),
+            'patch',
+            $payload,
+            ['path' => '/v2/agendas/123/locations/456'],
+            [
+                'state' => 1,
+            ]
+        );
 
         $data = ['uid' => 456, 'agendaUid' => 123, 'state' => true];
+
         $location = $oa->location($data)->update();
         $this->assertInstanceOf(Location::class, $location);
     }
@@ -193,18 +389,27 @@ class LocationsFunctionalTest extends OpenAgendaTestCase
      */
     public function testUpdateFromLocation(): void
     {
-        // $location = $location->update(true); // Full update
-        $wrapper = $this->clientWrapper();
+        [, $client] = $this->oa();
 
-        $payload = FileResource::instance($this)->getContent('Response/locations/location.json');
-        $wrapper->expects($this->once())
-            ->method('post')
-            ->willReturn(new Response(200, [], '{"access_token": "my authorization token"}'));
-        $wrapper->expects($this->once())
-            ->method('patch')
-            ->willReturn(new Response(200, [], $payload));
+        $payload = json_decode(FileResource::instance($this)->getContent('Response/locations/location.json'), true);
+        $payload += [
+            '_status' => 200,
+            '_success' => true,
+        ];
+        $this->assertClientCall(
+            $client,
+            $this->once(),
+            'patch',
+            $payload,
+            ['path' => '/v2/agendas/123/locations/456'],
+            [
+                'state' => 1,
+            ]
+        );
 
-        $location = new Location(['uid' => 456, 'agendaUid' => 123]);
+        $location = new Location(['uid' => 456, 'agendaUid' => 123, 'extId' => 'my-id', 'state' => 0], ['markClean' => true]);
+        $location->setNew(false);
+        $location->extId = 'my-id';
         $location->state = true;
         $location = $location->update();
         $this->assertInstanceOf(Location::class, $location);
@@ -215,19 +420,22 @@ class LocationsFunctionalTest extends OpenAgendaTestCase
      */
     public function testDelete(): void
     {
-        // $location = $oa->location(['agendaUid' => 123, 'uid' => 456])->delete();
-        [$oa, $wrapper] = $this->oa();
+        [$oa, $client] = $this->oa();
 
-        $payload = FileResource::instance($this)->getContent('Response/locations/location.json');
-        $wrapper->expects($this->once())
-            ->method('post')
-            ->willReturn(new Response(200, [], '{"access_token": "my authorization token"}'));
-        $wrapper->expects($this->once())
-            ->method('delete')
-            ->willReturn(new Response(200, [], $payload));
+        $payload = json_decode(FileResource::instance($this)->getContent('Response/locations/location.json'), true);
+        $payload += [
+            '_status' => 200,
+            '_success' => true,
+        ];
+        $this->assertClientCall(
+            $client,
+            $this->once(),
+            'delete',
+            $payload,
+            ['path' => '/v2/agendas/123/locations/456']
+        );
 
-        $data = ['uid' => 456, 'agendaUid' => 123];
-        $location = $oa->location($data)->delete();
+        $location = $oa->location(['agendaUid' => 123, 'uid' => 456])->delete();
         $this->assertInstanceOf(Location::class, $location);
     }
 
@@ -236,16 +444,20 @@ class LocationsFunctionalTest extends OpenAgendaTestCase
      */
     public function testDeleteFromLocation(): void
     {
-        // $location = $oa->location(['uid' => 456, 'agendaUid' => 123])->get()->delete();
-        $wrapper = $this->clientWrapper();
+        [, $client] = $this->oa();
 
-        $payload = FileResource::instance($this)->getContent('Response/locations/location.json');
-        $wrapper->expects($this->once())
-            ->method('post')
-            ->willReturn(new Response(200, [], '{"access_token": "my authorization token"}'));
-        $wrapper->expects($this->once())
-            ->method('delete')
-            ->willReturn(new Response(200, [], $payload));
+        $payload = json_decode(FileResource::instance($this)->getContent('Response/locations/location.json'), true);
+        $payload += [
+            '_status' => 200,
+            '_success' => true,
+        ];
+        $this->assertClientCall(
+            $client,
+            $this->once(),
+            'delete',
+            $payload,
+            ['path' => '/v2/agendas/123/locations/456']
+        );
 
         $location = new Location(['uid' => 456, 'agendaUid' => 123]);
         $location = $location->delete();

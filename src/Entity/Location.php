@@ -14,6 +14,10 @@ declare(strict_types=1);
  */
 namespace OpenAgenda\Entity;
 
+use Exception;
+use libphonenumber\PhoneNumber;
+use libphonenumber\PhoneNumberFormat;
+use libphonenumber\PhoneNumberUtil;
 use OpenAgenda\Endpoint\EndpointFactory;
 use OpenAgenda\OpenAgenda;
 use OpenAgenda\OpenAgendaException;
@@ -34,7 +38,7 @@ use OpenAgenda\OpenAgendaException;
  * @property string|null $district
  * @property string|null $department
  * @property string|null $region
- * @property string|null $country
+ * @property string|null $countryCode
  * @property string|null $insee
  * @property float|null $latitude
  * @property float|null $longitude
@@ -66,8 +70,7 @@ class Location extends Entity
         'longitude' => ['field' => 'longitude'],
         'createdAt' => ['field' => 'createdAt', 'type' => 'datetime'],
         'updatedAt' => ['field' => 'updatedAt', 'type' => 'datetime'],
-        // website exists in doc but not in API payload
-        // 'website' => ['field' => 'website'],
+        'website' => ['field' => 'website'],
         'email' => ['field' => 'email'],
         'phone' => ['field' => 'phone'],
         'links' => ['field' => 'links'],
@@ -99,7 +102,21 @@ class Location extends Entity
     {
         $this->_requireClient();
 
-        return EndpointFactory::make('/location', $this->toArray())->update();
+        $data = $this->extract(array_keys($this->_schema), true);
+        $data = array_filter($data, function ($value) {
+            return $value !== null;
+        });
+
+        if ($this->uid) {
+            $data['uid'] = $this->uid;
+        } elseif ($this->extId) {
+            $data['extId'] = $this->extId;
+        }
+        $data['agendaUid'] = $this->agendaUid;
+
+        /** @uses \OpenAgenda\Endpoint\Location::update() */
+        return EndpointFactory::make('/location', $data)
+            ->update();
     }
 
     /**
@@ -131,14 +148,40 @@ class Location extends Entity
     }
 
     /**
+     * Set multilingual description clean and truncate to 5000.
+     *
+     * @param string|array $value Descriptions
+     * @return string[]
+     */
+    protected function _setDescription($value)
+    {
+        return $this->_setMultilingual($value, true, 5000);
+    }
+
+    /**
+     * Set multilingual access clean and truncate to 5000.
+     *
+     * @param string|array $value Access
+     * @return string[]
+     */
+    protected function _setAccess($value)
+    {
+        return $this->_setMultilingual($value, true, 1000);
+    }
+
+    /**
      * Country code is uppercase.
      *
      * @param string|null $value Country code.
      * @return string
      */
-    protected function _setCountry(?string $value): string
+    protected function _setCountryCode(?string $value): ?string
     {
-        return strtoupper($value);
+        if (is_string($value)) {
+            $value = strtoupper($value);
+        }
+
+        return $value;
     }
 
     /**
@@ -161,6 +204,27 @@ class Location extends Entity
     protected function _setLongitude($value)
     {
         return (float)$value;
+    }
+
+    /**
+     * // todo tests
+     *
+     * @param string|null $value
+     * @return string|null
+     */
+    protected function _setPhone(?string $value)
+    {
+        if ($value) {
+            $instance = PhoneNumberUtil::getInstance();
+            try {
+                $phone = $instance->parse($value, OpenAgenda::getDefaultLang());
+                $value = $instance->format($phone, PhoneNumberFormat::E164);
+            } catch (Exception $e) {
+                $value = null;
+            }
+        }
+
+        return $value;
     }
 
     /**

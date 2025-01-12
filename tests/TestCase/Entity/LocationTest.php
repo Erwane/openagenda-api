@@ -214,11 +214,29 @@ class LocationTest extends OpenAgendaTestCase
         ], $endpoint->toArray());
     }
 
-    /** @covers \OpenAgenda\Entity\Location::_setCountry */
-    public function testSetCountry(): void
+    /** @covers \OpenAgenda\Entity\Location::_setDescription */
+    public function testSetDescription(): void
     {
-        $entity = new Location(['country' => 'fr']);
-        $this->assertEquals('FR', $entity->country);
+        $string = str_pad('start_', 5005, '-');
+        $entity = new Location(['description' => $string]);
+        $this->assertEquals(5000, strlen($entity->description['fr']));
+        $this->assertStringEndsWith('-- ...', $entity->description['fr']);
+    }
+
+    /** @covers \OpenAgenda\Entity\Location::_setAccess */
+    public function testSetAccess(): void
+    {
+        $string = str_pad('start_', 1005, '-');
+        $entity = new Location(['access' => $string]);
+        $this->assertEquals(1000, strlen($entity->access['fr']));
+        $this->assertStringEndsWith('-- ...', $entity->access['fr']);
+    }
+
+    /** @covers \OpenAgenda\Entity\Location::_setCountry */
+    public function testSetCountryCode(): void
+    {
+        $entity = new Location(['countryCode' => 'fr']);
+        $this->assertEquals('FR', $entity->countryCode);
     }
 
     /** @covers \OpenAgenda\Entity\Location::_setLatitude */

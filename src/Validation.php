@@ -73,7 +73,7 @@ class Validation
      * @param int|null $maxLength Value max length.
      * @return string|bool
      */
-    public static function multilingual(array $check, ?int $maxLength = null)
+    public static function multilingual(array $check, int $maxLength)
     {
         foreach ($check as $lang => $value) {
             if (!self::lang($lang)) {

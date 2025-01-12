@@ -146,7 +146,10 @@ class Location extends Endpoint
             ->email('email')
             // phone
             ->allowEmptyString('phone')
-            ->add('phone', 'phone', ['rule' => [Validation::class, 'phone']])
+            ->add('phone', 'phone', [
+                    'rule' => [[Validation::class, 'phone'], 'FR'],
+                ]
+            )
             // links
             ->allowEmptyArray('links')
             ->isArray('links')

@@ -166,8 +166,26 @@ class EntityTest extends TestCase
 
     public function testIsDirty(): void
     {
-        $ent = new ent(['uid' => 1]);
+        $ent = new ent([
+            'id' => 99,
+            'description' => ['fr' => 'lorem'],
+        ], ['markClean' => true]);
+
+        $ent->id = 99;
+        $ent->description = ['fr' => 'lorem ipsum'];
         $this->assertTrue($ent->isDirty());
+    }
+
+    public function testDirtyNotSetWhenNoDiff()
+    {
+        $ent = new ent([
+            'id' => 99,
+            'description' => ['fr' => 'lorem'],
+        ], ['markClean' => true]);
+        $this->assertFalse($ent->isDirty());
+        $ent->id = 99;
+        $ent->description = ['fr' => 'lorem'];
+        $this->assertFalse($ent->isDirty());
     }
 
     public static function dataNoHtml(): array

@@ -78,21 +78,24 @@ class OpenAgendaTestCase extends TestCase
      * @param \OpenAgenda\Client|\PHPUnit\Framework\MockObject\MockObject $client
      * @param \PHPUnit\Framework\MockObject\Rule\InvokedCount $count
      * @param string $method
-     * @param string $path
-     * @param array|null $query
-     * @param array|bool $payload
+     * @param array|int $payload
+     * @param array $uriExpect
+     * @param array $requestData
      */
-    public function assertClientCall(Client $client, InvokedCount $count, string $method, string $path, ?array $query, $payload)
+    public function assertClientCall(Client $client, InvokedCount $count, string $method, $payload, array $uriExpect = [], array $requestData = [])
     {
+        if (!is_array($payload) && !is_int($payload)) {
+            $this->fail('fix payload');
+        }
         $client->expects($count)
             ->method($method)
-            ->with($this->callback(function (Uri $uri) use ($path, $query) {
+            ->with($this->callback(function (Uri $uri) use ($uriExpect) {
                 parse_str((string)$uri->getQuery(), $q);
-                $this->assertEquals($path, $uri->getPath());
-                $this->assertSame($query, $q);
+                $this->assertEquals($uriExpect['path'] ?? '/v2', $uri->getPath());
+                $this->assertSame($uriExpect['query'] ?? [], $q);
 
                 return true;
-            }))
+            }), $requestData)
             ->willReturn($payload);
     }
 }

@@ -37,7 +37,6 @@ class LocationTest extends EndpointTestCase
         $v = $endpoint->validationUriPath(new Validator());
 
         // agendaUid
-        $this->assertTrue($v->hasField('agendaUid'));
         $field = $v->field('agendaUid');
         $this->assertTrue($field->isPresenceRequired());
         $rules = $field->rules();

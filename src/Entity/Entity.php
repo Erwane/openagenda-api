@@ -272,13 +272,14 @@ abstract class Entity implements ArrayAccess
         $fields = $this->fromOpenAgenda($fields);
 
         foreach ($fields as $name => $value) {
-            $this->setDirty($name, true);
-
             if ($options['setter']) {
                 $setter = static::_accessor($name, 'set');
                 if ($setter) {
                     $value = $this->{$setter}($value);
                 }
+            }
+            if (!isset($this->_fields[$name]) || $this->_fields[$name] !== $value) {
+                $this->setDirty($name);
             }
 
             $this->_fields[$name] = $value;
@@ -361,6 +362,26 @@ abstract class Entity implements ArrayAccess
         }
 
         return $method;
+    }
+
+    /**
+     * Returns an array with the requested fields
+     * stored in this entity, indexed by field name
+     *
+     * @param array<string> $fields list of fields to be returned
+     * @param bool $onlyDirty Return the requested field only if it is dirty
+     * @return array
+     */
+    public function extract(array $fields, bool $onlyDirty = false): array
+    {
+        $result = [];
+        foreach ($fields as $field) {
+            if (!$onlyDirty || $this->isDirty($field)) {
+                $result[$field] = $this->get($field);
+            }
+        }
+
+        return $result;
     }
 
     /**
@@ -523,5 +544,29 @@ abstract class Entity implements ArrayAccess
         $converter = new HtmlConverter(['strip_tags' => true]);
 
         return $converter->convert($html);
+    }
+
+    protected function _setMultilingual($value, bool $clean, ?int $truncate = null)
+    {
+        if (is_string($value)) {
+            $value = [OpenAgenda::getDefaultLang() => $value];
+        }
+
+        if (is_array($value)) {
+            foreach ($value as $lang => $text) {
+                if ($clean) {
+                    $text = static::noHtml($text, false);
+                }
+                if ($truncate) {
+                    if (mb_strlen($text) > $truncate) {
+                        $text = mb_substr($text, 0, $truncate - 4) . ' ...';
+                    }
+                }
+
+                $value[$lang] = $text;
+            }
+        }
+
+        return $value;
     }
 }

@@ -34,7 +34,7 @@ class Locations extends Endpoint
         'createdAt[gte]' => ['type' => 'datetime'],
         'updatedAt[lte]' => ['type' => 'datetime'],
         'updatedAt[gte]' => ['type' => 'datetime'],
-        'sort' => [],
+        'order' => [],
     ];
 
     /**
@@ -86,10 +86,10 @@ class Locations extends Endpoint
             ->dateTime('updatedAt[lte]', ['ymd', Validation::DATETIME_ISO8601])
             ->dateTime('updatedAt[gte]', ['ymd', Validation::DATETIME_ISO8601])
 
-            // sort
-            ->allowEmptyString('sort')
-            ->scalar('sort')
-            ->inList('sort', [
+            // order
+            ->allowEmptyString('order')
+            ->scalar('order')
+            ->inList('order', [
                 'name.asc',
                 'name.desc',
                 'createdAt.asc',
