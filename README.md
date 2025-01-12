@@ -6,6 +6,11 @@
 [![Packagist Downloads](https://img.shields.io/packagist/dt/Erwane/openagenda-api)](https://packagist.org/packages/Erwane/openagenda-api)
 [![Packagist Version](https://img.shields.io/packagist/v/Erwane/openagenda-api)](https://packagist.org/packages/Erwane/openagenda-api)
 
+## Version map
+
+| branch | This package version | OpenAgenda API | PHP min |
+|:------:|----------------------|:--------------:|:-------:|
+|  3.x   | 3.0.*                |       v2       | PHP 7.2 |
 
 ## Installation
 
@@ -13,9 +18,11 @@ The sdk is not directly usable.
 You need to use one client wrapper, compatible with your PSR-18 http client.
 
 Available wrappers are:
+
 * Guzzle: `erwane/openagenda-wrapper-guzzle`
 
 example:
+
 ```php
 composer require erwane/openagenda-wrapper-guzzle:"1.0.*"
 ```
