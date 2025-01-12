@@ -118,6 +118,7 @@ class Client
     {
         $params['headers']['key'] = $this->publicKey;
 
+        // todo this could throw exception
         $response = $this->http->head((string)$uri, $params);
 
         return $response->getStatusCode();
@@ -136,6 +137,7 @@ class Client
         // Add key
         $params['headers']['key'] = $this->publicKey;
 
+        // todo this could throw exception
         $response = $this->http->get((string)$uri, $params);
 
         return $this->payload($response);
@@ -154,6 +156,8 @@ class Client
     public function post($uri, array $data = [], array $params = []): array
     {
         $params = $this->_addAuthenticationHeaders($params);
+
+        // todo this could throw exception
         $response = $this->http->post((string)$uri, $data, $params);
 
         return $this->payload($response);
@@ -172,6 +176,8 @@ class Client
     public function patch($uri, array $data = [], array $params = []): array
     {
         $params = $this->_addAuthenticationHeaders($params);
+
+        // todo this could throw exception
         $response = $this->http->patch((string)$uri, $data, $params);
 
         return $this->payload($response);
@@ -189,6 +195,8 @@ class Client
     public function delete($uri, array $params = []): array
     {
         $params = $this->_addAuthenticationHeaders($params);
+
+        // todo this could throw exception
         $response = $this->http->delete((string)$uri, $params);
 
         return $this->payload($response);
@@ -230,6 +238,8 @@ class Client
             }
             $endpoint = new Auth();
             $uri = $endpoint->getUri('post');
+
+            // todo this could throw exception
             $response = $this->http->post((string)$uri, [
                 'grant_type' => 'authorization_code',
                 'code' => $this->secretKey,

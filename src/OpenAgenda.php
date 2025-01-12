@@ -223,7 +223,6 @@ class OpenAgenda
      * @param array $params Query params.
      * @return \OpenAgenda\Endpoint\Agenda
      * @throws \OpenAgenda\Endpoint\UnknownEndpointException
-     * @uses \OpenAgenda\Endpoint\Agendas
      */
     public function agenda(array $params): Endpoint
     {
@@ -236,6 +235,7 @@ class OpenAgenda
      * @param array $params Query params.
      * @return \OpenAgenda\Entity\Location[]|\Ramsey\Collection\Collection
      * @throws \OpenAgenda\Endpoint\UnknownEndpointException
+     * @uses \OpenAgenda\Endpoint\Locations
      */
     public function locations(array $params = []): Collection
     {
@@ -260,6 +260,7 @@ class OpenAgenda
      * @param array $params Query params.
      * @return \OpenAgenda\Entity\Event[]|\Ramsey\Collection\Collection
      * @throws \OpenAgenda\Endpoint\UnknownEndpointException
+     * @uses \OpenAgenda\Endpoint\Events
      */
     public function events(array $params = []): Collection
     {

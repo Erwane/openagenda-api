@@ -35,10 +35,16 @@ class AgendasTest extends EndpointTestCase
 
         $v = $endpoint->validationUriQueryGet(new Validator());
 
-        $this->assertCount(9, $v);
+        $this->assertCount(10, $v);
 
         // size
         $field = $v->field('size');
+        $this->assertTrue($field->isEmptyAllowed());
+        $rules = $field->rules();
+        $this->assertArrayHasKey('integer', $rules);
+
+        // limit
+        $field = $v->field('limit');
         $this->assertTrue($field->isEmptyAllowed());
         $rules = $field->rules();
         $this->assertArrayHasKey('integer', $rules);

@@ -9,20 +9,20 @@ _See [basics](basics.md) of how to do this._
 
 * [my agendas](#my-agendas)
 * [search](#search)
-* [get](#get)
+* [get or exists](#get)
 * [Agenda object](#schema)
 
 ## My agendas
 
 ```php
-$agendas = $oa->myAgendas(['size' => 2]);
+$agendas = $oa->myAgendas(['limit' => 2]);
 ```
 
 ### Params
 
 | field | type    | description                                                                                                                 |
 |-------|---------|-----------------------------------------------------------------------------------------------------------------------------|
-| size  | integer | How many results by request. Default `100`                                                                                  |
+| limit | integer | How many results by request. Default `100`                                                                                  |
 | page  | integer | Pagination. Require a PSR-16 configured cache.<br/>You can only ask for next or previous page.<br/>**Not implemented yet**. |
 
 ## Search
@@ -48,7 +48,7 @@ $agenda = $oa->agendas(['size' => 1, 'slug' => 'my-agenda-slug'])->first();
 | search   | string             | Search terms in title, locations and agenda keywords                                                                        |
 | official | boolean            | Only officials agendas. Default `false`.                                                                                    |
 | slug     | string or string[] | Get agendas with this slug(s).                                                                                              |
-| uid      | id or id[]         | Get agendas with this id(s)                                                                                                 |
+| uid      | int or int[]       | Get agendas with this uid(s)                                                                                                |
 | network  | int                | Get only agendas in this network id                                                                                         |
 | sort     | string             | Sort results.<br/>Allowed values are `createdAt.desc` and `recentlyAddedEvents.desc`                                        |
 
@@ -58,10 +58,10 @@ The `agendas()` method return a [Collection](collection.md) of `OpenAgenda\Entit
 
 ## Get
 
-Get one agenda.
-
+Get one agenda.  
+If you want to check an agenda exists, you can use `exists()` method instead of `get()`.
 ```php
-// Using OpenAgenda::agenda() method
+$exists = $oa->agenda(['uid' => 12345])->exists();
 $agenda = $oa->agenda(['uid' => 12345, 'detailed' => true])->get();
 ```
 
@@ -78,10 +78,9 @@ $agenda = $oa->agenda(['uid' => 12345, 'detailed' => true])->get();
 |:--------------:|:--------:|:--------------------|
 |      uid       |   int    | Agenda uid          |
 |     title      |  string  | Title               |
-|      slug      |  string  | Slug                |
 |  description   |  string  | Description         |
+|      slug      |  string  | Slug                |
 |      url       |  string  | External URL        |
-|    official    | boolean  | Is official         |
 |     image      |  string  | Image URL           |
 |    official    | boolean  | Is official         |
 |    private     | boolean  | Is private          |

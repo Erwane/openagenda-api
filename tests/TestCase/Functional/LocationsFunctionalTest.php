@@ -25,11 +25,18 @@ use OpenAgenda\Test\Utility\FileResource;
  */
 class LocationsFunctionalTest extends OpenAgendaTestCase
 {
+    public function testSearch()
+    {
+        // $locations = $oa->locations(['agendaUid' => 123, 'name' => 'My Location']);
+        $this->markTestIncomplete();
+    }
+
     /**
      * Test search one location from Agenda
      */
-    public function testSearchLocationFromAgenda(): void
+    public function testSearchFromAgenda(): void
     {
+        // $locations = $agenda->locations(['name' => 'My Location']);
         $wrapper = $this->clientWrapper();
 
         $payload = FileResource::instance($this)->getContent('Response/locations/locations.json');
@@ -43,12 +50,25 @@ class LocationsFunctionalTest extends OpenAgendaTestCase
         $this->assertInstanceOf(Location::class, $location);
     }
 
+    public function testExists(): void
+    {
+        // $exists = $oa->location(['uid' => 456, 'agendaUid' => 123])->exists();
+        $this->markTestIncomplete();
+    }
+
+    public function testExistsFromAgenda(): void
+    {
+        // $exists = $agenda->location(['uid' => 456])->exists();
+        $this->markTestIncomplete();
+    }
+
     /**
      * Test getting one location from id.
      * Test location exists
      */
-    public function testLocation(): void
+    public function testGet(): void
     {
+        // $location = $oa->location(['uid' => 456, 'agendaUid' => 123])->get();
         [$oa, $wrapper] = $this->oa();
 
         $payload = FileResource::instance($this)->getContent('Response/locations/location.json');
@@ -70,8 +90,10 @@ class LocationsFunctionalTest extends OpenAgendaTestCase
      * Test getting one location
      * Test location exists
      */
-    public function testLocationFromAgenda(): void
+    public function testGetFromAgenda(): void
     {
+        // $location = $agenda->location(['extId' => 'my-location-id'])->get();
+
         $wrapper = $this->clientWrapper();
 
         $payload = FileResource::instance($this)->getContent('Response/locations/location.json');
@@ -96,6 +118,7 @@ class LocationsFunctionalTest extends OpenAgendaTestCase
      */
     public function testCreate(): void
     {
+        // $location = $oa->location($data)->create();
         [$oa, $wrapper] = $this->oa();
 
         $payload = FileResource::instance($this)->getContent('Response/locations/location.json');
@@ -121,6 +144,7 @@ class LocationsFunctionalTest extends OpenAgendaTestCase
      */
     public function testCreateFromAgenda(): void
     {
+        // location = $agenda->location($data)->create();
         $wrapper = $this->clientWrapper();
 
         $payload = FileResource::instance($this)->getContent('Response/locations/location.json');
@@ -148,6 +172,7 @@ class LocationsFunctionalTest extends OpenAgendaTestCase
      */
     public function testUpdate(): void
     {
+        // $location = $oa->location(['agendaUid' => 123, 'uid' => 456, 'state' => true])->update();
         [$oa, $wrapper] = $this->oa();
 
         $payload = FileResource::instance($this)->getContent('Response/locations/location.json');
@@ -168,6 +193,7 @@ class LocationsFunctionalTest extends OpenAgendaTestCase
      */
     public function testUpdateFromLocation(): void
     {
+        // $location = $location->update(true); // Full update
         $wrapper = $this->clientWrapper();
 
         $payload = FileResource::instance($this)->getContent('Response/locations/location.json');
@@ -189,6 +215,7 @@ class LocationsFunctionalTest extends OpenAgendaTestCase
      */
     public function testDelete(): void
     {
+        // $location = $oa->location(['agendaUid' => 123, 'uid' => 456])->delete();
         [$oa, $wrapper] = $this->oa();
 
         $payload = FileResource::instance($this)->getContent('Response/locations/location.json');
@@ -209,6 +236,7 @@ class LocationsFunctionalTest extends OpenAgendaTestCase
      */
     public function testDeleteFromLocation(): void
     {
+        // $location = $oa->location(['uid' => 456, 'agendaUid' => 123])->get()->delete();
         $wrapper = $this->clientWrapper();
 
         $payload = FileResource::instance($this)->getContent('Response/locations/location.json');

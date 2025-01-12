@@ -14,7 +14,6 @@ declare(strict_types=1);
  */
 namespace OpenAgenda\Test\TestCase\Functional;
 
-use GuzzleHttp\Psr7\Response;
 use OpenAgenda\Entity\Agenda;
 use OpenAgenda\Test\OpenAgendaTestCase;
 use OpenAgenda\Test\Utility\FileResource;
@@ -25,21 +24,102 @@ use OpenAgenda\Test\Utility\FileResource;
 class AgendasFunctionalTest extends OpenAgendaTestCase
 {
     /**
+     * Search agendas
+     * // Using OpenAgenda::agenda() method
+     * $agendas = $oa->agendas([
+     * 'size' => 5,
+     * 'uid' => [12, 34, 56],
+     * 'sort' => 'recentlyAddedEvents.desc',
+     * ]);
+     */
+    public function testSearch(): void
+    {
+        [$oa, $client] = $this->oa();
+
+        $payload = json_decode(FileResource::instance($this)->getContent('Response/agendas/agendas.json'), true);
+        $payload += [
+            '_status' => 200,
+            '_success' => true,
+        ];
+
+        $this->assertClientCall($client, $this->once(), 'get', '/v2/agendas', [
+            'size' => '2',
+            'fields' => ['summary', 'schema'],
+            'search' => 'my agenda',
+            'official' => '1',
+            'slug' => ['slug-1', 'slug-2'],
+            'uid' => ['123', '456'],
+            'network' => '123',
+            'sort' => 'createdAt.desc',
+        ], $payload);
+
+        $agendas = $oa->agendas([
+            'size' => 2,
+            'fields' => ['summary', 'schema'],
+            'search' => 'my agenda',
+            'official' => true,
+            'slug' => ['slug-1', 'slug-2'],
+            'uid' => [123, 456],
+            'network' => 123,
+            'sort' => 'createdAt.desc',
+        ]);
+        $this->assertCount(2, $agendas);
+        $this->assertInstanceOf(Agenda::class, $agendas->first());
+    }
+
+    /**
+     * Get my agendas
+     * $agendas = $oa->myAgendas(['size' => 2]);
+     */
+    public function testMines(): void
+    {
+        [$oa, $client] = $this->oa();
+
+        $payload = json_decode(FileResource::instance($this)->getContent('Response/agendas/mines.json'), true);
+        $payload += [
+            '_status' => 200,
+            '_success' => true,
+        ];
+
+        $this->assertClientCall($client, $this->once(), 'get', '/v2/me/agendas', ['limit' => '2'], $payload);
+
+        $agendas = $oa->myAgendas(['limit' => 2]);
+        $this->assertCount(1, $agendas);
+        $this->assertInstanceOf(Agenda::class, $agendas->first());
+    }
+
+    /**
+     * Test agenda exists
+     * $exists = $oa->agenda(['uid' => 12345])->exists();
+     */
+    public function testExists(): void
+    {
+        [$oa, $client] = $this->oa();
+
+        $this->assertClientCall($client, $this->once(), 'head', '/v2/agendas/12345', [], 200);
+
+        $exists = $oa->agenda(['uid' => 12345])->exists();
+        $this->assertTrue($exists);
+    }
+
+    /**
      * Test get agenda from uid
+     * $agenda = $oa->agenda(['uid' => 12345, 'detailed' => true])->get();
      */
     public function testGet(): void
     {
-        [$oa, $wrapper] = $this->oa();
-        $payload = FileResource::instance($this)->getContent('Response/agendas/agenda.json');
-        $wrapper->expects($this->once())
-            ->method('get')
-            ->with(
-                'https://api.openagenda.com/v2/agendas/123?detailed=1',
-                ['headers' => ['key' => 'publicKey']]
-            )
-            ->willReturn(new Response(200, [], $payload));
+        [$oa, $client] = $this->oa();
 
-        $agenda = $oa->agenda(['uid' => 123, 'detailed' => true])->get();
+        $payload = json_decode(FileResource::instance($this)->getContent('Response/agendas/agenda.json'), true);
+        $payload += [
+            '_status' => 200,
+            '_success' => true,
+        ];
+        $this->assertClientCall($client, $this->once(), 'get', '/v2/agendas/12345', [
+            'detailed' => '1',
+        ], $payload);
+
+        $agenda = $oa->agenda(['uid' => 12345, 'detailed' => true])->get();
         $this->assertInstanceOf(Agenda::class, $agenda);
     }
 }

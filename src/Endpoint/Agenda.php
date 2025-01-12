@@ -65,6 +65,19 @@ class Agenda extends Endpoint
     /**
      * {@inheritDoc}
      *
+     * @throws \OpenAgenda\OpenAgendaException
+     */
+    public function exists(): bool
+    {
+        $status = OpenAgenda::getClient()
+            ->head($this->getUri(__FUNCTION__));
+
+        return $status >= 200 && $status < 300;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
      * @return \OpenAgenda\Entity\Agenda|null
      * @throws \OpenAgenda\OpenAgendaException
      */
@@ -80,18 +93,5 @@ class Agenda extends Endpoint
         }
 
         return $agenda;
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @throws \OpenAgenda\OpenAgendaException
-     */
-    public function exists(): bool
-    {
-        $status = OpenAgenda::getClient()
-            ->head($this->getUri(__FUNCTION__));
-
-        return $status >= 200 && $status < 300;
     }
 }

@@ -14,9 +14,11 @@ declare(strict_types=1);
  */
 namespace OpenAgenda\Test;
 
+use League\Uri\Uri;
 use OpenAgenda\Client;
 use OpenAgenda\OpenAgenda;
 use OpenAgenda\Wrapper\HttpWrapper;
+use PHPUnit\Framework\MockObject\Rule\InvokedCount;
 use PHPUnit\Framework\TestCase;
 use Psr\SimpleCache\CacheInterface;
 
@@ -26,22 +28,24 @@ use Psr\SimpleCache\CacheInterface;
 class OpenAgendaTestCase extends TestCase
 {
     /**
-     * @return array{0: \OpenAgenda\OpenAgenda, 1: \OpenAgenda\Wrapper\HttpWrapper|\PHPUnit\Framework\MockObject\MockObject}
+     * @return array{0: \OpenAgenda\OpenAgenda, 1: \OpenAgenda\Client|\PHPUnit\Framework\MockObject\MockObject}
      */
     protected function oa(array $params = []): array
     {
-        $wrapper = $this->getMockBuilder(HttpWrapper::class)->getMock();
-
         $params += [
             'public_key' => 'publicKey',
             'secret_key' => 'secretKey',
-            'wrapper' => $wrapper,
+            'wrapper' => $this->getMockBuilder(HttpWrapper::class)->getMock(),
         ];
+        $oa = new OpenAgenda($params);
 
-        return [
-            new OpenAgenda($params),
-            $wrapper,
-        ];
+        $client = $this->createPartialMock(Client::class, [
+            'head', 'get', 'post', 'patch', 'delete',
+        ]);
+
+        OpenAgenda::setClient($client);
+
+        return [$oa, $client];
     }
 
     /**
@@ -68,5 +72,27 @@ class OpenAgendaTestCase extends TestCase
         OpenAgenda::setClient($client);
 
         return $wrapper;
+    }
+
+    /**
+     * @param \OpenAgenda\Client|\PHPUnit\Framework\MockObject\MockObject $client
+     * @param \PHPUnit\Framework\MockObject\Rule\InvokedCount $count
+     * @param string $method
+     * @param string $path
+     * @param array|null $query
+     * @param array|bool $payload
+     */
+    public function assertClientCall(Client $client, InvokedCount $count, string $method, string $path, ?array $query, $payload)
+    {
+        $client->expects($count)
+            ->method($method)
+            ->with($this->callback(function (Uri $uri) use ($path, $query) {
+                parse_str((string)$uri->getQuery(), $q);
+                $this->assertEquals($path, $uri->getPath());
+                $this->assertSame($query, $q);
+
+                return true;
+            }))
+            ->willReturn($payload);
     }
 }

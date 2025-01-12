@@ -25,6 +25,7 @@ use Ramsey\Collection\Collection;
 class Agendas extends Endpoint
 {
     protected $_schema = [
+        'limit' => ['type' => 'int'],
         'size' => ['type' => 'int'],
         'fields' => ['type' => 'array'],
         'search' => ['type' => 'string'],
@@ -32,9 +33,7 @@ class Agendas extends Endpoint
         'slug' => ['type' => 'array'],
         'uid' => ['type' => 'array'],
         'network' => ['type' => 'int'],
-        'sort' => [
-            'type' => 'string',
-        ],
+        'sort' => ['type' => 'string'],
     ];
 
     /**
@@ -47,6 +46,9 @@ class Agendas extends Endpoint
     {
         return $validator
             // limit
+            ->allowEmptyString('limit')
+            ->integer('limit')
+            // size
             ->allowEmptyString('size')
             ->integer('size')
             // page

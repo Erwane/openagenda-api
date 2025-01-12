@@ -54,7 +54,7 @@ $locations = $agenda->locations(['name' => 'My Location']);
 ### Get
 
 Get one location.  
-If you want to check a location exists, you can use `head()` method instead of `get()`.
+If you want to check a location exists, you can use `exists()` method instead of `get()`.
 
 ```php
 // Using OpenAgenda::location()
