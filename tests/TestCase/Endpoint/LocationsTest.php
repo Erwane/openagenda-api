@@ -16,9 +16,9 @@ namespace OpenAgenda\Test\TestCase\Endpoint;
 
 use Cake\Validation\Validation;
 use Cake\Validation\Validator;
-use InvalidArgumentException;
 use OpenAgenda\Endpoint\Locations;
 use OpenAgenda\Entity\Location as LocationEntity;
+use OpenAgenda\OpenAgendaException;
 use OpenAgenda\Test\EndpointTestCase;
 use OpenAgenda\Test\Utility\FileResource;
 use Ramsey\Collection\Collection;
@@ -88,7 +88,7 @@ class LocationsTest extends EndpointTestCase
         $rules = $field->rules();
         $this->assertArrayHasKey('scalar', $rules);
 
-        // created_lte
+        // createdAt[lte]
         $this->assertTrue($v->hasField('createdAt[lte]'));
         $field = $v->field('createdAt[lte]');
         $this->assertTrue($field->isEmptyAllowed());
@@ -96,7 +96,7 @@ class LocationsTest extends EndpointTestCase
         $this->assertArrayHasKey('dateTime', $rules);
         $this->assertEquals(['ymd', Validation::DATETIME_ISO8601], $rules['dateTime']->get('pass')[0]);
 
-        // created_gte
+        // createdAt[gte]
         $this->assertTrue($v->hasField('createdAt[gte]'));
         $field = $v->field('createdAt[gte]');
         $this->assertTrue($field->isEmptyAllowed());
@@ -160,7 +160,7 @@ class LocationsTest extends EndpointTestCase
             'message' => 'OpenAgenda\\Endpoint\\Locations has errors.',
             'errors' => $expected,
         ];
-        $this->expectException(InvalidArgumentException::class);
+        $this->expectException(OpenAgendaException::class);
         $this->expectExceptionMessage(json_encode($message, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
         $endpoint->getUri($method);
     }
@@ -196,7 +196,7 @@ class LocationsTest extends EndpointTestCase
                         'detailed' => '1',
                         'state' => '1',
                         'createdAt' => ['lte' => '2023-06-02T00:00:00'],
-                        'updatedAt' => ['lte' => '2023-06-02T12:40:00'],
+                        'updatedAt' => ['lte' => '2023-06-02T11:40:00'],
                         'sort' => 'createdAt.desc',
                     ],
                 ],

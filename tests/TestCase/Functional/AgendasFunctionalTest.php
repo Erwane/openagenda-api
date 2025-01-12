@@ -19,6 +19,9 @@ use OpenAgenda\Entity\Agenda;
 use OpenAgenda\Test\OpenAgendaTestCase;
 use OpenAgenda\Test\Utility\FileResource;
 
+/**
+ * @coversNothing
+ */
 class AgendasFunctionalTest extends OpenAgendaTestCase
 {
     /**

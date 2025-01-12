@@ -5,8 +5,12 @@ namespace OpenAgenda\Entity;
 
 use ArrayAccess;
 use Cake\Chronos\Chronos;
+use HTMLPurifier;
+use HTMLPurifier_Config;
+use HTMLPurifier_TagTransform_Simple;
 use InvalidArgumentException;
-use OpenAgenda\OpenAgendaException;
+use League\HTMLToMarkdown\HtmlConverter;
+use OpenAgenda\OpenAgenda;
 
 /**
  * Inspired by CakePHP Entity.
@@ -349,9 +353,6 @@ abstract class Entity implements ArrayAccess
     protected static function _accessor(string $property, string $type): string
     {
         $class = static::class;
-        if ($class === Entity::class) {
-            return '';
-        }
 
         $method = sprintf('_%s%s', $type, ucfirst($property));
 
@@ -375,6 +376,19 @@ abstract class Entity implements ArrayAccess
         $this->_dirty[$field] = true;
 
         return $this;
+    }
+
+    /**
+     * Checks if the entity is dirty or if a single field of it is dirty.
+     *
+     * @param string|null $field The field to check the status for. Null for the whole entity.
+     * @return bool Whether the field was changed or not
+     */
+    public function isDirty(?string $field = null): bool
+    {
+        return $field === null
+            ? $this->_dirty !== []
+            : isset($this->_dirty[$field]);
     }
 
     /**
@@ -432,92 +446,82 @@ abstract class Entity implements ArrayAccess
     }
 
     /**
-     * set global event language
+     * Remove html from sentence and keep only words.
      *
-     * @param string $value property value
-     * @return $this
-     * @throws \OpenAgenda\OpenAgendaException
+     * @param string|null $html HTML
+     * @param bool $keepNewLine Should keep new lines
+     * @return string
      */
-    public function setLang(string $value)
+    public static function noHtml(?string $html, bool $keepNewLine = true)
     {
-        if ($this->_isValidLanguage($value)) {
-            $this->_fields['lang'] = $value;
+        $text = strip_tags($html);
+
+        // decode html
+        $text = html_entity_decode($text, ENT_QUOTES);
+
+        // remove new lines
+        if (!$keepNewLine) {
+            $text = str_replace(["\r", "\n"], ' ', $text);
         }
 
-        return $this;
+        // remove unused white spaces
+        $text = preg_replace('/\pZ+/u', ' ', $text);
+
+        return trim($text);
     }
 
     /**
-     * setLang alias
+     * clean description html tags
      *
-     * @param string $value property value
-     * @return $this
-     * @throws \OpenAgenda\OpenAgendaException
+     * @param string $value worse html ever
+     * @return string
      */
-    public function setLanguage(string $value)
+    public static function cleanupHtml(string $value)
     {
-        return $this->setLang($value);
+        $projectUrl = OpenAgenda::getProjectUrl();
+        $config = HTMLPurifier_Config::createDefault();
+
+        $config->set('Cache.DefinitionImpl', null);
+        $config->set('HTML.AllowedElements', [
+            'a', 'b', 'strong', 'i', 'em', 'u', 'p', 'img', 'hr', 'span',
+            'ul', 'ol', 'li', 'h1', 'h2', 'h3', 'h4', 'h5',
+        ]);
+        $config->set('HTML.AllowedAttributes', ['a.href', 'a.target', 'img.src', 'img.alt', 'img.width', 'img.height']);
+        $config->set('HTML.TargetBlank', true);
+        $config->set('Attr.AllowedFrameTargets', ['_blank', '_self']);
+        $config->set('Attr.AllowedRel', ['noopener', 'noreferrer']);
+        $config->set('AutoFormat.RemoveEmpty', true);
+        $config->set('AutoFormat.RemoveSpansWithoutAttributes', true);
+        $config->set('URI.AllowedSchemes', ['http', 'https']);
+        if ($projectUrl) {
+            $config->set('URI.Base', $projectUrl);
+            $config->set('URI.MakeAbsolute', true);
+        }
+
+        // tag transformation
+        $def = $config->getHTMLDefinition(true);
+        $def->info_tag_transform['h1'] = new HTMLPurifier_TagTransform_Simple('h3');
+        $def->info_tag_transform['h2'] = new HTMLPurifier_TagTransform_Simple('h3');
+
+        $purifier = new HTMLPurifier($config);
+
+        return trim($purifier->purify($value));
     }
 
     /**
-     * return true if valide language code
+     * html to markdown converter
      *
-     * @param string $lang code
-     * @return bool
-     * @throws \OpenAgenda\OpenAgendaException
+     * @param string $html html input
+     * @return string
      */
-    protected function _isValidLanguage(string $lang)
+    public static function htmlToMarkdown(string $html)
     {
-        if (!preg_match('/^(en|fr|es|de|it|ne|pt|ar|is)$/', $lang)) {
-            throw new OpenAgendaException('invalid language code', 1);
+        if ($html === strip_tags($html)) {
+            return $html;
         }
 
-        return true;
-    }
+        $converter = new HtmlConverter(['strip_tags' => true]);
 
-    /**
-     * return lang $lang or default
-     *
-     * @param string|null $lang lang information
-     * @return string lang
-     * @throws \OpenAgenda\OpenAgendaException
-     */
-    protected function _getLang(?string $lang = null): string
-    {
-        // Throw exception if no lang set
-        if ($lang === null && !isset($this->_fields['lang'])) {
-            throw new OpenAgendaException('default lang not set. Use setLang()', 1);
-        }
-
-        // chech if lang is valid
-        if ($lang !== null) {
-            $this->_isValidLanguage($lang);
-        }
-
-        // return right lang
-        return $lang ?? $this->_fields['lang'];
-    }
-
-    /**
-     * Get i18n value.
-     *
-     * @param string|mixed $data I18n value.
-     * @param string|null $lang Language code.
-     * @return array
-     */
-    protected function _i18nValue($data, ?string $lang = null)
-    {
-        // todo: tests that
-        if (is_string($data)) {
-            $ary = [
-                $this->_getLang($lang) => $data,
-            ];
-
-            $value = json_decode(json_encode($ary));
-        } else {
-            $value = $data;
-        }
-
-        return $value;
+        return $converter->convert($html);
     }
 }

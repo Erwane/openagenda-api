@@ -34,6 +34,7 @@ abstract class HttpWrapper implements HttpWrapperInterface
      * The HttpWrapper SHOULD set PSR-18 Http client in $this->http
      *
      * @param array $params The PSR-18 Http client params.
+     * @codeCoverageIgnore
      */
     public function __construct(array $params = [])
     {

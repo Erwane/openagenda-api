@@ -43,8 +43,8 @@ $locations = $agenda->locations(['name' => 'My Location']);
 | detailed    | boolean                      |    n     | When `true`, get all locations fields. Default `false`                                                                      |
 | search      | string                       |    n     | Search terms in title, locations and agenda keywords.                                                                       |
 | state       | boolean                      |    n     | When `true`, only verified locations. Default `null`.                                                                       |
-| created_lte | DateTimeInterface or string* |    n     | Only locations created before or at.                                                                                        |
-| created_gte | DateTimeInterface or string* |    n     | Only locations created at or after.                                                                                         |
+| createdAt[lte] | DateTimeInterface or string* |    n     | Only locations created before or at.                                                                                        |
+| createdAt[gte] | DateTimeInterface or string* |    n     | Only locations created at or after.                                                                                         |
 | updated_lte | DateTimeInterface or string* |    n     | Only locations updated before or at.                                                                                        |n
 | updated_gte | DateTimeInterface or string* |    n     | Only locations updated at or after.                                                                                         |
 | sort        | string                       |    n     | Sort results.<br/>Allowed values are `name.asc`, `name.desc`, `createdAt.asc`, `createdAt.desc`                                 |
@@ -57,7 +57,7 @@ Get one location.
 If you want to check a location exists, you can use `head()` method instead of `get()`.
 
 ```php
-// Using endpoint
+// Using OpenAgenda::location()
 $location = $oa->location(['uid' => 456, 'agendaUid' => 123])->get();
 $exists = $oa->location(['uid' => 456, 'agendaUid' => 123])->exists();
 

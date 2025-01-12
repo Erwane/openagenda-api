@@ -20,6 +20,9 @@ use OpenAgenda\Wrapper\HttpWrapper;
 use PHPUnit\Framework\TestCase;
 use Psr\SimpleCache\CacheInterface;
 
+/**
+ * @coversNothing
+ */
 class OpenAgendaTestCase extends TestCase
 {
     /**

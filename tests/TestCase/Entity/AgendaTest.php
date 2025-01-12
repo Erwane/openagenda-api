@@ -136,10 +136,10 @@ class AgendaTest extends OpenAgendaTestCase
 
         $this->assertInstanceOf(LocationEndpoint::class, $endpoint);
         $this->assertEquals([
-            'head' => 'https://api.openagenda.com/v2/agendas/123/locations/456',
+            'exists' => 'https://api.openagenda.com/v2/agendas/123/locations/456',
             'get' => 'https://api.openagenda.com/v2/agendas/123/locations/456',
-            'post' => 'https://api.openagenda.com/v2/agendas/123/locations/456',
-            'patch' => 'https://api.openagenda.com/v2/agendas/123/locations/456',
+            'create' => 'https://api.openagenda.com/v2/agendas/123/locations',
+            'update' => 'https://api.openagenda.com/v2/agendas/123/locations/456',
             'delete' => 'https://api.openagenda.com/v2/agendas/123/locations/456',
             'params' => [
                 '_path' => '/location',

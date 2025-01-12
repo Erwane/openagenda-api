@@ -20,6 +20,9 @@ use OpenAgenda\OpenAgenda;
 use OpenAgenda\Wrapper\HttpWrapper;
 use PHPUnit\Framework\TestCase;
 
+/**
+ * @coversNothing
+ */
 class EndpointTestCase extends TestCase
 {
     /**

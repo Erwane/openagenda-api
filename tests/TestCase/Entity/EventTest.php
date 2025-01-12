@@ -298,10 +298,10 @@ class EventTest extends OpenAgendaTestCase
 
         $this->assertInstanceOf(AgendaEndpoint::class, $endpoint);
         $this->assertEquals([
-            'head' => 'https://api.openagenda.com/v2/agendas/123',
+            'exists' => 'https://api.openagenda.com/v2/agendas/123',
             'get' => 'https://api.openagenda.com/v2/agendas/123',
-            'post' => 'https://api.openagenda.com/v2/agendas/123',
-            'patch' => 'https://api.openagenda.com/v2/agendas/123',
+            'create' => 'https://api.openagenda.com/v2/agendas/123',
+            'update' => 'https://api.openagenda.com/v2/agendas/123',
             'delete' => 'https://api.openagenda.com/v2/agendas/123',
             'params' => [
                 '_path' => '/agenda',
@@ -324,10 +324,10 @@ class EventTest extends OpenAgendaTestCase
 
         $this->assertInstanceOf(LocationEndpoint::class, $endpoint);
         $this->assertEquals([
-            'head' => 'https://api.openagenda.com/v2/agendas/789/locations/456',
+            'exists' => 'https://api.openagenda.com/v2/agendas/789/locations/456',
             'get' => 'https://api.openagenda.com/v2/agendas/789/locations/456',
-            'post' => 'https://api.openagenda.com/v2/agendas/789/locations/456',
-            'patch' => 'https://api.openagenda.com/v2/agendas/789/locations/456',
+            'create' => 'https://api.openagenda.com/v2/agendas/789/locations',
+            'update' => 'https://api.openagenda.com/v2/agendas/789/locations/456',
             'delete' => 'https://api.openagenda.com/v2/agendas/789/locations/456',
             'params' => [
                 '_path' => '/location',
@@ -338,5 +338,113 @@ class EventTest extends OpenAgendaTestCase
                 'countryCode' => 'FR',
             ],
         ], $endpoint->toArray());
+    }
+
+    /** @covers \OpenAgenda\Entity\Event::_setTitle */
+    public function testSetTitle(): void
+    {
+        $entity = new Event(['title' => 'My event']);
+        $this->assertEquals(['fr' => 'My event'], $entity->title);
+    }
+
+    /** @covers \OpenAgenda\Entity\Event::_setDescription */
+    public function testSetDescription(): void
+    {
+        $entity = new Event([
+            'description' => <<<HTML
+<span>This</span> description
+<p>should be on <a href="not this">one</a></p>
+<ul>
+<li>line </li>
+<li>and clean.</li>
+</ul>
+HTML
+    ,
+        ]);
+        $this->assertEquals(['fr' => 'This description should be on one line and clean.'], $entity->description);
+    }
+
+    /** @covers \OpenAgenda\Entity\Event::_setDescription */
+    public function testSetDescriptionTruncate(): void
+    {
+        $string = str_pad('start_', 201, '-');
+        $entity = new Event(['description' => $string]);
+        $this->assertEquals(200, strlen($entity->description['fr']));
+        $this->assertStringEndsWith('-- ...', $entity->description['fr']);
+    }
+
+    /** @covers \OpenAgenda\Entity\Event::_setLongDescription */
+    public function testSetLongDescription(): void
+    {
+        OpenAgenda::setProjectUrl('https://my-domain.org');
+        $entity = new Event([
+            'longDescription' => <<<HTML
+<h1>This</h1>
+description
+<p>should be <a href="to-link">clean</a></p>
+<ul>
+<li>and in </li>
+<li>markdown</li>
+</ul>
+HTML
+    ,
+        ]);
+        $this->assertEquals([
+            'fr' => <<<MD
+### This
+
+description should be [clean](https://my-domain.org/to-link)
+
+- and in
+- markdown
+MD
+    ,
+        ], $entity->longDescription);
+    }
+
+    /** @covers \OpenAgenda\Entity\Event::_setLongDescription */
+    public function testSetLongDescriptionTruncate(): void
+    {
+        $string = str_pad('start_', 10009, '-');
+        $entity = new Event(['longDescription' => $string]);
+        $this->assertEquals(10000, strlen($entity->longDescription['fr']));
+        $this->assertStringEndsWith('-- ...', $entity->longDescription['fr']);
+    }
+
+    /** @covers \OpenAgenda\Entity\Event::_setConditions */
+    public function testSetConditionsLangAndTruncate(): void
+    {
+        $string = str_pad('start_', 260, '-');
+        $entity = new Event(['conditions' => $string]);
+        $this->assertEquals(255, strlen($entity->conditions['fr']));
+        $this->assertStringEndsWith('-- ...', $entity->conditions['fr']);
+    }
+
+    public static function dataSetKeywords()
+    {
+        return [
+            [
+                'tag1',
+                ['fr' => ['tag1']],
+            ],
+            [
+                ['tag1', ' <span>tag 2</span> '],
+                ['fr' => ['tag1', 'tag 2']],
+            ],
+            [
+                ['fr' => ['tag1', 'tag2'], 'en' => ['tag3', 'tag4']],
+                ['fr' => ['tag1', 'tag2'], 'en' => ['tag3', 'tag4']],
+            ],
+        ];
+    }
+
+    /**
+     * @covers \OpenAgenda\Entity\Event::_setKeywords
+     * @dataProvider dataSetKeywords
+     */
+    public function testSetKeywords($keywords, $expected): void
+    {
+        $entity = new Event(['keywords' => $keywords]);
+        $this->assertSame($expected, $entity->keywords);
     }
 }

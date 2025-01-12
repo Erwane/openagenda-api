@@ -19,10 +19,10 @@ use OpenAgenda\OpenAgenda;
 use OpenAgenda\OpenAgendaException;
 
 /**
- * @property int|null $id
- * @property int|null $agenda_id
- * @property int|null $location_set_id
- * @property int|string|null $ext_id
+ * @property int|null $uid
+ * @property int|null $agendaUid
+ * @property int|null $locationSetId
+ * @property int|string|null $extId
  * @property string|null $slug
  * @property string|null $name
  * @property array|null $description
@@ -30,7 +30,7 @@ use OpenAgenda\OpenAgendaException;
  * @property array|null $access
  * @property string|null $address
  * @property string|null $city
- * @property string|null $postal_code
+ * @property string|null $postalCode
  * @property string|null $district
  * @property string|null $department
  * @property string|null $region
@@ -39,8 +39,8 @@ use OpenAgenda\OpenAgendaException;
  * @property float|null $latitude
  * @property float|null $longitude
  * @property string|null $timezone
- * @property \Cake\Chronos\Chronos|null $created_at
- * @property \Cake\Chronos\Chronos|null $updated_at
+ * @property \Cake\Chronos\Chronos|null $createdAt
+ * @property \Cake\Chronos\Chronos|null $updatedAt
  */
 class Location extends Entity
 {

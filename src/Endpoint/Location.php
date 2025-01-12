@@ -198,7 +198,7 @@ class Location extends Endpoint
     /**
      * @inheritDoc
      */
-    public function uriPath(string $method, bool $validate = true): string
+    protected function uriPath(string $method, bool $validate = true): string
     {
         parent::uriPath($method);
 
@@ -264,46 +264,59 @@ class Location extends Endpoint
     /**
      * Create location
      *
+     * @param bool $validate Validate data
      * @return \OpenAgenda\Entity\Location|null
+     * @throws \OpenAgenda\OpenAgendaException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
-    public function create()
+    public function create(bool $validate = true)
     {
         unset($this->params['uid']);
 
         $entity = new LocationEntity($this->params);
+
+        if ($validate) {
+            $errors = $this->getValidator('create')
+                ->validate($entity->toArray());
+            if ($errors) {
+                $this->throwException($errors);
+            }
+        }
 
         $uri = $this->getUri(__FUNCTION__);
 
         $response = OpenAgenda::getClient()
             ->post($uri, $entity->toOpenAgenda());
 
-        $entity = $this->_parseResponse($response);
-
-        return $entity;
+        return $this->_parseResponse($response);
     }
 
     /**
      * Patch location
      *
+     * @param bool $validate Validate data
      * @return \OpenAgenda\Entity\Location|null
+     * @throws \OpenAgenda\OpenAgendaException
+     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
-    public function update()
+    public function update(bool $validate = true)
     {
         $entity = new LocationEntity($this->params);
         $entity->setNew(false);
-        $errors = $this->getValidator('update')->validate($this->params, $entity->isNew());
 
-        if ($errors) {
-            $this->throwException($errors);
+        if ($validate) {
+            $errors = $this->getValidator('update')
+                ->validate($entity->toArray(), false);
+            if ($errors) {
+                $this->throwException($errors);
+            }
         }
-        $data = $entity->toOpenAgenda();
 
         // todo: no data to update, skip. Maybe an option ?
 
         $uri = $this->getUri(__FUNCTION__);
-        $client = OpenAgenda::getClient();
-
-        $response = $client->patch($uri, $data);
+        $response = OpenAgenda::getClient()
+            ->patch($uri, $entity->toOpenAgenda());
 
         return $this->_parseResponse($response);
     }

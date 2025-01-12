@@ -310,7 +310,7 @@ class Event extends Endpoint
     /**
      * @inheritDoc
      */
-    public function uriPath(string $method, bool $validate = true): string
+    protected function uriPath(string $method, bool $validate = true): string
     {
         parent::uriPath($method);
 
@@ -380,9 +380,7 @@ class Event extends Endpoint
         $response = OpenAgenda::getClient()
             ->post($uri, $entity->toOpenAgenda());
 
-        $entity = $this->_parseResponse($response);
-
-        return $entity;
+        return $this->_parseResponse($response);
     }
 
     /**
@@ -395,26 +393,22 @@ class Event extends Endpoint
      */
     public function update(bool $validate = true)
     {
+        $entity = new EventEntity($this->params);
+        $entity->setNew(false);
+
         if ($validate) {
             $errors = $this->getValidator('update')
-                ->validate($this->params, false);
+                ->validate($entity->toArray(), false);
             if ($errors) {
-                dump($errors);
                 $this->throwException($errors);
             }
         }
 
-        $entity = new EventEntity($this->params);
-        $entity->setNew(false);
-
-        $data = $entity->toOpenAgenda();
-
         // todo: no data to update, skip. Maybe an option ?
 
         $uri = $this->getUri(__FUNCTION__);
-        $client = OpenAgenda::getClient();
-
-        $response = $client->patch($uri, $data);
+        $response = OpenAgenda::getClient()
+            ->patch($uri, $entity->toOpenAgenda());
 
         return $this->_parseResponse($response);
     }

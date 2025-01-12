@@ -21,9 +21,6 @@ List events for an agenda.
 Return a [Collection](collection.md) of Event items.
 
 ```php
-// Using endpoint
-$events = $oa->get('/events', $options);
-
 // Using previous fetched OpenAgenda\Entity\Agenda object
 $events = $agenda->events($options);
 ```
@@ -99,9 +96,6 @@ The `/events` endpoint or `$agenda->events()` method accept an options array wit
 Get an Event
 
 ```php
-// Using endpoint
-$event = $oa->get('/event', $options);
-
 // Using previous fetched OpenAgenda\Entity\Agenda object
 $event = $agenda->event($options)->get();
 ```
@@ -122,7 +116,7 @@ Create an event in an agenda.
 Return an event object with the new id.
 
 ```php
-// Using endpoint
+// Using OpenAgenda todo
 $event = $oa->post('/event', $data);
 
 // Using previous fetched OpenAgenda\Entity\Agenda object
@@ -143,7 +137,7 @@ If using `post`, all accessible update fields should be sets in `$data`.
 If using `patch` only passed (or changed) fields will be updated.
 
 ```php
-// Using endpoint
+// Using endpoint todo
 $event = $oa->post('/event', $data);
 $event = $oa->patch('/event', $data);
 
@@ -162,13 +156,10 @@ Delete an event.
 Return the deleted Event object.
 
 ```php
-// Using endpoint
-$event = $oa->delete('/event', $data);
-
 // Using previous fetched OpenAgenda\Entity\Location object
-$event = $event->delete($id);
+$event = $event->delete($eventUid);
 // you can chain from Agenda too
-$event = $agenda->event($eventId)->delete();
+$event = $agenda->event($eventUid)->delete();
 ```
 
 ## Schema

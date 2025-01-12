@@ -15,9 +15,9 @@ declare(strict_types=1);
 namespace OpenAgenda\Test\TestCase\Endpoint;
 
 use Cake\Validation\Validator;
-use InvalidArgumentException;
 use OpenAgenda\Endpoint\Events;
 use OpenAgenda\Entity\Event as EventEntity;
+use OpenAgenda\OpenAgendaException;
 use OpenAgenda\Test\EndpointTestCase;
 use OpenAgenda\Test\Utility\FileResource;
 use OpenAgenda\Validation;
@@ -262,7 +262,7 @@ class EventsTest extends EndpointTestCase
                 ],
             ],
         ];
-        $this->expectException(InvalidArgumentException::class);
+        $this->expectException(OpenAgendaException::class);
         $this->expectExceptionMessage(json_encode($message, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
         $endpoint->getUri('GET');
     }

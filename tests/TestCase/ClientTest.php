@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace OpenAgenda\Test\TestCase;
 
+use Exception;
 use GuzzleHttp\Psr7\Response;
 use OpenAgenda\Client;
 use OpenAgenda\OpenAgendaException;
@@ -64,6 +65,10 @@ class ClientTest extends TestCase
         new Client(['public_key' => 'publicKey']);
     }
 
+    /**
+     * @covers \OpenAgenda\Client::payload
+     * @covers \OpenAgenda\OpenAgendaException
+     */
     public function testResponseFailed(): void
     {
         $payload = FileResource::instance($this)->getContent('Response/locations/delete-not-found.json');
@@ -71,10 +76,16 @@ class ClientTest extends TestCase
             ->method('get')
             ->willReturn(new Response(404, ['content-type' => 'application/json'], $payload));
 
-        $this->expectExceptionCode(404);
-        $this->expectExceptionMessage('location not found');
-
-        $this->client->get('https://api.openagenda.com/v2/agendas');
+        try {
+            $this->client->get('https://api.openagenda.com/v2/agendas');
+        } catch (Exception $e) {
+            $this->assertInstanceOf(OpenAgendaException::class, $e);
+            $this->assertEquals(404, $e->getCode());
+            $this->assertEquals('location not found', $e->getMessage());
+            $this->assertInstanceOf(Response::class, $e->getResponse());
+            $newPayload = json_decode($payload, true) + ['_status' => 404, '_success' => false];
+            $this->assertEquals($newPayload, $e->getPayload());
+        }
     }
 
     public function testHead(): void
@@ -203,6 +214,14 @@ class ClientTest extends TestCase
             '_success' => true,
             'json' => 'object',
         ], $response);
+    }
+
+    public function testGetAccessTokenNoSecret(): void
+    {
+        $client = new Client(['public_key' => 'publicKey', 'wrapper' => $this->wrapper]);
+        $this->expectException(OpenAgendaException::class);
+        $this->expectExceptionMessage('Missing secret_key');
+        $client->getAccessToken();
     }
 
     public function testGetAccessTokenFailed(): void

@@ -20,6 +20,9 @@ use OpenAgenda\Entity\Location;
 use OpenAgenda\Test\OpenAgendaTestCase;
 use OpenAgenda\Test\Utility\FileResource;
 
+/**
+ * @coversNothing
+ */
 class LocationsFunctionalTest extends OpenAgendaTestCase
 {
     /**
@@ -103,7 +106,12 @@ class LocationsFunctionalTest extends OpenAgendaTestCase
                 new Response(200, [], $payload)
             );
 
-        $data = ['agendaUid' => 123, 'name' => 'My location'];
+        $data = [
+            'agendaUid' => 123,
+            'name' => 'My location',
+            'address' => '122 rue de charonne, 75011 Paris, France',
+            'countryCode' => 'fr',
+        ];
         $location = $oa->location($data)->create();
         $this->assertInstanceOf(Location::class, $location);
     }
@@ -125,7 +133,12 @@ class LocationsFunctionalTest extends OpenAgendaTestCase
 
         $agenda = new Agenda(['uid' => 123]);
 
-        $data = ['agendaUid' => 123, 'name' => 'My location'];
+        $data = [
+            'agendaUid' => 123,
+            'name' => 'My location',
+            'address' => '122 rue de charonne, 75011 Paris, France',
+            'countryCode' => 'fr',
+        ];
         $location = $agenda->location($data)->create();
         $this->assertInstanceOf(Location::class, $location);
     }

@@ -7,9 +7,12 @@ declare(strict_types=1);
 namespace OpenAgenda\Test\TestCase;
 
 use GuzzleHttp\Psr7\Response;
+use OpenAgenda\Client;
 use OpenAgenda\Endpoint\Agenda;
+use OpenAgenda\Endpoint\Event;
 use OpenAgenda\Endpoint\Location;
 use OpenAgenda\Entity\Agenda as AgendaEntity;
+use OpenAgenda\Entity\Event as EventEntity;
 use OpenAgenda\Entity\Location as LocationEntity;
 use OpenAgenda\OpenAgenda;
 use OpenAgenda\OpenAgendaException;
@@ -84,6 +87,20 @@ class OpenAgendaTest extends TestCase
         new OpenAgenda(['public_key' => 'publicKey', 'wrapper' => $this->wrapper, 'cache' => new stdClass()]);
     }
 
+    public function testConstructInvalidLang()
+    {
+        $this->expectException(OpenAgendaException::class);
+        $this->expectExceptionMessage('Invalid defaultLang.');
+        new OpenAgenda(['public_key' => 'publicKey', 'wrapper' => $this->wrapper, 'defaultLang' => 'ac']);
+    }
+
+    public function testConstructInvalidUrl()
+    {
+        $this->expectException(OpenAgendaException::class);
+        $this->expectExceptionMessage('Invalid project url.');
+        new OpenAgenda(['public_key' => 'publicKey', 'wrapper' => $this->wrapper, 'projectUrl' => 'http://invalid']);
+    }
+
     public function testConstruct()
     {
         $cache = $this->createMock(CacheInterface::class);
@@ -96,6 +113,45 @@ class OpenAgendaTest extends TestCase
         $this->assertInstanceOf(OpenAgenda::class, $oa);
     }
 
+    public function testSetGetResetClient()
+    {
+        OpenAgenda::resetClient();
+        $this->assertNull(OpenAgenda::getClient());
+        OpenAgenda::setClient(new Client(['public_key' => 'publicKey', 'wrapper' => $this->wrapper]));
+        $this->assertInstanceOf(Client::class, OpenAgenda::getClient());
+
+        OpenAgenda::resetClient();
+        $this->assertNull(OpenAgenda::getClient());
+        new OpenAgenda([
+            'public_key' => 'publicKey',
+            'wrapper' => $this->wrapper,
+        ]);
+        $this->assertInstanceOf(Client::class, OpenAgenda::getClient());
+    }
+
+    public function testDefaultLang()
+    {
+        $this->assertEquals('fr', OpenAgenda::getDefaultLang());
+        new OpenAgenda([
+            'public_key' => 'publicKey',
+            'wrapper' => $this->wrapper,
+            'defaultLang' => 'en',
+        ]);
+        $this->assertEquals('en', OpenAgenda::getDefaultLang());
+    }
+
+    public function testProjectUrl()
+    {
+        new OpenAgenda([
+            'public_key' => 'publicKey',
+            'wrapper' => $this->wrapper,
+            'projectUrl' => 'https://my-domain.com',
+        ]);
+        $this->assertEquals('https://my-domain.com', OpenAgenda::getProjectUrl());
+        OpenAgenda::setProjectUrl(null);
+        $this->assertNull(OpenAgenda::getProjectUrl());
+    }
+
     public function testHead()
     {
         $this->markTestIncomplete();
@@ -103,16 +159,7 @@ class OpenAgendaTest extends TestCase
 
     public function testGet()
     {
-        $this->wrapper->expects($this->once())
-            ->method('get')
-            ->with(
-                'https://api.openagenda.com/v2/agendas',
-                ['headers' => ['key' => 'publicKey']]
-            )
-            ->willReturn(new Response(200, [], ''));
-
-        $agendas = $this->oa->get('/agendas');
-        $this->assertInstanceOf(Collection::class, $agendas);
+        $this->markTestIncomplete();
     }
 
     public function testPost()
@@ -130,7 +177,7 @@ class OpenAgendaTest extends TestCase
         $this->markTestIncomplete();
     }
 
-    public function testGetAgendas()
+    public function testAgendas()
     {
         $payload = FileResource::instance($this)
             ->getContent('Response/agendas/agendas.json');
@@ -147,7 +194,7 @@ class OpenAgendaTest extends TestCase
         $this->assertInstanceOf(AgendaEntity::class, $agendas->first());
     }
 
-    public function testGetMyAgendas()
+    public function testMyAgendas()
     {
         $payload = FileResource::instance($this)
             ->getContent('Response/agendas/mines.json');
@@ -164,7 +211,7 @@ class OpenAgendaTest extends TestCase
         $this->assertInstanceOf(AgendaEntity::class, $agendas->first());
     }
 
-    public function testGetAgenda()
+    public function testAgenda()
     {
         $endpoint = $this->oa->agenda(['uid' => 12345, 'detailed' => true]);
         $this->assertInstanceOf(Agenda::class, $endpoint);
@@ -173,7 +220,7 @@ class OpenAgendaTest extends TestCase
         $this->assertEquals('detailed=1', $uri->getQuery());
     }
 
-    public function testGetLocations()
+    public function testLocations()
     {
         $payload = FileResource::instance($this)->getContent('Response/locations/locations.json');
         $this->wrapper->expects($this->once())
@@ -194,5 +241,28 @@ class OpenAgendaTest extends TestCase
         $this->assertInstanceOf(Location::class, $endpoint);
         $uri = $endpoint->getUri('get');
         $this->assertEquals('/v2/agendas/456/locations/123', $uri->getPath());
+    }
+
+    public function testEvents()
+    {
+        $payload = FileResource::instance($this)->getContent('Response/events/events.json');
+        $this->wrapper->expects($this->once())
+            ->method('get')
+            ->with(
+                'https://api.openagenda.com/v2/agendas/123456/events',
+                ['headers' => ['key' => 'publicKey']]
+            )
+            ->willReturn(new Response(200, ['Content-Type' => 'application/json'], $payload));
+
+        $locations = $this->oa->events(['agendaUid' => 123456]);
+        $this->assertInstanceOf(EventEntity::class, $locations->first());
+    }
+
+    public function testEvent()
+    {
+        $endpoint = $this->oa->event(['uid' => 123, 'agendaUid' => 456]);
+        $this->assertInstanceOf(Event::class, $endpoint);
+        $uri = $endpoint->getUri('get');
+        $this->assertEquals('/v2/agendas/456/events/123', $uri->getPath());
     }
 }

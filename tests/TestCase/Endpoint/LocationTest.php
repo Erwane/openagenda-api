@@ -15,9 +15,9 @@ declare(strict_types=1);
 namespace OpenAgenda\Test\TestCase\Endpoint;
 
 use Cake\Validation\Validator;
-use InvalidArgumentException;
 use OpenAgenda\Endpoint\Location;
 use OpenAgenda\Entity\Location as LocationEntity;
+use OpenAgenda\OpenAgendaException;
 use OpenAgenda\Test\EndpointTestCase;
 use OpenAgenda\Test\Utility\FileResource;
 use OpenAgenda\Validation;
@@ -369,7 +369,7 @@ class LocationTest extends EndpointTestCase
             'message' => 'OpenAgenda\\Endpoint\\Location has errors.',
             'errors' => $expected,
         ];
-        $this->expectException(InvalidArgumentException::class);
+        $this->expectException(OpenAgendaException::class);
         $this->expectExceptionMessage(json_encode($message, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
         $endpoint->getUri($method);
     }
@@ -504,6 +504,22 @@ class LocationTest extends EndpointTestCase
 
         $entity = $endpoint->update();
         $this->assertInstanceOf(LocationEntity::class, $entity);
+    }
+
+    public function testCreateException(): void
+    {
+        $this->expectException(OpenAgendaException::class);
+        $this->expectExceptionMessageMatches('/"name":{"_required"/');
+        $endpoint = new Location(['agendaUid' => 1]);
+        $endpoint->create();
+    }
+
+    public function testUpdateException(): void
+    {
+        $this->expectException(OpenAgendaException::class);
+        $this->expectExceptionMessageMatches('/"uid":{"_required"/');
+        $endpoint = new Location(['agendaUid' => 1]);
+        $endpoint->update();
     }
 
     public function testDelete()

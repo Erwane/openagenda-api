@@ -42,13 +42,6 @@ class Client
     protected $cache;
 
     /**
-     * OpenAgenda api access token
-     *
-     * @var string|null
-     */
-    private $_accessToken = null;
-
-    /**
      * @var mixed|null
      */
     private $publicKey;
@@ -251,26 +244,6 @@ class Client
         }
 
         return $token;
-    }
-
-    /**
-     * transform a $array options to multipart array
-     *
-     * @param string|array $data options and datas
-     * @return array
-     */
-    private function _optionsToMultipart($data)
-    {
-        $return = [];
-
-        if (!empty($data['image'])) {
-            $return[] = ['name' => 'image', 'contents' => $data['image'], 'Content-type' => 'multipart/form-data'];
-            unset($data['image']);
-        }
-
-        $return[] = ['name' => 'data', 'contents' => is_array($data) ? json_encode($data) : $data];
-
-        return $return;
     }
 
     /**

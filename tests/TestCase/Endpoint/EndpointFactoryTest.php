@@ -21,6 +21,7 @@ use PHPUnit\Framework\TestCase;
  */
 class EndpointFactoryTest extends TestCase
 {
+    /** @covers \OpenAgenda\Endpoint\UnknownEndpointException */
     public function testUnknownEndpoint()
     {
         $this->expectException(UnknownEndpointException::class);

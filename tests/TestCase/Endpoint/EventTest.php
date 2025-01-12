@@ -16,9 +16,9 @@ namespace OpenAgenda\Test\TestCase\Endpoint;
 
 use Cake\Chronos\Chronos;
 use Cake\Validation\Validator;
-use InvalidArgumentException;
 use OpenAgenda\Endpoint\Event;
 use OpenAgenda\Entity\Event as EventEntity;
+use OpenAgenda\OpenAgendaException;
 use OpenAgenda\Test\EndpointTestCase;
 use OpenAgenda\Test\Utility\FileResource;
 use OpenAgenda\Validation;
@@ -522,7 +522,7 @@ class EventTest extends EndpointTestCase
             'message' => 'OpenAgenda\\Endpoint\\Event has errors.',
             'errors' => $expected,
         ];
-        $this->expectException(InvalidArgumentException::class);
+        $this->expectException(OpenAgendaException::class);
         $this->expectExceptionMessage(json_encode($message, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
         $endpoint->getUri($method);
     }
@@ -657,5 +657,21 @@ class EventTest extends EndpointTestCase
         $endpoint = new Event(['agendaUid' => 123, 'uid' => 456]);
         $entity = $endpoint->delete();
         $this->assertInstanceOf(EventEntity::class, $entity);
+    }
+
+    public function testCreateException(): void
+    {
+        $this->expectException(OpenAgendaException::class);
+        $this->expectExceptionMessageMatches('/"title":{"_required"/');
+        $endpoint = new Event(['agendaUid' => 1]);
+        $endpoint->create();
+    }
+
+    public function testUpdateException(): void
+    {
+        $this->expectException(OpenAgendaException::class);
+        $this->expectExceptionMessageMatches('/"uid":{"_required"/');
+        $endpoint = new Event(['agendaUid' => 1]);
+        $endpoint->update();
     }
 }

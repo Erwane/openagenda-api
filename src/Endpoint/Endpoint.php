@@ -14,12 +14,12 @@ declare(strict_types=1);
  */
 namespace OpenAgenda\Endpoint;
 
+use Cake\Chronos\Chronos;
 use Cake\Validation\Validator;
 use Cake\Validation\ValidatorAwareInterface;
 use Cake\Validation\ValidatorAwareTrait;
-use DateTime;
-use InvalidArgumentException;
 use League\Uri\Uri;
+use OpenAgenda\OpenAgendaException;
 
 /**
  * Abstract Endpoint
@@ -73,17 +73,11 @@ abstract class Endpoint implements ValidatorAwareInterface
     /**
      * Set endpoint params.
      *
-     * @param string[]|string $params Params to set or param name.
-     * @param mixed $value Param value or null if params is an array.
+     * @param array<string, mixed> $params Params to set or param name.
      * @return void
-     * @throws \DateMalformedStringException
      */
-    public function set($params, $value = null): void
+    public function set(array $params): void
     {
-        if (!is_array($params)) {
-            $params = [$params => $value];
-        }
-
         foreach ($params as $param => $value) {
             $value = $this->_formatType($param, $value);
 
@@ -97,14 +91,17 @@ abstract class Endpoint implements ValidatorAwareInterface
      * @param string $param Param name
      * @param mixed $value Param value
      * @return mixed
-     * @throws \DateMalformedStringException
      */
     protected function _formatType(string $param, $value)
     {
         if (!empty($this->_schema[$param]['type'])) {
             switch ($this->_schema[$param]['type']) {
                 case 'datetime':
-                    $value = new DateTime($value);
+                    if ($value instanceof \DateTimeInterface) {
+                        $value = Chronos::parse($value, $value->getTimezone());
+                    } else {
+                        $value = Chronos::parse($value);
+                    }
                     break;
                 case 'array':
                     $value = $this->paramAsArray($value);
@@ -161,8 +158,9 @@ abstract class Endpoint implements ValidatorAwareInterface
      */
     protected function convertQueryValue(array $map, $value)
     {
-        if ($value instanceof DateTime) {
-            $value = $value->format('Y-m-d\TH:i:s');
+        if ($value instanceof Chronos) {
+            $value = $value->setTimezone('UTC')
+                ->format('Y-m-d\TH:i:s');
         }
 
         return $value;
@@ -174,6 +172,7 @@ abstract class Endpoint implements ValidatorAwareInterface
      * @param string $method Request method
      * @param bool $validate Validate path parameters if true
      * @return \League\Uri\Uri
+     * @throws \OpenAgenda\OpenAgendaException
      */
     public function getUri(string $method, bool $validate = true): Uri
     {
@@ -197,8 +196,9 @@ abstract class Endpoint implements ValidatorAwareInterface
      * @param string $method Request method (HEAD, GET, POST, PATCH, DELETE)
      * @param bool $validate Validate path parameters if true
      * @return string
+     * @throws \OpenAgenda\OpenAgendaException
      */
-    public function uriPath(string $method, bool $validate = true): string
+    protected function uriPath(string $method, bool $validate = true): string
     {
         if ($validate) {
             $method = strtolower($method);
@@ -227,6 +227,7 @@ abstract class Endpoint implements ValidatorAwareInterface
      * @param string $method Validate path parameters if true
      * @param bool $validate Do query validation
      * @return array
+     * @throws \OpenAgenda\OpenAgendaException
      */
     protected function uriQuery(string $method, bool $validate = true): array
     {
@@ -256,10 +257,6 @@ abstract class Endpoint implements ValidatorAwareInterface
         }
 
         foreach ($params as $param => $value) {
-            if (!isset($this->_schema[$param])) {
-                continue;
-            }
-
             $map = $this->_schema[$param];
             $query[$param] = $this->convertQueryValue($map, $value);
         }
@@ -275,7 +272,7 @@ abstract class Endpoint implements ValidatorAwareInterface
      *
      * @param array $errors Endpoint errors
      * @return void
-     * @throws \InvalidArgumentException
+     * @throws \OpenAgenda\OpenAgendaException
      */
     protected function throwException(array $errors)
     {
@@ -284,21 +281,22 @@ abstract class Endpoint implements ValidatorAwareInterface
             'errors' => $errors,
         ];
 
-        throw new InvalidArgumentException(json_encode($message, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+        throw new OpenAgendaException(json_encode($message, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
     }
 
     /**
      * Return endpoint params
      *
      * @return array
+     * @throws \OpenAgenda\OpenAgendaException
      */
     public function toArray()
     {
         return [
-            'head' => $this->getUri('head', false)->__toString(),
+            'exists' => $this->getUri('exists', false)->__toString(),
             'get' => $this->getUri('get', false)->__toString(),
-            'post' => $this->getUri('post', false)->__toString(),
-            'patch' => $this->getUri('patch', false)->__toString(),
+            'create' => $this->getUri('create', false)->__toString(),
+            'update' => $this->getUri('update', false)->__toString(),
             'delete' => $this->getUri('delete', false)->__toString(),
             'params' => $this->params,
         ];

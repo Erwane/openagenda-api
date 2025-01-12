@@ -22,6 +22,9 @@ if (!defined('TEST_RESOURCES_TMP_DIR')) {
     define('TEST_RESOURCES_TMP_DIR', sys_get_temp_dir());
 }
 
+/**
+ * @coversNothing
+ */
 class FileResource
 {
     /**

@@ -14,6 +14,10 @@ declare(strict_types=1);
  */
 namespace OpenAgenda\Test\test_app\TestApp;
 
+use OpenAgenda\Entity\Agenda;
+use OpenAgenda\Entity\Event;
+use OpenAgenda\Entity\Location;
+
 /**
  * Entity for tests
  *
@@ -22,6 +26,7 @@ namespace OpenAgenda\Test\test_app\TestApp;
  * @property \Cake\Chronos\Chronos $createdAt
  * @property array $description
  * @property bool $state
+ * @coversNothing
  */
 class Entity extends \OpenAgenda\Entity\Entity
 {
@@ -31,5 +36,8 @@ class Entity extends \OpenAgenda\Entity\Entity
         'createdAt' => ['type' => 'datetime'],
         'description' => ['type' => 'json'],
         'state' => ['type' => 'bool'],
+        'agenda' => ['type' => Agenda::class],
+        'location' => ['type' => Location::class],
+        'event' => ['type' => Event::class],
     ];
 }

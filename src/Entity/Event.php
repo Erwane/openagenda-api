@@ -4,27 +4,23 @@ declare(strict_types=1);
 namespace OpenAgenda\Entity;
 
 use Cake\Chronos\Chronos;
-use HTMLPurifier;
-use HTMLPurifier_Config;
-use HTMLPurifier_TagTransform_Simple;
-use League\HTMLToMarkdown\HtmlConverter;
 use OpenAgenda\Endpoint\EndpointFactory;
 use OpenAgenda\OpenAgenda;
 use OpenAgenda\OpenAgendaException;
 
 /**
- * @property int|null $id
+ * @property int|null $uid
  * @property string|null $slug
  * @property int|null $state
  * @property int|null $status
  * @property bool|null $featured
  * @property string|null $agenda
- * @property int|null $agenda_id
+ * @property int|null $agendaUid
  * @property string|null $location
- * @property int|null $location_id
+ * @property int|null $locationUid
  * @property string|null $type
  * @property string|null $image
- * @property string|null $image_credits
+ * @property string|null $imageCredits
  * @property array<string, string>|null $title
  * @property array<string, string>|null $description
  * @property array<string, string>|null $longDescription
@@ -34,12 +30,12 @@ use OpenAgenda\OpenAgendaException;
  * @property array<string, string>|null $registration
  * @property array<string, bool>|null $accessibility
  * @property string[]|null $links
- * @property int|null $attendance_mode
- * @property string|null $online_access_link
+ * @property int|null $attendanceMode
+ * @property string|null $onlineAccessLink
  * @property array|null $timings
  * @property string|null $timezone
- * @property \Cake\Chronos\Chronos|null $created_at
- * @property \Cake\Chronos\Chronos|null $updated_at
+ * @property \Cake\Chronos\Chronos|null $createdAt
+ * @property \Cake\Chronos\Chronos|null $updatedAt
  */
 class Event extends Entity
 {
@@ -252,18 +248,7 @@ class Event extends Entity
 
         if (is_array($value)) {
             foreach ($value as $lang => $text) {
-                // remove tags
-                $text = strip_tags($text);
-
-                // decode html
-                $text = html_entity_decode($text, ENT_QUOTES);
-
-                // remove new lines
-                $text = preg_replace(['/\\r?\\n/', '/^\\r?\\n$/', '/^$/'], ' ', $text);
-
-                // remove unused white spaces
-                $text = preg_replace('/[\pZ\pC]+/u', ' ', $text);
-
+                $text = static::noHtml($text, false);
                 if (mb_strlen($text) > 200) {
                     $text = mb_substr($text, 0, 196) . ' ...';
                 }
@@ -289,8 +274,9 @@ class Event extends Entity
 
         if (is_array($value)) {
             foreach ($value as $lang => $text) {
-                $text = $this->_cleanHtml($text);
-                $text = $this->_toMarkDown($text);
+                $text = static::cleanupHtml($text);
+                $text = static::htmlToMarkdown($text);
+
                 if (mb_strlen($text) > 10000) {
                     $text = mb_substr($text, 0, 9996) . ' ...';
                 }
@@ -316,6 +302,8 @@ class Event extends Entity
 
         if (is_array($value)) {
             foreach ($value as $lang => $text) {
+                $text = self::noHtml($text, false);
+
                 if (mb_strlen($text) > 255) {
                     $text = mb_substr($text, 0, 251) . ' ...';
                 }
@@ -330,24 +318,33 @@ class Event extends Entity
     /**
      * Event keywords is multilingual
      *
-     * @param array|string|null $value Event keywords
+     * @param array|string|null $keywords Event keywords
      * @return array<string, string>|null
      */
-    protected function _setKeywords($value): ?array
+    protected function _setKeywords($keywords): ?array
     {
-        if (is_string($value)) {
-            $value = [OpenAgenda::getDefaultLang() => $value];
+        if (is_string($keywords)) {
+            $keywords = [OpenAgenda::getDefaultLang() => [$keywords]];
         }
 
-        if (is_array($value)) {
-            foreach ($value as $lang => $keywords) {
-                $keywords = array_map('trim', $keywords);
+        if (is_array($keywords)) {
+            // Has lang keys ?
+            $hasLang = array_filter(array_keys($keywords), function ($value) {
+                return !is_int($value);
+            });
+            if (!$hasLang) {
+                $keywords = [OpenAgenda::getDefaultLang() => $keywords];
+            }
 
-                $value[$lang] = $keywords;
+            /** @var array<string, array> $keywords */
+            foreach ($keywords as $lang => $items) {
+                $items = array_map([$this, 'noHtml'], $items);
+
+                $keywords[$lang] = $items;
             }
         }
 
-        return $value;
+        return $keywords;
     }
 
     /**
@@ -359,6 +356,7 @@ class Event extends Entity
      */
     protected function _setImage(?string $file)
     {
+        // Todo handle images
         if (empty($file)) {
             return $file;
         }
@@ -371,65 +369,5 @@ class Event extends Entity
         $this->_fields['image'] = fopen($file, 'r');
 
         return $file;
-    }
-
-    /**
-     * clean description html tags
-     *
-     * @param string $value worse html ever
-     * @return string
-     */
-    protected function _cleanHtml(string $value)
-    {
-        $config = HTMLPurifier_Config::createDefault();
-
-        $config->set('Cache.DefinitionImpl', null);
-        $config->set('HTML.AllowedElements', [
-            'a', 'b', 'strong', 'i', 'em', 'u', 'p', 'img', 'hr', 'span',
-            'ul', 'ol', 'li', 'h1', 'h2', 'h3', 'h4', 'h5',
-        ]);
-        $config->set('HTML.AllowedAttributes', ['a.href', 'a.target', 'img.src', 'img.alt', 'img.width', 'img.height']);
-        $config->set('Attr.AllowedFrameTargets', ['_blank', '_self']);
-        $config->set('Attr.AllowedRel', []);
-        $config->set('AutoFormat.RemoveEmpty', true);
-        $config->set('AutoFormat.RemoveSpansWithoutAttributes', true);
-        $config->set('URI.AllowedSchemes', ['http', 'https']);
-
-        // tag transformation
-        $def = $config->getHTMLDefinition(true);
-        $def->info_tag_transform['h1'] = new HTMLPurifier_TagTransform_Simple('h3');
-        $def->info_tag_transform['h2'] = new HTMLPurifier_TagTransform_Simple('h3');
-
-        $purifier = new HTMLPurifier($config);
-        $firstPass = trim($purifier->purify($value));
-
-        if ($this->baseUrl === null) {
-            return $firstPass;
-        }
-
-        // second pass with url
-        $config = HTMLPurifier_Config::createDefault();
-        $config->set('URI.Base', $this->baseUrl);
-        $config->set('HTML.TargetBlank', true);
-        $purifier = new HTMLPurifier($config);
-
-        return trim($purifier->purify($firstPass));
-    }
-
-    /**
-     * html to markdown converter
-     *
-     * @param string $html html input
-     * @return string
-     */
-    protected function _toMarkDown(string $html)
-    {
-        if ($html === strip_tags($html)) {
-            return $html;
-        }
-
-        $converter = new HtmlConverter(['strip_tags' => true]);
-
-        return $converter->convert($html);
     }
 }

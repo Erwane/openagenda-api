@@ -173,4 +173,21 @@ class AgendasTest extends EndpointTestCase
         $this->assertEquals(AgendaEntity::class, $agendas->getType());
         $this->assertCount(2, $agendas);
     }
+
+    public function testGetMines()
+    {
+        $payload = FileResource::instance($this)->getContent('Response/agendas/mines.json');
+        $this->mockRequest(false, 'get', [
+            'https://api.openagenda.com/v2/me/agendas?size=1',
+            ['headers' => ['key' => 'publicKey']],
+        ], [200, $payload]);
+
+        $endpoint = new Agendas(['size' => 1, '_path' => '/agendas/mines']);
+
+        $agendas = $endpoint->get();
+
+        $this->assertInstanceOf(Collection::class, $agendas);
+        $this->assertEquals(AgendaEntity::class, $agendas->getType());
+        $this->assertCount(1, $agendas);
+    }
 }

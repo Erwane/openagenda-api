@@ -31,6 +31,7 @@ use OpenAgenda\Test\Utility\FileResource;
  */
 class LocationTest extends OpenAgendaTestCase
 {
+    /** @covers \OpenAgenda\Entity\Location::fromOpenAgenda */
     public function testAliasesIn()
     {
         $json = FileResource::instance($this)->getContent('Response/locations/location.json');
@@ -67,6 +68,7 @@ class LocationTest extends OpenAgendaTestCase
         ], $result);
     }
 
+    /** @covers \OpenAgenda\Entity\Location::toOpenAgenda */
     public function testAliasesOut()
     {
         $ent = new Location([
@@ -200,15 +202,36 @@ class LocationTest extends OpenAgendaTestCase
 
         $this->assertInstanceOf(AgendaEndpoint::class, $endpoint);
         $this->assertEquals([
-            'head' => 'https://api.openagenda.com/v2/agendas/123',
+            'exists' => 'https://api.openagenda.com/v2/agendas/123',
             'get' => 'https://api.openagenda.com/v2/agendas/123',
-            'post' => 'https://api.openagenda.com/v2/agendas/123',
-            'patch' => 'https://api.openagenda.com/v2/agendas/123',
+            'create' => 'https://api.openagenda.com/v2/agendas/123',
+            'update' => 'https://api.openagenda.com/v2/agendas/123',
             'delete' => 'https://api.openagenda.com/v2/agendas/123',
             'params' => [
                 '_path' => '/agenda',
                 'uid' => 123,
             ],
         ], $endpoint->toArray());
+    }
+
+    /** @covers \OpenAgenda\Entity\Location::_setCountry */
+    public function testSetCountry(): void
+    {
+        $entity = new Location(['country' => 'fr']);
+        $this->assertEquals('FR', $entity->country);
+    }
+
+    /** @covers \OpenAgenda\Entity\Location::_setLatitude */
+    public function testSetLatitude(): void
+    {
+        $entity = new Location(['latitude' => '1.23450']);
+        $this->assertEquals(1.2345, $entity->latitude);
+    }
+
+    /** @covers \OpenAgenda\Entity\Location::_setLongitude */
+    public function testSetLongitude(): void
+    {
+        $entity = new Location(['longitude' => '1.23450']);
+        $this->assertEquals(1.2345, $entity->longitude);
     }
 }

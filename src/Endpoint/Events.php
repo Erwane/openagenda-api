@@ -201,7 +201,7 @@ class Events extends Endpoint
     /**
      * @inheritDoc
      */
-    public function uriPath(string $method, bool $validate = true): string
+    protected function uriPath(string $method, bool $validate = true): string
     {
         parent::uriPath($method, $validate);
 
