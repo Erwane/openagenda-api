@@ -1,0 +1,52 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - '3.x'
+  pull_request:
+    branches:
+      - '*'
+  workflow_dispatch:
+
+permissions:
+  contents: read # to fetch code (actions/checkout)
+
+jobs:
+  testsuite:
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        php-version:
+          - '7.2'
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: ${{ matrix.php-version }}
+        extensions: mbstring, intl
+        ini-values: zend.assertions = 1
+        coverage: pcov
+
+    - name: Composer install
+      uses: ramsey/composer-install@v3
+      with:
+        dependency-versions: ${{ matrix.dependencies }}
+        composer-options: "${{ matrix.composer-options }}"
+
+    - name: Run PHPUnit
+      env:
+        XDEBUG_MODE: coverage
+      run: |
+        export CODECOVERAGE=1
+        vendor/bin/phpunit --coverage-clover=coverage.xml
+
+    - name: Submit code coverage
+      uses: codecov/codecov-action@v5
+      with:
+        files: coverage.xml
+        token: ${{ secrets.CODECOV_TOKEN }}
