@@ -42,16 +42,25 @@ class AgendasFunctionalTest extends OpenAgendaTestCase
             '_success' => true,
         ];
 
-        $this->assertClientCall($client, $this->once(), 'get', '/v2/agendas', [
-            'size' => '2',
-            'fields' => ['summary', 'schema'],
-            'search' => 'my agenda',
-            'official' => '1',
-            'slug' => ['slug-1', 'slug-2'],
-            'uid' => ['123', '456'],
-            'network' => '123',
-            'sort' => 'createdAt.desc',
-        ], $payload);
+        $this->assertClientCall(
+            $client,
+            $this->once(),
+            'get',
+            $payload,
+            [
+                'path' => '/v2/agendas',
+                'query' => [
+                    'size' => '2',
+                    'fields' => ['summary', 'schema'],
+                    'search' => 'my agenda',
+                    'official' => '1',
+                    'slug' => ['slug-1', 'slug-2'],
+                    'uid' => ['123', '456'],
+                    'network' => '123',
+                    'sort' => 'createdAt.desc',
+                ],
+            ]
+        );
 
         $agendas = $oa->agendas([
             'size' => 2,
@@ -81,7 +90,16 @@ class AgendasFunctionalTest extends OpenAgendaTestCase
             '_success' => true,
         ];
 
-        $this->assertClientCall($client, $this->once(), 'get', '/v2/me/agendas', ['limit' => '2'], $payload);
+        $this->assertClientCall(
+            $client,
+            $this->once(),
+            'get',
+            $payload,
+            [
+                'path' => '/v2/me/agendas',
+                'query' => ['limit' => '2'],
+            ]
+        );
 
         $agendas = $oa->myAgendas(['limit' => 2]);
         $this->assertCount(1, $agendas);
@@ -96,7 +114,13 @@ class AgendasFunctionalTest extends OpenAgendaTestCase
     {
         [$oa, $client] = $this->oa();
 
-        $this->assertClientCall($client, $this->once(), 'head', '/v2/agendas/12345', [], 200);
+        $this->assertClientCall(
+            $client,
+            $this->once(),
+            'head',
+            200,
+            ['path' => '/v2/agendas/12345']
+        );
 
         $exists = $oa->agenda(['uid' => 12345])->exists();
         $this->assertTrue($exists);
@@ -115,9 +139,15 @@ class AgendasFunctionalTest extends OpenAgendaTestCase
             '_status' => 200,
             '_success' => true,
         ];
-        $this->assertClientCall($client, $this->once(), 'get', '/v2/agendas/12345', [
-            'detailed' => '1',
-        ], $payload);
+        $this->assertClientCall($client,
+            $this->once(),
+            'get',
+            $payload,
+            [
+                'path' => '/v2/agendas/12345',
+                'query' => ['detailed' => '1'],
+            ]
+        );
 
         $agenda = $oa->agenda(['uid' => 12345, 'detailed' => true])->get();
         $this->assertInstanceOf(Agenda::class, $agenda);
