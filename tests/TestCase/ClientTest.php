@@ -88,7 +88,7 @@ class ClientTest extends TestCase
      */
     public function testWrapperException($method): void
     {
-        $exception = new HttpWrapperException('Wrapper exception: previous exception', 500);
+        $exception = new HttpWrapperException("Wrapper $method request failed. previous exception", 500);
 
         $this->wrapper->expects($this->once())
             ->method($method)
@@ -107,7 +107,7 @@ class ClientTest extends TestCase
         } catch (OpenAgendaException $e) {
             $this->assertInstanceOf(OpenAgendaException::class, $e);
             $this->assertEquals(500, $e->getCode());
-            $this->assertEquals('Wrapper exception: previous exception', $e->getMessage());
+            $this->assertEquals("Wrapper $method request failed. previous exception", $e->getMessage());
             $this->assertInstanceOf(HttpWrapperException::class, $e->getPrevious());
         }
     }
