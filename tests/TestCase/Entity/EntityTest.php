@@ -108,6 +108,12 @@ class EntityTest extends TestCase
         $ent->get('');
     }
 
+    public function testGetWithAccessor(): void
+    {
+        $ent = new Ent(['uid' => 1]);
+        $this->assertSame(1, $ent->id);
+    }
+
     public function testToOpenAgenda()
     {
         $now = Chronos::now();

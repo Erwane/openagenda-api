@@ -583,4 +583,45 @@ MD
         $entity = new Event(['image' => $image]);
         $this->assertSame($expected, $entity->image);
     }
+
+    public static function dataGetAgendaUid(): array
+    {
+        return [
+            [[], null],
+            [['agendaUid' => 1], 1],
+            [['agenda' => new Agenda(['uid' => 1])], 1],
+            [['originAgenda' => new Agenda(['uid' => 1])], 1],
+        ];
+    }
+
+    /**
+     * @dataProvider dataGetAgendaUid
+     * @covers       \OpenAgenda\Entity\Event::_getAgenda
+     * @covers       \OpenAgenda\Entity\Event::_getAgendaUid
+     */
+    public function testGetAgendaUid($data, $expected): void
+    {
+        $ent = new Event($data);
+        $this->assertSame($expected, $ent->agendaUid);
+    }
+
+    public static function dataGetLocationUid(): array
+    {
+        return [
+            [[], null],
+            [['locationUid' => 1], 1],
+            [['location' => new Location(['uid' => 1])], 1],
+        ];
+    }
+
+    /**
+     * @dataProvider dataGetLocationUid
+     * @covers       \OpenAgenda\Entity\Event::_getLocation
+     * @covers       \OpenAgenda\Entity\Event::_getLocationUid
+     */
+    public function testGetLocationUid($data, $expected): void
+    {
+        $ent = new Event($data);
+        $this->assertSame($expected, $ent->locationUid);
+    }
 }

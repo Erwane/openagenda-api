@@ -21,6 +21,7 @@ use OpenAgenda\Entity\Location;
 /**
  * Entity for tests
  *
+ * @property int $id
  * @property int $uid
  * @property string $postalCode
  * @property \Cake\Chronos\Chronos $createdAt
@@ -41,4 +42,9 @@ class Entity extends \OpenAgenda\Entity\Entity
         'event' => ['type' => Event::class],
         'image' => ['type' => 'file'],
     ];
+
+    protected function _getId()
+    {
+        return $this->uid;
+    }
 }

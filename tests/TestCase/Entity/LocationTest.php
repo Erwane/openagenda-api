@@ -260,7 +260,7 @@ class LocationTest extends OpenAgendaTestCase
         $this->assertStringEndsWith('-- ...', $entity->access['fr']);
     }
 
-    /** @covers \OpenAgenda\Entity\Location::_setCountry */
+    /** @covers \OpenAgenda\Entity\Location::_setCountryCode */
     public function testSetCountryCode(): void
     {
         $entity = new Location(['countryCode' => 'fr']);

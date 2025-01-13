@@ -20,7 +20,7 @@ use OpenAgenda\OpenAgenda;
  * @link        https://cakephp.org CakePHP(tm) Project
  * @see         https://github.com/cakephp/cakephp/blob/5.x/src/ORM/Entity.php
  * @license     https://opensource.org/licenses/mit-license.php MIT License
- * @property int $id
+ * @property int $uid
  */
 abstract class Entity implements ArrayAccess
 {
