@@ -6,6 +6,9 @@ namespace OpenAgenda\Entity;
 use InvalidArgumentException;
 use OpenAgenda\OpenAgendaException;
 
+/**
+ * @deprecated 2.0.4 Rewrited in ^3.0 Check README.
+ */
 trait EntityTrait
 {
     /**

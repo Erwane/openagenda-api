@@ -5,6 +5,9 @@ namespace OpenAgenda\Entity;
 
 use OpenAgenda\OpenAgendaException;
 
+/**
+ * @deprecated 2.0.4 Rewrited in ^3.0 Check README.
+ */
 abstract class Entity
 {
     use EntityTrait;

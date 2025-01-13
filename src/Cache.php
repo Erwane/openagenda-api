@@ -7,6 +7,9 @@ use Psr\SimpleCache\InvalidArgumentException;
 use Symfony\Component\Cache\Adapter\FilesystemAdapter;
 use Symfony\Component\Cache\Psr16Cache;
 
+/**
+ * @deprecated 2.0.4 Removed in ^3.0 Check 3.x README.
+ */
 class Cache
 {
     protected static $_cache;

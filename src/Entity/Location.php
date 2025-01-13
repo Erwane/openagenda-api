@@ -11,6 +11,7 @@ namespace OpenAgenda\Entity;
  * @property string $pricing
  * @property string $pricingInfo
  * @property array $dates
+ * @deprecated 2.0.4 Rewrited in ^3.0 Check README.
  */
 class Location extends Entity
 {

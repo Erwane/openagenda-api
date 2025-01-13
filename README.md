@@ -1,7 +1,29 @@
 # OpenAgenda API SDK for PHP
 
+## Obsolete version
+
+The 2.x version of this package was marked as deprecated and was totally rewrote in 3.x.
+
+Plus, to avoid confusion with [openagenda/sdk-php](https://github.com/OpenAgenda/sdk-php), this package
+was moved to his owner namespace [erwane/openagenda-api](https://github.com/Erwane/openagenda-api).
+
+There is no compatibility between 2.x and 3.x (really sorry), but I've made my maximum to write it in a more OpenAgenda
+compatible way and write a lots of documentations.
+
+Thank you everyone.
+
+## Version map
+
+| branch | This package version | OpenAgenda API | PHP min |
+|:------:|----------------------|:--------------:|:-------:|
+|  3.x   | 3.0.*                |       v2       | PHP 7.2 |
+|  2.x   | ^2.0 (deprecated)    |       v2       | PHP 7.2 |
+|  1.x   | ^1.0 (deprecated)    |       v1       | PHP 5.6 |
+
 ## Installation
+
 use composer
+
 ```
 composer require openagenda/api-sdk
 ```
@@ -9,6 +31,7 @@ composer require openagenda/api-sdk
 ## Usage
 
 ### Creation and Authentication
+
 ```php
 use OpenAgenda\OpenAgenda;
 
@@ -29,6 +52,7 @@ $openAgenda->setBaseUrl('example.com');
 ```
 
 ### Publish event
+
 ```php
 /*
  * create Location object
@@ -83,6 +107,7 @@ $openAgenda->attachEventToAgenda($event, $agenda);
 ```
 
 ### Update event
+
 ```php
 $event = $openAgenda->getEvent(0123456789);
 
@@ -92,12 +117,13 @@ $openAgenda->updateEvent($event);
 ```
 
 ### Delete event
+
 ```php
 $openAgenda->deleteEvent(0123456789, 'openagenda-slug-or-id');
 ```
 
-
 ## Performance
+
 A small cache is used for accessToken and agenda slugs id. OpenAgenda API is not requested when not necessary
 
 For event update, only the "dirty" fields are sents to API

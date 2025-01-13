@@ -8,6 +8,9 @@ use OpenAgenda\Entity\Agenda;
 use OpenAgenda\Entity\Event;
 use OpenAgenda\Entity\Location;
 
+/**
+ * @deprecated 2.0.4 Rewrited in ^3.0 Check README.
+ */
 class OpenAgenda
 {
     /**

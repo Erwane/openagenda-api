@@ -18,6 +18,7 @@ use OpenAgenda\OpenAgendaException;
  * @property int $state
  * @property string $image
  * @property string|null $baseUrl
+ * @deprecated 2.0.4 Rewrited in ^3.0 Check README.
  */
 class Event extends Entity
 {

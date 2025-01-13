@@ -11,6 +11,9 @@ use GuzzleHttp\Psr7\Uri;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\UriInterface;
 
+/**
+ * @deprecated 2.0.4 Rewrited in ^3.0 Check README.
+ */
 class Client extends GuzzleClient
 {
     /**

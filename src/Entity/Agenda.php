@@ -5,6 +5,7 @@ namespace OpenAgenda\Entity;
 
 /**
  * @property int $uid
+ * @deprecated 2.0.4 Rewrited in ^3.0 Check README.
  */
 class Agenda extends Entity
 {
