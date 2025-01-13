@@ -75,4 +75,27 @@ class ValidationTest extends TestCase
 
         $this->assertSame($expected, $success);
     }
+
+    public static function dataCheckImage(): array
+    {
+        $path = 'resources/wendywei-1537637.jpg';
+        $realPath = TESTS . $path;
+
+        return [
+            [['file'], 1, false],
+            ['resources/wendywei-1537637.jpg', 1, false],
+            [$realPath, 0.001, false],
+            [fopen($realPath, 'r'), 0.001, false],
+            [$realPath, 1, true],
+            [fopen($realPath, 'r'), 1, true],
+            [fopen(__FILE__, 'r'), 10, false],
+        ];
+    }
+
+    /** @dataProvider dataCheckImage */
+    public function testCheckImage($input, $limit, $expected): void
+    {
+        $success = Validation::image($input, $limit);
+        $this->assertSame($expected, $success);
+    }
 }

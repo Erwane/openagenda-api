@@ -95,4 +95,29 @@ class Validation
 
         return true;
     }
+
+    /**
+     * Validate image absolute path or file resource.
+     *
+     * @param string|resource $check Absolute path or file resource
+     * @param float $max Maximum size in MegaBytes (MB)
+     * @return bool
+     */
+    public static function image($check, float $max): bool
+    {
+        $success = false;
+        $max = $max * 1024 * 1024;
+
+        if (is_string($check) && is_file($check)) {
+            $size = filesize($check);
+            $success = $size <= $max;
+        } elseif (is_resource($check)) {
+            $stat = fstat($check);
+            $mime = mime_content_type($check);
+            $success = ($stat['size'] && $stat['size'] <= $max)
+                && ($mime && in_array($mime, ['image/jpg', 'image/jpeg']));
+        }
+
+        return $success;
+    }
 }
