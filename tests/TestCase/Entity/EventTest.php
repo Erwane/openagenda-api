@@ -62,7 +62,7 @@ class EventTest extends OpenAgendaTestCase
             'uid' => 456,
             'agendaUid' => 123,
             'name' => 'My location',
-            'address' => '122 rue de charonne, 75011 Paris, France',
+            'address' => '122 rue de Charonne, 75011 Paris, France',
             'access' => [],
             'description' => [],
             'image' => null,

@@ -262,7 +262,7 @@ class LocationsFunctionalTest extends OpenAgendaTestCase
             [
                 'extId' => 'my-id',
                 'name' => 'My location',
-                'address' => '122 rue de charonne, 75011 Paris, France',
+                'address' => '122 rue de Charonne, 75011 Paris, France',
                 'countryCode' => 'FR',
                 'state' => 1,
                 'description' => ['fr' => 'Location description'],
@@ -289,7 +289,7 @@ class LocationsFunctionalTest extends OpenAgendaTestCase
             'agendaUid' => 123,
             'extId' => 'my-id',
             'name' => 'My location',
-            'address' => '122 rue de charonne, 75011 Paris, France',
+            'address' => '122 rue de Charonne, 75011 Paris, France',
             'countryCode' => 'fr',
             'state' => true,
             'description' => 'Location description',
@@ -336,7 +336,7 @@ class LocationsFunctionalTest extends OpenAgendaTestCase
             ['path' => '/v2/agendas/123/locations'],
             [
                 'name' => 'My location',
-                'address' => '122 rue de charonne, 75011 Paris, France',
+                'address' => '122 rue de Charonne, 75011 Paris, France',
                 'countryCode' => 'FR',
             ]
         );
@@ -346,7 +346,7 @@ class LocationsFunctionalTest extends OpenAgendaTestCase
         $data = [
             'agendaUid' => 123,
             'name' => 'My location',
-            'address' => '122 rue de charonne, 75011 Paris, France',
+            'address' => '122 rue de Charonne, 75011 Paris, France',
             'countryCode' => 'fr',
         ];
         $location = $agenda->location($data)->create();
