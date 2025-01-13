@@ -253,6 +253,8 @@ class LocationsFunctionalTest extends OpenAgendaTestCase
             '_status' => 200,
             '_success' => true,
         ];
+        $imagePath = FileResource::instance($this)->getPath('wendywei-1537637.jpg');
+
         $this->assertClientCall(
             $client,
             $this->once(),
@@ -271,7 +273,7 @@ class LocationsFunctionalTest extends OpenAgendaTestCase
                 'email' => 'email@example.com',
                 'phone' => '+33123456789',
                 'links' => ['https://www.louvre.fr', 'https://www.facebook.com/museedulouvre'],
-                // 'image' => '', // todo image
+                'image' => $imagePath,
                 'imageCredits' => 'Image credits',
                 'region' => 'Normandie',
                 'department' => 'Oise',
@@ -298,7 +300,7 @@ class LocationsFunctionalTest extends OpenAgendaTestCase
             'email' => 'email@example.com',
             'phone' => '0123456789',
             'links' => ['https://www.louvre.fr', 'https://www.facebook.com/museedulouvre'],
-            // 'image' => '',
+            'image' => $imagePath,
             'imageCredits' => 'Image credits',
             'region' => 'Normandie',
             'department' => 'Oise',

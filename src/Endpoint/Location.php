@@ -151,6 +151,7 @@ class Location extends Endpoint
             ->isArray('links')
             // image
             ->allowEmptyFile('image')
+            ->add('image', 'image', ['rule' => [[$this, 'checkImage'], 10]])
             // imageCredits
             ->allowEmptyString('imageCredits')
             ->scalar('imageCredits')
@@ -222,12 +223,35 @@ class Location extends Endpoint
      * @param array $context Validation context.
      * @return bool
      */
-    public static function presenceIdOrExtId(array $context = [])
+    public static function presenceIdOrExtId(array $context = []): bool
     {
         $data = $context['data'];
         $isNew = $context['newRecord'] ?? true;
 
         return !$isNew && empty($data['uid']) && empty($data['extId']);
+    }
+
+    /**
+     * Check image is valid.
+     *
+     * @param string|resource $check Image file resource or absolute path
+     * @param float $max Max size in MegaBytes (MB or Mo)
+     * @return false
+     */
+    public static function checkImage($check, float $max = 10): bool
+    {
+        $success = false;
+        $max = $max * 1024 * 1024;
+
+        if (is_string($check) && is_file($check)) {
+            $size = filesize($check);
+            $success = $size <= $max;
+        } elseif (is_resource($check)) {
+            $stat = fstat($check);
+            $success = $stat['size'] && $stat['size'] <= $max;
+        }
+
+        return $success;
     }
 
     /**
