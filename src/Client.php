@@ -116,19 +116,36 @@ class Client
     }
 
     /**
+     * Send request to HttpWrapper.
+     * Catch HttpWrapperException.
+     *
+     * @param string $method Wrapper method
+     * @param array $args Wrapper args
+     * @return \Psr\Http\Message\ResponseInterface
+     * @throws \OpenAgenda\OpenAgendaException
+     */
+    protected function _doRequest(string $method, array $args = [])
+    {
+        try {
+            return $this->http->$method(...$args);
+        } catch (Wrapper\HttpWrapperException $e) {
+            throw new OpenAgendaException($e->getMessage(), $e->getCode(), $e);
+        }
+    }
+
+    /**
      * Query OpenAgenda endpoint with a HEAD request and return Response status code.
      *
      * @param \League\Uri\Uri|string $uri OpenAgenda uri
      * @param array $params Request params
      * @return int
-     * @throws \OpenAgenda\Wrapper\HttpWrapperException
+     * @throws \OpenAgenda\OpenAgendaException
      */
     public function head($uri, array $params = []): int
     {
         $params['headers']['key'] = $this->publicKey;
 
-        // todo this could throw exception
-        $response = $this->http->head((string)$uri, $params);
+        $response = $this->_doRequest('head', [(string)$uri, $params]);
 
         return $response->getStatusCode();
     }
@@ -146,8 +163,7 @@ class Client
         // Add key
         $params['headers']['key'] = $this->publicKey;
 
-        // todo this could throw exception
-        $response = $this->http->get((string)$uri, $params);
+        $response = $this->_doRequest('get', [(string)$uri, $params]);
 
         return $this->payload($response);
     }
@@ -165,8 +181,7 @@ class Client
     {
         $params = $this->_addAuthenticationHeaders($params);
 
-        // todo this could throw exception
-        $response = $this->http->post((string)$uri, $data, $params);
+        $response = $this->_doRequest('post', [(string)$uri, $data, $params]);
 
         return $this->payload($response);
     }
@@ -184,8 +199,7 @@ class Client
     {
         $params = $this->_addAuthenticationHeaders($params);
 
-        // todo this could throw exception
-        $response = $this->http->patch((string)$uri, $data, $params);
+        $response = $this->_doRequest('patch', [(string)$uri, $data, $params]);
 
         return $this->payload($response);
     }
@@ -202,8 +216,7 @@ class Client
     {
         $params = $this->_addAuthenticationHeaders($params);
 
-        // todo this could throw exception
-        $response = $this->http->delete((string)$uri, $params);
+        $response = $this->_doRequest('delete', [(string)$uri, $params]);
 
         return $this->payload($response);
     }
@@ -245,10 +258,12 @@ class Client
             $endpoint = new Auth();
             $uri = $endpoint->getUri('post');
 
-            // todo this could throw exception
-            $response = $this->http->post((string)$uri, [
-                'grant_type' => 'authorization_code',
-                'code' => $this->secretKey,
+            $response = $this->_doRequest('post', [
+                (string)$uri,
+                [
+                    'grant_type' => 'authorization_code',
+                    'code' => $this->secretKey,
+                ],
             ]);
 
             $payload = $this->payload($response);

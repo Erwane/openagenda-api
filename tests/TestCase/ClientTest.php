@@ -9,6 +9,7 @@ use OpenAgenda\Client;
 use OpenAgenda\OpenAgendaException;
 use OpenAgenda\Test\Utility\FileResource;
 use OpenAgenda\Wrapper\HttpWrapper;
+use OpenAgenda\Wrapper\HttpWrapperException;
 use PHPUnit\Framework\TestCase;
 use Psr\SimpleCache\CacheInterface;
 
@@ -68,6 +69,47 @@ class ClientTest extends TestCase
     public function testGetWrapper(): void
     {
         $this->assertSame($this->wrapper, $this->client->getWrapper());
+    }
+
+    public static function dataWrapperException()
+    {
+        return [
+            ['head'],
+            ['get'],
+            ['post'],
+            ['patch'],
+            ['delete'],
+        ];
+    }
+
+    /**
+     * @dataProvider dataWrapperException
+     * @covers       \OpenAgenda\Client::_doRequest
+     */
+    public function testWrapperException($method): void
+    {
+        $exception = new HttpWrapperException('Wrapper exception: previous exception', 500);
+
+        $this->wrapper->expects($this->once())
+            ->method($method)
+            ->willThrowException($exception);
+
+        // For PATCH and DELETE getAccessToken()
+        $this->wrapper->expects($this->any())
+            ->method('post')
+            ->willReturn(new Response(200, [], json_encode([
+                'access_token' => 'my authorization token',
+                'expires_in' => 3600,
+            ])));
+
+        try {
+            $this->client->$method('https://example.com');
+        } catch (OpenAgendaException $e) {
+            $this->assertInstanceOf(OpenAgendaException::class, $e);
+            $this->assertEquals(500, $e->getCode());
+            $this->assertEquals('Wrapper exception: previous exception', $e->getMessage());
+            $this->assertInstanceOf(HttpWrapperException::class, $e->getPrevious());
+        }
     }
 
     /**
@@ -244,6 +286,7 @@ class ClientTest extends TestCase
                 'message' => 'Invalid key',
             ])));
 
+        $this->expectException(OpenAgendaException::class);
         $this->expectExceptionCode(401);
         $this->client->getAccessToken();
     }

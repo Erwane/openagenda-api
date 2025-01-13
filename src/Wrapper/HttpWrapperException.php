@@ -15,10 +15,36 @@ declare(strict_types=1);
 namespace OpenAgenda\Wrapper;
 
 use OpenAgenda\OpenAgendaException;
+use Psr\Http\Message\RequestInterface;
 
 /**
  * HttpWrapper exception
  */
 class HttpWrapperException extends OpenAgendaException
 {
+    /**
+     * @var \Psr\Http\Message\RequestInterface
+     */
+    protected $_request;
+
+    /**
+     * Set Wrapper request in this exception.
+     *
+     * @param \Psr\Http\Message\RequestInterface $request Wrapper request.
+     * @return void
+     */
+    public function setRequest(RequestInterface $request)
+    {
+        $this->_request = $request;
+    }
+
+    /**
+     * Get exception response.
+     *
+     * @return \Psr\Http\Message\RequestInterface|null
+     */
+    public function getRequest(): ?RequestInterface
+    {
+        return $this->_request;
+    }
 }
