@@ -70,7 +70,8 @@ class EventsTest extends EndpointTestCase
         $field = $v->field('size');
         $this->assertTrue($field->isEmptyAllowed());
         $rules = $field->rules();
-        $this->assertArrayHasKey('integer', $rules);
+        $this->assertEquals(1, $rules['greaterThanOrEqual']->get('pass')[1]);
+        $this->assertEquals(300, $rules['lessThanOrEqual']->get('pass')[1]);
 
         // page
         $field = $v->field('page');

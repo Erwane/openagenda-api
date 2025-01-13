@@ -26,10 +26,6 @@ use Ramsey\Collection\Collection;
  */
 class Events extends Endpoint
 {
-    public const DESC_FORMAT_MD = 'markdown';
-    public const DESC_FORMAT_HTML = 'HTML';
-    public const DESC_FORMAT_EMBEDS = 'HTMLWithEmbeds';
-
     protected $_schema = [
         'detailed' => ['type' => 'bool'],
         'longDescriptionFormat' => [],
@@ -56,6 +52,7 @@ class Events extends Endpoint
         'locationUid' => ['type' => 'array'],
         'accessibility' => ['type' => 'array'],
         'status' => ['type' => 'array'],
+        'sort' => ['type' => 'string'],
     ];
 
     /**
@@ -84,13 +81,14 @@ class Events extends Endpoint
             // longDescriptionFormat
             ->allowEmptyString('longDescriptionFormat')
             ->inList('longDescriptionFormat', [
-                self::DESC_FORMAT_MD,
-                self::DESC_FORMAT_HTML,
-                self::DESC_FORMAT_EMBEDS,
+                Event::DESC_FORMAT_MD,
+                Event::DESC_FORMAT_HTML,
+                Event::DESC_FORMAT_EMBEDS,
             ])
             // size
             ->allowEmptyString('size')
-            ->integer('size')
+            ->greaterThanOrEqual('size', 1)
+            ->lessThanOrEqual('size', 300)
             // page
             ->allowEmptyString('page')
             ->integer('page')

@@ -26,6 +26,14 @@ use OpenAgenda\Validation;
  */
 class Event extends Endpoint
 {
+    public const DESC_FORMAT_MD = 'markdown';
+    public const DESC_FORMAT_HTML = 'HTML';
+    public const DESC_FORMAT_EMBEDS = 'HTMLWithEmbeds';
+
+    protected $_schema = [
+        'longDescriptionFormat' => [],
+    ];
+
     /**
      * @inheritDoc
      */
@@ -104,6 +112,7 @@ class Event extends Endpoint
     public function validationUriQueryGet(Validator $validator): Validator
     {
         return $validator
+            // longDescriptionFormat
             ->allowEmptyString('longDescriptionFormat')
             ->inList('longDescriptionFormat', ['markdown', 'HTML', 'HTMLWithEmbeds']);
     }
@@ -155,9 +164,7 @@ class Event extends Endpoint
             ->isArray('registration')
             // accessibility
             ->allowEmptyArray('accessibility')
-            ->add('accessibility', 'accessibility', [
-                'rule' => [[Validation::class, 'accessibility']],
-            ])
+            ->add('accessibility', 'accessibility', ['rule' => [$this, 'checkAccessibility']])
             // timings
             ->requirePresence('timings', 'create')
             ->add('timings', 'timings', ['rule' => [$this, 'checkTimings']])
@@ -217,6 +224,9 @@ class Event extends Endpoint
     public static function checkTimings(array $check): bool
     {
         foreach ($check as $item) {
+            if (!is_array($item)) {
+                return false;
+            }
             if (!array_key_exists('begin', $item) || !array_key_exists('end', $item)) {
                 return false;
             }
@@ -266,6 +276,31 @@ class Event extends Endpoint
         }
 
         return true;
+    }
+
+    /**
+     * Check event accessibility
+     *
+     * @param array $check Accessibility
+     * @return bool
+     */
+    public static function checkAccessibility(array $check)
+    {
+        $success = true;
+        if ($check) {
+            $diff = array_diff_key($check, [
+                EventEntity::ACCESS_HI => null,
+                EventEntity::ACCESS_II => null,
+                EventEntity::ACCESS_MI => null,
+                EventEntity::ACCESS_PI => null,
+                EventEntity::ACCESS_VI => null,
+            ]);
+            if ($diff) {
+                $success = false;
+            }
+        }
+
+        return $success;
     }
 
     /**
@@ -324,7 +359,9 @@ class Event extends Endpoint
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
+     *
+     * @throws \OpenAgenda\OpenAgendaException
      */
     public function exists(): bool
     {
@@ -338,6 +375,7 @@ class Event extends Endpoint
      * Get event.
      *
      * @return \OpenAgenda\Entity\Event|null
+     * @throws \OpenAgenda\OpenAgendaException
      */
     public function get(): ?EventEntity
     {
@@ -366,6 +404,7 @@ class Event extends Endpoint
         unset($this->params['uid']);
 
         $entity = new EventEntity($this->params);
+        // dump($entity->toArray());
 
         if ($validate) {
             $errors = $this->getValidator('create')
@@ -409,6 +448,7 @@ class Event extends Endpoint
         $uri = $this->getUri(__FUNCTION__);
         $response = OpenAgenda::getClient()
             ->patch($uri, $entity->toOpenAgenda());
+        dump($response);
 
         return $this->_parseResponse($response);
     }

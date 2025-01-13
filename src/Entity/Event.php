@@ -53,9 +53,9 @@ class Event extends Entity
 
     public const ACCESS_HI = 'hi'; // Hearing impairment.
     public const ACCESS_II = 'ii'; // Visual impairment.
-    public const ACCESS_VI = 'vi'; // Psychic impairment.
     public const ACCESS_MI = 'mi'; // Motor impairment.
     public const ACCESS_PI = 'pi'; // Intellectual impairment.
+    public const ACCESS_VI = 'vi'; // Psychic impairment.
 
     public const ATTENDANCE_OFFLINE = 1; // (default): Offline, face-to-face.
     public const ATTENDANCE_ONLINE = 2; // Online event, `onlineAccessLink` is required.
@@ -114,8 +114,19 @@ class Event extends Entity
     {
         $this->_requireClient();
 
+        $data = $this->extract(array_keys($this->_schema), true);
+        $data = array_filter($data, function ($value) {
+            return $value !== null;
+        });
+
+        if ($this->uid) {
+            $data['uid'] = $this->uid;
+        }
+        $data['agendaUid'] = $this->agendaUid;
+
         /** @uses \OpenAgenda\Endpoint\Event::update() */
-        return EndpointFactory::make('/event', $this->toArray())->update();
+        return EndpointFactory::make('/event', $data)
+            ->update();
     }
 
     /**
@@ -136,7 +147,7 @@ class Event extends Entity
      * Get Agenda endpoint with params.
      *
      * @param array $params Endpoint params
-     * @return \OpenAgenda\Endpoint\Location|\OpenAgenda\Endpoint\Endpoint|
+     * @return \OpenAgenda\Endpoint\Location|\OpenAgenda\Endpoint\Endpoint
      * @throws \OpenAgenda\Endpoint\UnknownEndpointException
      * @throws \OpenAgenda\OpenAgendaException
      */
@@ -151,7 +162,7 @@ class Event extends Entity
      * Get Location endpoint with params.
      *
      * @param array $params Endpoint params
-     * @return \OpenAgenda\Endpoint\Location|\OpenAgenda\Endpoint\Endpoint|
+     * @return \OpenAgenda\Endpoint\Location|\OpenAgenda\Endpoint\Endpoint
      * @throws \OpenAgenda\Endpoint\UnknownEndpointException
      * @throws \OpenAgenda\OpenAgendaException
      */
@@ -168,7 +179,7 @@ class Event extends Entity
      * @param array $timings Array of event timings.
      * @return array
      */
-    protected function _setTimings(array $timings)
+    protected function _setTimings(array $timings): array
     {
         foreach ($timings as $key => $timing) {
             if (isset($timing['begin']) && is_string($timing['begin'])) {
@@ -181,6 +192,56 @@ class Event extends Entity
         }
 
         return $timings;
+    }
+
+    /**
+     * Set ages.
+     *
+     * @param array $value Array of event ages.
+     * @return array
+     */
+    protected function _setAge(array $value): array
+    {
+        $min = null;
+        $max = null;
+        if (isset($value[0]) && isset($value[1])) {
+            [$min, $max] = $value;
+        } elseif (isset($value['min']) && isset($value['max'])) {
+            extract($value);
+        }
+
+        return ['min' => $min, 'max' => $max];
+    }
+
+    /**
+     * Set accessibility.
+     *
+     * @param array|string $value Array of event ages.
+     * @return array
+     */
+    protected function _setAccessibility($value): array
+    {
+        $out = [
+            self::ACCESS_HI => false,
+            self::ACCESS_II => false,
+            self::ACCESS_MI => false,
+            self::ACCESS_PI => false,
+            self::ACCESS_VI => false,
+        ];
+
+        if (is_string($value) && isset($out[$value])) {
+            $out[$value] = true;
+        } elseif (is_array($value)) {
+            $stringKeys = array_filter(array_keys($value), function ($value) {
+                return !is_int($value);
+            });
+            if (!$stringKeys) {
+                $value = array_combine($value, array_fill(0, count($value), true));
+            }
+            $out = array_merge($out, $value);
+        }
+
+        return $out;
     }
 
     /**
@@ -227,11 +288,7 @@ class Event extends Entity
      */
     protected function _setTitle($value): ?array
     {
-        if (is_string($value)) {
-            $value = [OpenAgenda::getDefaultLang() => $value];
-        }
-
-        return $value;
+        return static::setMultilingual($value, true, 140);
     }
 
     /**
@@ -242,22 +299,7 @@ class Event extends Entity
      */
     protected function _setDescription($value): ?array
     {
-        if (is_string($value)) {
-            $value = [OpenAgenda::getDefaultLang() => $value];
-        }
-
-        if (is_array($value)) {
-            foreach ($value as $lang => $text) {
-                $text = static::noHtml($text, false);
-                if (mb_strlen($text) > 200) {
-                    $text = mb_substr($text, 0, 196) . ' ...';
-                }
-
-                $value[$lang] = $text;
-            }
-        }
-
-        return $value;
+        return static::setMultilingual($value, true, 200);
     }
 
     /**
@@ -296,23 +338,7 @@ class Event extends Entity
      */
     protected function _setConditions($value): ?array
     {
-        if (is_string($value)) {
-            $value = [OpenAgenda::getDefaultLang() => $value];
-        }
-
-        if (is_array($value)) {
-            foreach ($value as $lang => $text) {
-                $text = self::noHtml($text, false);
-
-                if (mb_strlen($text) > 255) {
-                    $text = mb_substr($text, 0, 251) . ' ...';
-                }
-
-                $value[$lang] = $text;
-            }
-        }
-
-        return $value;
+        return static::setMultilingual($value, true, 255);
     }
 
     /**

@@ -221,7 +221,7 @@ class EventTest extends EndpointTestCase
         $this->assertTrue($field->isEmptyAllowed());
         $rules = $field->rules();
         $this->assertArrayHasKey('accessibility', $rules);
-        $this->assertEquals([Validation::class, 'accessibility'], $rules['accessibility']->get('rule'));
+        $this->assertEquals('checkAccessibility', $rules['accessibility']->get('rule')[1]);
 
         // timings
         $field = $v->field('timings');
@@ -294,6 +294,10 @@ class EventTest extends EndpointTestCase
         return [
             [
                 [],
+                false,
+            ],
+            [
+                ['begin' => '2025-01-06T11:00:00+01:00', 'end' => '2025-01-06T13:00:00+01:00'],
                 false,
             ],
             [
@@ -382,6 +386,39 @@ class EventTest extends EndpointTestCase
     public function testCheckAge($input, $expected)
     {
         $success = Event::checkAge($input);
+        $this->assertSame($expected, $success);
+    }
+
+    public static function dataCheckAccessibility()
+    {
+        return [
+            [[], true],
+            [
+                [
+                    EventEntity::ACCESS_HI => true,
+                    EventEntity::ACCESS_II => true,
+                    EventEntity::ACCESS_MI => true,
+                    EventEntity::ACCESS_PI => true,
+                    EventEntity::ACCESS_VI => true,
+                ], true,
+            ],
+            [
+                [
+                    EventEntity::ACCESS_HI,
+                ], false,
+            ],
+            [
+                ['unknown' => true], false,
+            ],
+        ];
+    }
+
+    /**
+     * @dataProvider dataCheckAccessibility
+     */
+    public function testCheckAccessibility($input, $expected)
+    {
+        $success = Event::checkAccessibility($input);
         $this->assertSame($expected, $success);
     }
 

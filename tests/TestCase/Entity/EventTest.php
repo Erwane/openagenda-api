@@ -79,7 +79,7 @@ class EventTest extends OpenAgendaTestCase
             'longitude' => 2.386696,
             'createdAt' => Chronos::parse('2025-01-06T18:09:50.000Z'),
             'updatedAt' => Chronos::parse('2025-01-09T08:56:52.000Z'),
-            // 'website' => null,
+            'website' => null,
             'email' => null,
             'phone' => null,
             'links' => [],
@@ -178,7 +178,13 @@ class EventTest extends OpenAgendaTestCase
             'conditions' => ['en' => 'price en', 'fr' => 'price fr'],
             'age' => ['min' => 7, 'max' => 121],
             'registration' => [],
-            'accessibility' => ['ii' => false, 'hi' => true, 'vi' => false, 'pi' => true, 'mi' => false,],
+            'accessibility' => [
+                'hi' => true,
+                'ii' => false,
+                'mi' => false,
+                'pi' => true,
+                'vi' => false,
+            ],
             'links' => [],
             'attendanceMode' => 1,
             'onlineAccessLink' => null,
@@ -223,6 +229,91 @@ class EventTest extends OpenAgendaTestCase
         $entity->timings = $input;
 
         $this->assertEquals($expected, $entity->timings);
+    }
+
+    public static function dataSetAge(): array
+    {
+        return [
+            [[], ['min' => null, 'max' => null]],
+            [[7, 50], ['min' => 7, 'max' => 50]],
+            [['min' => 7, 'max' => 50], ['min' => 7, 'max' => 50]],
+        ];
+    }
+
+    /**
+     * @covers       \OpenAgenda\Entity\Event::_setAge
+     * @dataProvider dataSetAge
+     */
+    public function testSetAge($input, $expected): void
+    {
+        $entity = new Event();
+        $entity->age = $input;
+
+        $this->assertEquals($expected, $entity->age);
+    }
+
+    public static function dataAccessibility(): array
+    {
+        return [
+            [
+                [],
+                [
+                    Event::ACCESS_HI => false,
+                    Event::ACCESS_II => false,
+                    Event::ACCESS_MI => false,
+                    Event::ACCESS_PI => false,
+                    Event::ACCESS_VI => false,
+                ],
+            ],
+            [
+                Event::ACCESS_HI,
+                [
+                    Event::ACCESS_HI => true,
+                    Event::ACCESS_II => false,
+                    Event::ACCESS_MI => false,
+                    Event::ACCESS_PI => false,
+                    Event::ACCESS_VI => false,
+                ],
+            ],
+            [
+                [
+                    Event::ACCESS_MI,
+                    Event::ACCESS_VI,
+                ],
+                [
+                    Event::ACCESS_HI => false,
+                    Event::ACCESS_II => false,
+                    Event::ACCESS_MI => true,
+                    Event::ACCESS_PI => false,
+                    Event::ACCESS_VI => true,
+                ],
+            ],
+            [
+                [
+                    Event::ACCESS_II => true,
+                    Event::ACCESS_PI => true,
+                ],
+                [
+                    Event::ACCESS_HI => false,
+                    Event::ACCESS_II => true,
+                    Event::ACCESS_MI => false,
+                    Event::ACCESS_PI => true,
+                    Event::ACCESS_VI => false,
+                ],
+            ],
+        ];
+    }
+
+    /**
+     * @covers       \OpenAgenda\Entity\Event::_setAccessibility
+     * @dataProvider dataAccessibility
+     */
+    public function testAccessibility($input, $expected): void
+    {
+        $entity = new Event();
+        $entity->accessibility = $input;
+
+        $this->assertEquals($expected, $entity->accessibility);
     }
 
     public static function dataClientNotSet()
@@ -347,6 +438,15 @@ class EventTest extends OpenAgendaTestCase
         $this->assertEquals(['fr' => 'My event'], $entity->title);
     }
 
+    /** @covers \OpenAgenda\Entity\Event::_setTitle */
+    public function testSetTitleTruncate(): void
+    {
+        $string = str_pad('start_', 145, '-');
+        $entity = new Event(['title' => $string]);
+        $this->assertEquals(140, strlen($entity->title['fr']));
+        $this->assertStringEndsWith('-- ...', $entity->title['fr']);
+    }
+
     /** @covers \OpenAgenda\Entity\Event::_setDescription */
     public function testSetDescription(): void
     {
@@ -359,7 +459,7 @@ class EventTest extends OpenAgendaTestCase
 <li>and clean.</li>
 </ul>
 HTML
-    ,
+            ,
         ]);
         $this->assertEquals(['fr' => 'This description should be on one line and clean.'], $entity->description);
     }
@@ -387,7 +487,7 @@ description
 <li>markdown</li>
 </ul>
 HTML
-    ,
+            ,
         ]);
         $this->assertEquals([
             'fr' => <<<MD
@@ -398,7 +498,7 @@ description should be [clean](https://my-domain.org/to-link)
 - and in
 - markdown
 MD
-    ,
+            ,
         ], $entity->longDescription);
     }
 
@@ -439,7 +539,7 @@ MD
     }
 
     /**
-     * @covers \OpenAgenda\Entity\Event::_setKeywords
+     * @covers       \OpenAgenda\Entity\Event::_setKeywords
      * @dataProvider dataSetKeywords
      */
     public function testSetKeywords($keywords, $expected): void
