@@ -14,14 +14,15 @@ declare(strict_types=1);
  */
 namespace OpenAgenda\Wrapper;
 
-use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\ResponseInterface;
 
 /**
  * Psr-18 Http client wrapper interface.
  */
-interface HttpWrapperInterface extends ClientInterface
+interface HttpWrapperInterface
 {
+    public const USER_AGENT = 'OpenAgenda-ESdk/3.x';
+
     /**
      * Do a HEAD request and return ResponseInterface.
      *

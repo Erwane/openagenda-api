@@ -23,9 +23,9 @@ use League\Uri\Uri;
 abstract class HttpWrapper implements HttpWrapperInterface
 {
     /**
-     * Http client
+     * PSR-18 Http client wrapper
      *
-     * @var \Psr\Http\Client\ClientInterface
+     * @var \OpenAgenda\Wrapper\HttpWrapper
      */
     protected $http;
 

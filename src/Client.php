@@ -51,8 +51,6 @@ class Client
      */
     private $secretKey;
 
-    public const USER_AGENT = 'OpenAgenda-ESdk/2.2';
-
     /**
      * Construct OpenAgenda Client.
      *
