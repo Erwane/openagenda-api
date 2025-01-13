@@ -77,7 +77,13 @@ class LocationTest extends EndpointTestCase
         ];
     }
 
-    /** @dataProvider dataValidationUriPath */
+    /**
+     * @dataProvider dataValidationUriPath
+     * @covers       \OpenAgenda\Endpoint\Location::validationUriPathExists
+     * @covers       \OpenAgenda\Endpoint\Location::validationUriPathGet
+     * @covers       \OpenAgenda\Endpoint\Location::validationUriPathUpdate
+     * @covers       \OpenAgenda\Endpoint\Location::validationUriPathDelete
+     */
     public function testValidationUriPathMethods($method)
     {
         $endpoint = new Location();
@@ -133,21 +139,18 @@ class LocationTest extends EndpointTestCase
         $field = $v->field('name');
         $this->assertEquals('create', $field->isPresenceRequired());
         $rules = $field->rules();
-        $this->assertArrayHasKey('maxLength', $rules);
         $this->assertEquals([100], $rules['maxLength']->get('pass'));
 
         // address
         $field = $v->field('address');
         $this->assertEquals('create', $field->isPresenceRequired());
         $rules = $field->rules();
-        $this->assertArrayHasKey('maxLength', $rules);
         $this->assertEquals([255], $rules['maxLength']->get('pass'));
 
         // countryCode
         $field = $v->field('countryCode');
         $this->assertEquals('create', $field->isPresenceRequired());
         $rules = $field->rules();
-        $this->assertArrayHasKey('lengthBetween', $rules);
         $this->assertEquals([2, 2], $rules['lengthBetween']->get('pass'));
 
         // state
@@ -160,7 +163,6 @@ class LocationTest extends EndpointTestCase
         $field = $v->field('description');
         $this->assertTrue($field->isEmptyAllowed());
         $rules = $field->rules();
-        $this->assertArrayHasKey('multilingual', $rules);
         $this->assertEquals([Validation::class, 'multilingual'], $rules['multilingual']->get('rule'));
         $this->assertEquals([5000], $rules['multilingual']->get('pass'));
 
@@ -168,7 +170,6 @@ class LocationTest extends EndpointTestCase
         $field = $v->field('access');
         $this->assertTrue($field->isEmptyAllowed());
         $rules = $field->rules();
-        $this->assertArrayHasKey('multilingual', $rules);
         $this->assertEquals([Validation::class, 'multilingual'], $rules['multilingual']->get('rule'));
         $this->assertEquals([1000], $rules['multilingual']->get('pass'));
 
@@ -188,7 +189,6 @@ class LocationTest extends EndpointTestCase
         $field = $v->field('phone');
         $this->assertTrue($field->isEmptyAllowed());
         $rules = $field->rules();
-        $this->assertArrayHasKey('phone', $rules);
         $this->assertEquals([Validation::class, 'phone'], $rules['phone']->get('rule'));
 
         // links

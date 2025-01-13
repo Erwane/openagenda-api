@@ -61,7 +61,6 @@ class LocationsTest extends EndpointTestCase
         $this->assertTrue($field->isEmptyAllowed());
         $rules = $field->rules();
         $this->assertArrayHasKey('numeric', $rules);
-        $this->assertArrayHasKey('greaterThanOrEqual', $rules);
         $this->assertEquals(['>=', 1], $rules['greaterThanOrEqual']->get('pass'));
 
         // detailed
@@ -86,35 +85,30 @@ class LocationsTest extends EndpointTestCase
         $field = $v->field('createdAt[lte]');
         $this->assertTrue($field->isEmptyAllowed());
         $rules = $field->rules();
-        $this->assertArrayHasKey('dateTime', $rules);
         $this->assertEquals(['ymd', Validation::DATETIME_ISO8601], $rules['dateTime']->get('pass')[0]);
 
         // createdAt[gte]
         $field = $v->field('createdAt[gte]');
         $this->assertTrue($field->isEmptyAllowed());
         $rules = $field->rules();
-        $this->assertArrayHasKey('dateTime', $rules);
         $this->assertEquals(['ymd', Validation::DATETIME_ISO8601], $rules['dateTime']->get('pass')[0]);
 
         // updated_lte
         $field = $v->field('updatedAt[lte]');
         $this->assertTrue($field->isEmptyAllowed());
         $rules = $field->rules();
-        $this->assertArrayHasKey('dateTime', $rules);
         $this->assertEquals(['ymd', Validation::DATETIME_ISO8601], $rules['dateTime']->get('pass')[0]);
 
         // updated_gte
         $field = $v->field('updatedAt[gte]');
         $this->assertTrue($field->isEmptyAllowed());
         $rules = $field->rules();
-        $this->assertArrayHasKey('dateTime', $rules);
         $this->assertEquals(['ymd', Validation::DATETIME_ISO8601], $rules['dateTime']->get('pass')[0]);
 
         // order
         $field = $v->field('order');
         $this->assertTrue($field->isEmptyAllowed());
         $rules = $field->rules();
-        $this->assertArrayHasKey('inList', $rules);
         $this->assertEquals([
             'name.asc',
             'name.desc',

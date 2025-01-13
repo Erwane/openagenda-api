@@ -95,7 +95,6 @@ class AgendasTest extends EndpointTestCase
         $field = $v->field('sort');
         $this->assertTrue($field->isEmptyAllowed());
         $rules = $field->rules();
-        $this->assertArrayHasKey('inList', $rules);
         $this->assertEquals(['createdAt.desc', 'recentlyAddedEvents.desc'], $rules['inList']->get('pass')[0]);
     }
 

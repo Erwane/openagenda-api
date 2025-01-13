@@ -121,7 +121,6 @@ class EventTest extends EndpointTestCase
         $field = $v->field('longDescriptionFormat');
         $this->assertTrue($field->isEmptyAllowed());
         $rules = $field->rules();
-        $this->assertArrayHasKey('inList', $rules);
         $this->assertEquals(['markdown', 'HTML', 'HTMLWithEmbeds'], $rules['inList']->get('pass')[0]);
     }
 
@@ -162,7 +161,6 @@ class EventTest extends EndpointTestCase
         $field = $v->field('title');
         $this->assertSame('create', $field->isPresenceRequired());
         $rules = $field->rules();
-        $this->assertArrayHasKey('multilingual', $rules);
         $this->assertEquals([Validation::class, 'multilingual'], $rules['multilingual']->get('rule'));
         $this->assertEquals(140, $rules['multilingual']->get('pass')[0]);
 
@@ -170,7 +168,6 @@ class EventTest extends EndpointTestCase
         $field = $v->field('description');
         $this->assertSame('create', $field->isPresenceRequired());
         $rules = $field->rules();
-        $this->assertArrayHasKey('multilingual', $rules);
         $this->assertEquals([Validation::class, 'multilingual'], $rules['multilingual']->get('rule'));
         $this->assertEquals(200, $rules['multilingual']->get('pass')[0]);
 
@@ -178,7 +175,6 @@ class EventTest extends EndpointTestCase
         $field = $v->field('longDescription');
         $this->assertTrue($field->isEmptyAllowed());
         $rules = $field->rules();
-        $this->assertArrayHasKey('multilingual', $rules);
         $this->assertEquals([Validation::class, 'multilingual'], $rules['multilingual']->get('rule'));
         $this->assertEquals(10000, $rules['multilingual']->get('pass')[0]);
 
@@ -186,7 +182,6 @@ class EventTest extends EndpointTestCase
         $field = $v->field('conditions');
         $this->assertTrue($field->isEmptyAllowed());
         $rules = $field->rules();
-        $this->assertArrayHasKey('multilingual', $rules);
         $this->assertEquals([Validation::class, 'multilingual'], $rules['multilingual']->get('rule'));
         $this->assertEquals(255, $rules['multilingual']->get('pass')[0]);
 
@@ -194,7 +189,6 @@ class EventTest extends EndpointTestCase
         $field = $v->field('keywords');
         $this->assertTrue($field->isEmptyAllowed());
         $rules = $field->rules();
-        $this->assertArrayHasKey('multilingual', $rules);
         $this->assertEquals([Validation::class, 'multilingual'], $rules['multilingual']->get('rule'));
         $this->assertEquals(255, $rules['multilingual']->get('pass')[0]);
 
@@ -207,7 +201,6 @@ class EventTest extends EndpointTestCase
         $field = $v->field('imageCredits');
         $this->assertTrue($field->isEmptyAllowed());
         $rules = $field->rules();
-        $this->assertArrayHasKey('maxLength', $rules);
         $this->assertEquals(255, $rules['maxLength']->get('pass')[0]);
 
         // registration
@@ -220,21 +213,18 @@ class EventTest extends EndpointTestCase
         $field = $v->field('accessibility');
         $this->assertTrue($field->isEmptyAllowed());
         $rules = $field->rules();
-        $this->assertArrayHasKey('accessibility', $rules);
         $this->assertEquals('checkAccessibility', $rules['accessibility']->get('rule')[1]);
 
         // timings
         $field = $v->field('timings');
         $this->assertSame('create', $field->isPresenceRequired());
         $rules = $field->rules();
-        $this->assertArrayHasKey('timings', $rules);
         $this->assertEquals('checkTimings', $rules['timings']->get('rule')[1]);
 
         // age
         $field = $v->field('age');
         $this->assertTrue($field->isEmptyAllowed());
         $rules = $field->rules();
-        $this->assertArrayHasKey('age', $rules);
         $this->assertEquals('checkAge', $rules['age']->get('rule')[1]);
 
         // locationUid
@@ -248,7 +238,6 @@ class EventTest extends EndpointTestCase
         $field = $v->field('attendanceMode');
         $this->assertTrue($field->isEmptyAllowed());
         $rules = $field->rules();
-        $this->assertArrayHasKey('inList', $rules);
         $this->assertEquals([
             EventEntity::ATTENDANCE_OFFLINE,
             EventEntity::ATTENDANCE_ONLINE,
@@ -266,7 +255,6 @@ class EventTest extends EndpointTestCase
         $field = $v->field('status');
         $this->assertTrue($field->isEmptyAllowed());
         $rules = $field->rules();
-        $this->assertArrayHasKey('inList', $rules);
         $this->assertEquals([
             EventEntity::STATUS_SCHEDULED,
             EventEntity::STATUS_RESCHEDULED,
@@ -280,7 +268,6 @@ class EventTest extends EndpointTestCase
         $field = $v->field('state');
         $this->assertTrue($field->isEmptyAllowed());
         $rules = $field->rules();
-        $this->assertArrayHasKey('inList', $rules);
         $this->assertEquals([
             EventEntity::STATE_REFUSED,
             EventEntity::STATE_MODERATION,

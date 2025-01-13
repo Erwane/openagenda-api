@@ -403,7 +403,6 @@ class Event extends Endpoint
         unset($this->params['uid']);
 
         $entity = new EventEntity($this->params);
-        // dump($entity->toArray());
 
         if ($validate) {
             $errors = $this->getValidator('create')
@@ -446,7 +445,6 @@ class Event extends Endpoint
         $uri = $this->getUri(__FUNCTION__);
         $response = OpenAgenda::getClient()
             ->patch($uri, $entity->toOpenAgenda());
-        dump($response);
 
         return $this->_parseResponse($response);
     }
