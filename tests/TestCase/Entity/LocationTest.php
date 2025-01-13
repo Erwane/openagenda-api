@@ -69,7 +69,7 @@ class LocationTest extends OpenAgendaTestCase
     }
 
     /** @covers \OpenAgenda\Entity\Location::toOpenAgenda */
-    public function testAliasesOut()
+    public function testToOpenAgenda()
     {
         $ent = new Location([
             'uid' => 35867424,
@@ -77,7 +77,7 @@ class LocationTest extends OpenAgendaTestCase
             'address' => '4 rue Edouard Herriot 59150 Wattrelos',
             'access' => [],
             'description' => [],
-            // 'image' => null,
+            'image' => null,
             'imageCredits' => null,
             'slug' => 'centres-sociaux-de-wattrelos-59150_6977111',
             'locationSetId' => null,
@@ -92,7 +92,7 @@ class LocationTest extends OpenAgendaTestCase
             'longitude' => 3.235638,
             'createdAt' => Chronos::parse('2024-12-27T15:41:32.000Z'),
             'updatedAt' => Chronos::parse('2024-12-27T15:42:32.000Z'),
-            // 'website' => null,
+            'website' => null,
             'email' => null,
             'phone' => null,
             'links' => [],
@@ -106,6 +106,7 @@ class LocationTest extends OpenAgendaTestCase
             'address' => '4 rue Edouard Herriot 59150 Wattrelos',
             'access' => [],
             'description' => [],
+            'image' => null,
             'imageCredits' => null,
             'slug' => 'centres-sociaux-de-wattrelos-59150_6977111',
             'city' => 'Wattrelos',
@@ -119,6 +120,7 @@ class LocationTest extends OpenAgendaTestCase
             'longitude' => 3.235638,
             'createdAt' => '2024-12-27T15:41:32',
             'updatedAt' => '2024-12-27T15:42:32',
+            'website' => null,
             'email' => null,
             'phone' => null,
             'links' => [],
@@ -126,6 +128,12 @@ class LocationTest extends OpenAgendaTestCase
             'extId' => null,
             'state' => 1,
         ], $ent->toOpenAgenda());
+    }
+
+    public function testToOpenAgendaImagePath(): void
+    {
+        $ent = new Location(['image' => TESTS . 'resources/wendywei-1537637.jpg']);
+        $this->assertIsResource($ent->toOpenAgenda()['image']);
     }
 
     public static function dataClientNotSet()

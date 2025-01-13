@@ -202,7 +202,7 @@ class LocationTest extends EndpointTestCase
         $this->assertTrue($field->isEmptyAllowed());
         $rules = $field->rules();
         $this->assertIsCallable($rules['image']->get('rule'));
-        $this->assertEquals('checkImage', $rules['image']->get('rule')[1]);
+        $this->assertEquals([Validation::class, 'image'], $rules['image']->get('rule'));
         $this->assertEquals(10, $rules['image']->get('pass')[0]);
 
         // imageCredits
@@ -282,28 +282,6 @@ class LocationTest extends EndpointTestCase
     public function testPresenceIdOrExtId($context, $expected): void
     {
         $success = Location::presenceIdOrExtId($context);
-        $this->assertSame($expected, $success);
-    }
-
-    public static function dataCheckImage(): array
-    {
-        $path = 'resources/wendywei-1537637.jpg';
-        $realPath = TESTS . $path;
-
-        return [
-            [['file'], 1, false],
-            ['resources/wendywei-1537637.jpg', 1, false],
-            [$realPath, 0.001, false],
-            [fopen($realPath, 'r'), 0.001, false],
-            [$realPath, 1, true],
-            [fopen($realPath, 'r'), 1, true],
-        ];
-    }
-
-    /** @dataProvider dataCheckImage */
-    public function testCheckImage($input, $limit, $expected): void
-    {
-        $success = Location::checkImage($input, $limit);
         $this->assertSame($expected, $success);
     }
 

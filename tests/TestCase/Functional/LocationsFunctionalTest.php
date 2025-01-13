@@ -15,6 +15,7 @@ declare(strict_types=1);
 namespace OpenAgenda\Test\TestCase\Functional;
 
 use Cake\Chronos\Chronos;
+use League\Uri\Uri;
 use OpenAgenda\Entity\Agenda;
 use OpenAgenda\Entity\Location;
 use OpenAgenda\Test\OpenAgendaTestCase;
@@ -253,7 +254,6 @@ class LocationsFunctionalTest extends OpenAgendaTestCase
             '_status' => 200,
             '_success' => true,
         ];
-        $imagePath = FileResource::instance($this)->getPath('wendywei-1537637.jpg');
 
         $this->assertClientCall(
             $client,
@@ -273,7 +273,7 @@ class LocationsFunctionalTest extends OpenAgendaTestCase
                 'email' => 'email@example.com',
                 'phone' => '+33123456789',
                 'links' => ['https://www.louvre.fr', 'https://www.facebook.com/museedulouvre'],
-                'image' => $imagePath,
+                'image' => null,
                 'imageCredits' => 'Image credits',
                 'region' => 'Normandie',
                 'department' => 'Oise',
@@ -300,7 +300,7 @@ class LocationsFunctionalTest extends OpenAgendaTestCase
             'email' => 'email@example.com',
             'phone' => '0123456789',
             'links' => ['https://www.louvre.fr', 'https://www.facebook.com/museedulouvre'],
-            'image' => $imagePath,
+            'image' => null,
             'imageCredits' => 'Image credits',
             'region' => 'Normandie',
             'department' => 'Oise',
@@ -315,6 +315,42 @@ class LocationsFunctionalTest extends OpenAgendaTestCase
 
         $location = $oa->location($data)->create();
         $this->assertInstanceOf(Location::class, $location);
+    }
+
+    public function testCreateWithImage(): void
+    {
+        [$oa, $client] = $this->oa();
+
+        $payload = json_decode(FileResource::instance($this)->getContent('Response/locations/location.json'), true);
+        $payload += [
+            '_status' => 200,
+            '_success' => true,
+        ];
+
+        $client->expects($this->once())
+            ->method('post')
+            ->with(
+                $this->callback(function ($uri) {
+                    $this->assertInstanceOf(Uri::class, $uri);
+
+                    return true;
+                }),
+                $this->callback(function ($data) {
+                    $this->assertIsResource($data['image']);
+
+                    return true;
+                })
+            )
+            ->willReturn($payload);
+
+        $imagePath = FileResource::instance($this)->getPath('wendywei-1537637.jpg');
+        $oa->location([
+            'agendaUid' => 123,
+            'name' => 'Location',
+            'address' => 'Address',
+            'countryCode' => 'FR',
+            'image' => $imagePath,
+        ])->create();
     }
 
     /**
