@@ -26,6 +26,11 @@ use PHPUnit\Framework\TestCase;
 class EndpointTestCase extends TestCase
 {
     /**
+     * @var (\object&\PHPUnit\Framework\MockObject\MockObject)|\OpenAgenda\Wrapper\HttpWrapper|(\OpenAgenda\Wrapper\HttpWrapper&\object&\PHPUnit\Framework\MockObject\MockObject)|(\OpenAgenda\Wrapper\HttpWrapper&\PHPUnit\Framework\MockObject\MockObject)|\PHPUnit\Framework\MockObject\MockObject
+     */
+    protected $wrapper;
+
+    /**
      * @var (\object&\PHPUnit\Framework\MockObject\MockObject)|\OpenAgenda\Client|(\OpenAgenda\Client&\object&\PHPUnit\Framework\MockObject\MockObject)|(\OpenAgenda\Client&\PHPUnit\Framework\MockObject\MockObject)|\PHPUnit\Framework\MockObject\MockObject
      */
     protected $client;
@@ -54,9 +59,13 @@ class EndpointTestCase extends TestCase
             ->onlyMethods(['getAccessToken'])
             ->getMock();
 
-        // $this->client = new Client();
-
         OpenAgenda::setClient($this->client);
+    }
+
+    protected function tearDown(): void
+    {
+        parent::tearDown();
+        OpenAgenda::resetClient();
     }
 
     /**

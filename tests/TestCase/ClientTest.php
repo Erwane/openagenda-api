@@ -65,6 +65,11 @@ class ClientTest extends TestCase
         new Client(['public_key' => 'publicKey']);
     }
 
+    public function testGetWrapper(): void
+    {
+        $this->assertSame($this->wrapper, $this->client->getWrapper());
+    }
+
     /**
      * @covers \OpenAgenda\Client::payload
      * @covers \OpenAgenda\OpenAgendaException

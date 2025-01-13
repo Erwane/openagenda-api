@@ -32,20 +32,28 @@ class OpenAgendaTestCase extends TestCase
      */
     protected function oa(array $params = []): array
     {
+        $wrapper = $this->getMockBuilder(HttpWrapper::class)->getMock();
         $params += [
             'public_key' => 'publicKey',
             'secret_key' => 'secretKey',
-            'wrapper' => $this->getMockBuilder(HttpWrapper::class)->getMock(),
+            'wrapper' => $wrapper,
         ];
         $oa = new OpenAgenda($params);
 
-        $client = $this->createPartialMock(Client::class, [
-            'head', 'get', 'post', 'patch', 'delete',
-        ]);
+        // Overwrite Client
+        $client = $this->getMockBuilder(Client::class)
+            ->setConstructorArgs([$params])
+            ->disableOriginalClone()
+            ->disableArgumentCloning()
+            ->disallowMockingUnknownTypes()
+            ->onlyMethods([
+                'head', 'get', 'post', 'patch', 'delete',
+            ])
+            ->getMock();
 
         OpenAgenda::setClient($client);
 
-        return [$oa, $client];
+        return [$oa, $client, $wrapper];
     }
 
     /**
@@ -82,8 +90,14 @@ class OpenAgendaTestCase extends TestCase
      * @param array $uriExpect
      * @param array $requestData
      */
-    public function assertClientCall(Client $client, InvokedCount $count, string $method, $payload, array $uriExpect = [], array $requestData = [])
-    {
+    public function assertClientCall(
+        Client $client,
+        InvokedCount $count,
+        string $method,
+        $payload,
+        array $uriExpect = [],
+        array $requestData = []
+    ) {
         if (!is_array($payload) && !is_int($payload)) {
             $this->fail('fix payload');
         }
