@@ -144,6 +144,14 @@ class EntityTest extends TestCase
         ], $ent->toOpenAgenda(true));
     }
 
+    public function testToOpenAgendaFile(): void
+    {
+        $ent = new ent([
+            'image' => TESTS . 'resources/wendywei-1537637.jpg',
+        ]);
+        $this->assertIsResource($ent->toOpenAgenda()['image']);
+    }
+
     public function testArrayAccess()
     {
         $ent = new ent();
@@ -162,6 +170,15 @@ class EntityTest extends TestCase
         $this->assertFalse($ent->isDirty('uid'));
         $ent->setNew(true);
         $this->assertTrue($ent->isDirty('uid'));
+    }
+
+    public function testExtractOnlyDirty(): void
+    {
+        $ent = new ent(['uid' => 1], ['markClean' => true]);
+        $ent->description = ['fr' => 'lorem ipsum'];
+        $this->assertEquals([
+            'description' => ['fr' => 'lorem ipsum'],
+        ], $ent->extract(['uid', 'description'], true));
     }
 
     public function testIsDirty(): void

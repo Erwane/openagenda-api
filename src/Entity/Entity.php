@@ -5,6 +5,7 @@ namespace OpenAgenda\Entity;
 
 use ArrayAccess;
 use Cake\Chronos\Chronos;
+use Cake\Validation\Validation;
 use HTMLPurifier;
 use HTMLPurifier_Config;
 use HTMLPurifier_TagTransform_Simple;
@@ -195,6 +196,11 @@ abstract class Entity implements ArrayAccess
                         break;
                     case 'bool':
                         $value = $value ? 1 : 0;
+                        break;
+                    case 'file':
+                        if (is_string($value) && !Validation::url($value)) {
+                            $value = fopen($value, 'ro');
+                        }
                         break;
                 }
             }

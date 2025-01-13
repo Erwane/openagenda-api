@@ -16,6 +16,7 @@ namespace OpenAgenda;
 
 use Cake\Chronos\Chronos;
 use OpenAgenda\Endpoint\Auth;
+use OpenAgenda\Wrapper\HttpWrapper;
 use OpenAgenda\Wrapper\HttpWrapperInterface;
 use Psr\Http\Message\ResponseInterface;
 
@@ -71,6 +72,16 @@ class Client
         if (!($this->http instanceof HttpWrapperInterface)) {
             throw new OpenAgendaException('Invalid or missing `wrapper`.');
         }
+    }
+
+    /**
+     * Get PSR-18 Http client wrapper.
+     *
+     * @return \OpenAgenda\Wrapper\HttpWrapper
+     */
+    public function getWrapper(): HttpWrapper
+    {
+        return $this->http;
     }
 
     /**

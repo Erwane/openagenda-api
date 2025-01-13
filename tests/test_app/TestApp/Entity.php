@@ -39,5 +39,6 @@ class Entity extends \OpenAgenda\Entity\Entity
         'agenda' => ['type' => Agenda::class],
         'location' => ['type' => Location::class],
         'event' => ['type' => Event::class],
+        'image' => ['type' => 'file'],
     ];
 }
