@@ -1,0 +1,33 @@
+meta {
+  name: update
+  type: http
+  seq: 5
+}
+
+patch {
+  url: {{baseUrl}}/agendas/{{agenda_id}}/events/{{event_id}}
+  body: json
+  auth: none
+}
+
+headers {
+  access-token: {{access_token}}
+}
+
+body:json {
+  {
+    "locationUid": "{{location_id}}",
+    "title": {"fr": "My event"},
+    "description": {"fr": "My event description"},
+    "timings": [
+      {
+        "begin": "2025-12-06T11:00:00+01:00",
+        "end": "2025-12-06T15:00:00+01:00"
+      }
+    ],
+    "image": {
+      "url": "https://httpbin.org/image/jpeg"
+    },
+    "state": 2
+  }
+}

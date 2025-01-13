@@ -1,0 +1,19 @@
+meta {
+  name: Agendas
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/agendas
+  body: none
+  auth: none
+}
+
+params:query {
+  ~size: 2
+}
+
+headers {
+  key: {{public_key}}
+}

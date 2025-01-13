@@ -1,0 +1,19 @@
+meta {
+  name: Agenda - external
+  type: http
+  seq: 5
+}
+
+get {
+  url: {{baseUrl}}/agendas/41648
+  body: none
+  auth: none
+}
+
+params:query {
+  ~detailed: 0
+}
+
+headers {
+  key: {{public_key}}
+}

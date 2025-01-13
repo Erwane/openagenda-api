@@ -1,0 +1,26 @@
+{
+    "after": [
+        1,
+        249118
+    ],
+    "agendas": [
+        {
+            "uid": 41648,
+            "image": "https://cdn.openagenda.com/main/agenda41648.jpg?__ts=1664443597781",
+            "description": "Du 15 au 24 mars 2025, tous ensemble pour l'éveil du tout-petit ! \nUne semaine d'ateliers.",
+            "official": true,
+            "title": "La Semaine Nationale de la Petite Enfance",
+            "slug": "semainepetiteenfance"
+        },
+        {
+            "uid": 249118,
+            "image": "https://cdn.openagenda.com/main/agenda249118.jpg?__ts=1615967415759",
+            "description": "Le Donjon de Rouen vous accueille avec son concept inédit : l'Hyper Escape Game.",
+            "official": false,
+            "title": "Le Donjon de Rouen",
+            "slug": "le-donjon-de-rouen"
+        }
+    ],
+    "total": 10000,
+    "success": true
+}

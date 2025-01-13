@@ -1,0 +1,15 @@
+meta {
+  name: delete
+  type: http
+  seq: 6
+}
+
+delete {
+  url: {{baseUrl}}/agendas/{{agenda_id}}/events/41294774
+  body: none
+  auth: none
+}
+
+headers {
+  access-token: {{access_token}}
+}

@@ -1,0 +1,22 @@
+meta {
+  name: Locations
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/agendas/{{agenda_id}}/locations?size=1&createdAt[lte]=2023-06-02T12:40:00
+  body: none
+  auth: none
+}
+
+params:query {
+  size: 1
+  createdAt[lte]: 2023-06-02T12:40:00
+  ~order: createdAt.desc
+  ~detailed: 1
+}
+
+headers {
+  key: {{public_key}}
+}

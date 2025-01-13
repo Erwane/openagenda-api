@@ -3,440 +3,454 @@ declare(strict_types=1);
 
 namespace OpenAgenda\Entity;
 
-use DateTime;
-use HTMLPurifier;
-use HTMLPurifier_Config;
-use HTMLPurifier_TagTransform_Simple;
-use League\HTMLToMarkdown\HtmlConverter;
+use Cake\Chronos\Chronos;
+use Cake\Validation\Validation;
+use OpenAgenda\Endpoint\EndpointFactory;
+use OpenAgenda\OpenAgenda;
 use OpenAgenda\OpenAgendaException;
 
 /**
- * @property int $id
- * @property int $uid
- * @property int $locationUid
- * @property \OpenAgenda\Entity\Location $location
- * @property int $state
- * @property string $image
- * @property string|null $baseUrl
+ * @property int|null $uid
+ * @property string|null $slug
+ * @property int|null $state
+ * @property int|null $status
+ * @property bool|null $featured
+ * @property int|null $agendaUid
+ * @property \OpenAgenda\Entity\Agenda|null $agenda
+ * @property int|null $locationUid
+ * @property \OpenAgenda\Entity\Location|null $location
+ * @property string|null $type
+ * @property string|null $image
+ * @property string|null $imageCredits
+ * @property array<string, string>|null $title
+ * @property array<string, string>|null $description
+ * @property array<string, string>|null $longDescription
+ * @property array<string, string>|null $keywords
+ * @property array<string, string>|null $conditions
+ * @property array<string, int|null>|null $age
+ * @property array<string, string>|null $registration
+ * @property array<string, bool>|null $accessibility
+ * @property string[]|null $links
+ * @property int|null $attendanceMode
+ * @property string|null $onlineAccessLink
+ * @property array|null $timings
+ * @property string|null $timezone
+ * @property \Cake\Chronos\Chronos|null $createdAt
+ * @property \Cake\Chronos\Chronos|null $updatedAt
  */
 class Event extends Entity
 {
+    public const STATE_REFUSED = -1; // Refused.
+    public const STATE_MODERATION = 0; // To moderate.
+    public const STATE_READY = 1; // Ready to published.
+    public const STATE_PUBLISHED = 2; // Published. Event has public visibility.
+
+    public const STATUS_SCHEDULED = 1; // Event scheduled (default).
+    public const STATUS_RESCHEDULED = 2; // The time slots changed and event is re-scheduled.
+    public const STATUS_ONLINE = 3; // The face-to-face event switched to an online event.
+    public const STATUS_DEFERRED = 4; // Event deferred, new timings unknowns.
+    public const STATUS_FULL = 5; // Event is full.
+    public const STATUS_CANCELED = 6; // Event canceled and not re-scheduled.
+
+    public const ACCESS_HI = 'hi'; // Hearing impairment.
+    public const ACCESS_II = 'ii'; // Visual impairment.
+    public const ACCESS_MI = 'mi'; // Motor impairment.
+    public const ACCESS_PI = 'pi'; // Intellectual impairment.
+    public const ACCESS_VI = 'vi'; // Psychic impairment.
+
+    public const ATTENDANCE_OFFLINE = 1; // (default): Offline, face-to-face.
+    public const ATTENDANCE_ONLINE = 2; // Online event, `onlineAccessLink` is required.
+    public const ATTENDANCE_MIXED = 3; // Mixed.
+
+    protected $_schema = [
+        'uid' => [],
+        'agendaUid' => [],
+        'locationUid' => [],
+        'slug' => [],
+        'title' => ['required' => true],
+        'description' => ['type' => 'multilingual', 'required' => true],
+        'longDescription' => ['type' => 'multilingual'],
+        'conditions' => ['type' => 'multilingual'],
+        'keywords' => ['type' => 'multilingual'],
+        'image' => ['type' => 'file'],
+        'imageCredits' => [],
+        'registration' => [],
+        'accessibility' => [],
+        'timings' => ['required' => true],
+        'type' => [],
+        'age' => [],
+        'attendanceMode' => [],
+        'onlineAccessLink' => [],
+        'links' => [],
+        'timezone' => [],
+        'status' => [],
+        'state' => [],
+        'featured' => ['type' => 'bool'],
+        'createdAt' => ['type' => 'datetime'],
+        'updatedAt' => ['type' => 'datetime'],
+        'originAgenda' => ['type' => Agenda::class],
+        'location' => ['type' => Location::class],
+    ];
 
     /**
-     * set event title
+     * A method require client sets.
      *
-     * @param bool $value property value
-     * @return $this
-     */
-    public function setState(bool $value)
-    {
-        $this->_properties['state'] = $value;
-
-        return $this;
-    }
-
-    /**
-     * set event title
-     *
-     * @param string $value property value
-     * @param string|null $lang lang information
-     * @return $this
+     * @return void
      * @throws \OpenAgenda\OpenAgendaException
      */
-    public function setTitle(string $value, string $lang = null)
+    protected function _requireClient(): void
     {
-        $value = $this->_i18nValue($value, $lang);
-
-        $this->setI18nProperty('title', $value);
-
-        return $this;
-    }
-
-    /**
-     * set event keywords (old tags)
-     *
-     * @param $keywords
-     * @param null $lang lang information
-     * @return $this
-     * @throws \OpenAgenda\OpenAgendaException
-     */
-    public function setKeywords($keywords, $lang = null)
-    {
-        if (is_string($keywords)) {
-            $keywords = array_map('trim', explode(',', $keywords));
+        if (!OpenAgenda::getClient()) {
+            throw new OpenAgendaException('OpenAgenda object was not previously created or Client not set.');
         }
-
-        $keywords = implode(', ', $keywords);
-
-        $value = $this->_i18nValue($keywords, $lang);
-
-        $this->setI18nProperty('keywords', $value);
-
-        return $this;
     }
 
     /**
-     * @param $keywords
-     * @param null $lang
-     * @return \OpenAgenda\Entity\Event
-     * @throws \OpenAgenda\OpenAgendaException
-     */
-    public function setTags($keywords, $lang = null)
-    {
-        return $this->setKeywords($keywords, $lang);
-    }
-
-    /**
-     * set event description. 200 max length and no html
+     * Update this location.
      *
-     * @param string $value property value
-     * @param null $lang lang information
-     * @return $this
+     * @return self
      * @throws \OpenAgenda\OpenAgendaException
      */
-    public function setDescription(string $value, $lang = null)
+    public function update(): self
     {
-        $lang = $this->_getLang($lang);
+        $this->_requireClient();
 
-        $values = $this->_i18nValue($value, $lang);
+        $data = $this->extract(array_keys($this->_schema), true);
+        $data = array_filter($data, function ($value) {
+            return $value !== null;
+        });
 
-        foreach ($values as $lang => $value) {
-            // remove tags
-            $text = strip_tags($value);
+        if ($this->uid) {
+            $data['uid'] = $this->uid;
+        }
+        $data['agendaUid'] = $this->agendaUid;
 
-            // decode html
-            $text = html_entity_decode($text, ENT_QUOTES);
+        /** @uses \OpenAgenda\Endpoint\Event::update() */
+        return EndpointFactory::make('/event', $data)
+            ->update();
+    }
 
-            // remove new lines
-            $text = preg_replace(['/\\r?\\n/', '/^\\r?\\n$/', '/^$/'], ' ', $text);
+    /**
+     * Delete this location.
+     *
+     * @return self
+     * @throws \OpenAgenda\OpenAgendaException
+     */
+    public function delete(): self
+    {
+        $this->_requireClient();
 
-            // remove unused white spaces
-            $text = preg_replace('/[\pZ\pC]+/u', ' ', $text);
+        /** @uses \OpenAgenda\Endpoint\Event::delete() */
+        return EndpointFactory::make('/event', $this->toArray())->delete();
+    }
 
-            if (mb_strlen($text) > 194) {
-                $text = mb_substr($text, 0, 190) . ' ...';
+    /**
+     * Get Agenda endpoint with params.
+     *
+     * @param array $params Endpoint params
+     * @return \OpenAgenda\Endpoint\Location|\OpenAgenda\Endpoint\Endpoint
+     * @throws \OpenAgenda\Endpoint\UnknownEndpointException
+     * @throws \OpenAgenda\OpenAgendaException
+     */
+    public function agenda(array $params = [])
+    {
+        $params['uid'] = $this->agendaUid;
+
+        return EndpointFactory::make('/agenda', $params);
+    }
+
+    /**
+     * Get Location endpoint with params.
+     *
+     * @param array $params Endpoint params
+     * @return \OpenAgenda\Endpoint\Location|\OpenAgenda\Endpoint\Endpoint
+     * @throws \OpenAgenda\Endpoint\UnknownEndpointException
+     * @throws \OpenAgenda\OpenAgendaException
+     */
+    public function location(array $params = [])
+    {
+        $params['agendaUid'] = $this->agendaUid;
+
+        return EndpointFactory::make('/location', $params);
+    }
+
+    /**
+     * Set timings.
+     *
+     * @param array $timings Array of event timings.
+     * @return array
+     */
+    protected function _setTimings(array $timings): array
+    {
+        foreach ($timings as $key => $timing) {
+            if (isset($timing['begin']) && is_string($timing['begin'])) {
+                $timing['begin'] = Chronos::parse($timing['begin']);
             }
-
-            if (!isset($this->_properties['description'][$lang]) || $value !== $this->_properties['description'][$lang]) {
-                $this->setDirty('description.' . $lang, true);
+            if (isset($timing['end']) && is_string($timing['end'])) {
+                $timing['end'] = Chronos::parse($timing['end']);
             }
-
-            $this->_properties['description'][$this->_getLang($lang)] = $text;
+            $timings[$key] = $timing;
         }
 
-        return $this;
+        return $timings;
     }
 
     /**
-     * set free text
+     * Set ages.
      *
-     * @param string $text property value
-     * @param null $lang lang information
-     * @return $this
-     * @throws \OpenAgenda\OpenAgendaException
-     * @deprecated 1.1 use setLongDescription
+     * @param array $value Array of event ages.
+     * @return array
      */
-    public function setFreeText(string $text, $lang = null)
+    protected function _setAge(array $value): array
     {
-        return $this->setLongDescription($text, $lang);
+        $min = null;
+        $max = null;
+        if (isset($value[0]) && isset($value[1])) {
+            [$min, $max] = $value;
+        } elseif (isset($value['min']) && isset($value['max'])) {
+            extract($value);
+        }
+
+        return ['min' => $min, 'max' => $max];
     }
 
     /**
-     * set event long description (mark down)
+     * Set accessibility.
      *
-     * @param string $text text or html or markdown
-     * @param null $lang lang information
-     * @return $this
-     * @throws \OpenAgenda\OpenAgendaException
+     * @param array|string $value Array of event ages.
+     * @return array
      */
-    public function setLongDescription(string $text, $lang = null)
+    protected function _setAccessibility($value): array
     {
-        $lang = $this->_getLang($lang);
-
-        $values = $this->_i18nValue($text, $lang);
-
-        foreach ($values as $lang => $value) {
-            $value = $this->_cleanHtml($value);
-
-            $value = $this->_toMarkDown($value);
-
-            if (!isset($this->_properties['longDescription'][$lang]) || $value !== $this->_properties['longDescription'][$lang]) {
-                $this->setDirty('longDescription.' . $lang, true);
-            }
-
-            $this->_properties['longDescription'][$this->_getLang($lang)] = mb_substr($value, 0, 5800);
-        }
-
-        return $this;
-    }
-
-    /**
-     * attach the location object to event and set locationUid
-     *
-     * @param Location $location entity
-     * @return \OpenAgenda\Entity\Event
-     * @throws \OpenAgenda\OpenAgendaException
-     */
-    public function setLocation(Location $location)
-    {
-        $this->locationUid = $location->uid;
-
-        $this->_properties['location'] = $location;
-
-        if (is_array($location->dates)) {
-            foreach ($location->dates as $date) {
-                $this->addTiming($date);
-            }
-        }
-
-        return $this;
-    }
-
-    /**
-     * add timing to event, only if don't exists
-     *
-     * @param array $datas timings : ['date' => '2017-11-15', 'begin' => '08:30', 'end' => '19:00']
-     * @return $this
-     * @throws \OpenAgenda\OpenAgendaException
-     * @throws \Exception
-     */
-    public function addTiming(array $datas)
-    {
-        if (!isset($this->_properties['timings'])) {
-            $this->_properties['timings'] = [];
-        }
-        if (!isset($datas['begin'])) {
-            throw new OpenAgendaException('missing begin field', 1);
-        }
-        if (!isset($datas['end'])) {
-            throw new OpenAgendaException('missing end field', 1);
-        }
-
-        // use instance of DateTime only
-        if (!($datas['begin'] instanceof DateTime)) {
-            $datas['begin'] = new DateTime($datas['begin']);
-        }
-        if (!($datas['end'] instanceof DateTime)) {
-            $datas['end'] = new DateTime($datas['end']);
-        }
-
-        $timing = [
-            'begin' => $datas['begin']->format('c'),
-            'end' => $datas['end']->format('c'),
+        $out = [
+            self::ACCESS_HI => false,
+            self::ACCESS_II => false,
+            self::ACCESS_MI => false,
+            self::ACCESS_PI => false,
+            self::ACCESS_VI => false,
         ];
 
-        // check if timing exists
-        $exists = false;
-        foreach ($this->_properties['timings'] as $t) {
-            if ($timing['date'] == $t['date']
-                && $timing['begin'] == $t['begin']
-                && $timing['end'] == $t['end']
-            ) {
-                $exists = true;
-                break;
+        if (is_string($value) && isset($out[$value])) {
+            $out[$value] = true;
+        } elseif (is_array($value)) {
+            $stringKeys = array_filter(array_keys($value), function ($value) {
+                return !is_int($value);
+            });
+            if (!$stringKeys) {
+                $value = array_combine($value, array_fill(0, count($value), true));
             }
+            $out = array_merge($out, $value);
         }
 
-        if (!$exists) {
-            $this->_properties['timings'][] = $timing;
-        }
-
-        $this->setDirty('timings', true);
-
-        return $this;
+        return $out;
     }
 
     /**
-     * remove all timings and set to $timings
+     * Get agenda.
      *
-     * @param array $timings array of timing
-     * @return \OpenAgenda\Entity\Event
-     * @throws \OpenAgenda\OpenAgendaException
+     * @return \OpenAgenda\Entity\Agenda|null
      */
-    public function setTimings(array $timings = [])
+    protected function _getAgenda()
     {
-        $this->_properties['timings'] = [];
-
-        foreach ($timings as $timing) {
-            $this->addTiming($timing);
+        $agenda = null;
+        if (isset($this->_fields['agenda'])) {
+            $agenda = $this->_fields['agenda'];
+        } elseif (isset($this->_fields['originAgenda'])) {
+            $agenda = $this->_fields['originAgenda'];
         }
 
-        return $this;
+        return $agenda;
     }
 
     /**
-     * set event picture
+     * Get agenda uid.
      *
-     * @param string $file absolute path
-     * @return $this
-     * @throws \OpenAgenda\OpenAgendaException
-     * @deprecated 1.1 use setImage
+     * @return int|null
      */
-    public function setPicture(string $file)
+    protected function _getAgendaUid(): ?int
     {
-        return $this->setImage($file);
-    }
-
-    /**
-     * set event image
-     *
-     * @param string $file Absolute path
-     * @return $this
-     * @throws \OpenAgenda\OpenAgendaException
-     */
-    public function setImage(string $file)
-    {
-        if (empty($file)) {
-            return $this;
+        $value = $this->_fields['agendaUid'] ?? null;
+        if (!$value && $this->agenda instanceof Agenda) {
+            $value = $this->agenda->uid;
         }
 
-        if (!file_exists($file)) {
-            throw new OpenAgendaException('image file does not exists', 1);
+        return $value;
+    }
+
+    /**
+     * Get location.
+     *
+     * @return \OpenAgenda\Entity\Location|null
+     */
+    protected function _getLocation(): ?Location
+    {
+        return $this->_fields['location'] ?? null;
+    }
+
+    /**
+     * Get location uid.
+     *
+     * @return int|null
+     */
+    protected function _getLocationUid(): ?int
+    {
+        $value = $this->_fields['locationUid'] ?? null;
+        if (!$value && $this->location instanceof Location) {
+            $value = $this->location->uid;
         }
 
-        // set properties, not image to skip auto setDirty
-        $this->_properties['image'] = fopen($file, 'r');
-
-        return $this;
-    }
-
-    /**
-     * set event entrance conditions
-     *
-     * @param string $value property value
-     * @param string|null $lang language
-     * @return $this
-     * @throws \OpenAgenda\OpenAgendaException
-     */
-    public function setConditions(string $value, ?string $lang = null)
-    {
-        $value = $this->_i18nValue($value, $lang);
-
-        $this->setI18nProperty('conditions', $value);
-
-        return $this;
-    }
-
-    /**
-     * setConditions alias
-     *
-     * @param string $value property value
-     * @param string|null $lang language
-     * @return $this
-     * @throws \OpenAgenda\OpenAgendaException
-     */
-    public function setPricing(string $value, ?string $lang = null)
-    {
-        return $this->setConditions($value, $lang);
+        return $value;
     }
 
     /**
      * @inheritDoc
      */
-    public function toDatas()
+    public function toOpenAgenda(bool $onlyChanged = false): array
     {
-        $requiredKeys = ['title', 'description', 'locationUid', 'timings'];
-        $requiredDatas = array_intersect_key($this->toArray(), array_flip($requiredKeys));
+        $data = parent::toOpenAgenda($onlyChanged);
 
-        $datas = array_merge($requiredDatas, $this->getDirtyArray());
-
-        // $keys = ['title', 'keywords', 'description', 'longDescription', 'locationUid', 'image', 'timings', 'conditions', 'age'];
-        // $dirties = $this->getDirtyArray();
-
-        // $datas = array_intersect_key($dirties, array_flip($keys));
-
-        // picture
-        if (!is_null($this->image)) {
-            $datas['image'] = $this->image;
+        if (isset($data['location']) && $data['location'] instanceof Location) {
+            $data['locationUid'] = $data['location']['uid'];
         }
 
-        return [
-            'publish' => $this->state,
-            'data' => $datas,
-        ];
-    }
-
-    /**
-     * clean description html tags
-     *
-     * @param string $value worse html ever
-     */
-    protected function _cleanHtml(string $value)
-    {
-        $config = HTMLPurifier_Config::createDefault();
-
-        $config->set('Cache.DefinitionImpl', null);
-        $config->set('HTML.AllowedElements', ['a', 'b', 'strong', 'i', 'em', 'u', 'p', 'img', 'hr', 'ul', 'ol', 'li', 'span', 'h1', 'h2', 'h3', 'h4', 'h5']);
-        $config->set('HTML.AllowedAttributes', ['a.href', 'a.target', 'img.src', 'img.alt', 'img.width', 'img.height']);
-        $config->set('Attr.AllowedFrameTargets', ['_blank', '_self']);
-        $config->set('Attr.AllowedRel', []);
-        $config->set('AutoFormat.RemoveEmpty', true);
-        $config->set('AutoFormat.RemoveSpansWithoutAttributes', true);
-        $config->set('URI.AllowedSchemes', ['http', 'https']);
-
-        // tag transformation
-        $def = $config->getHTMLDefinition(true);
-        $def->info_tag_transform['h1'] = new HTMLPurifier_TagTransform_Simple('h3');
-        $def->info_tag_transform['h2'] = new HTMLPurifier_TagTransform_Simple('h3');
-
-        $purifier = new HTMLPurifier($config);
-        $firstPass = trim($purifier->purify($value));
-
-        if ($this->baseUrl === null) {
-            return $firstPass;
+        // Timings
+        $timings = $data['timings'] ?? null;
+        if (is_array($timings)) {
+            foreach ($timings as &$timing) {
+                if ($timing['begin'] instanceof Chronos) {
+                    $timing['begin'] = $timing['begin']->toAtomString();
+                }
+                if ($timing['end'] instanceof Chronos) {
+                    $timing['end'] = $timing['end']->toAtomString();
+                }
+            }
+            $data['timings'] = $timings;
         }
 
-        // second pass with url
-        $config = HTMLPurifier_Config::createDefault();
-        $config->set('URI.Base', $this->baseUrl);
-        $config->set('HTML.TargetBlank', true);
-        $purifier = new HTMLPurifier($config);
-
-        return trim($purifier->purify($firstPass));
-    }
-
-    /**
-     * html to markdown converter
-     *
-     * @param string $html html input
-     * @return string
-     */
-    protected function _toMarkDown(string $html)
-    {
-        if ($html === strip_tags($html)) {
-            return $html;
+        // image
+        if ($this->image) {
+            if (Validation::url($this->image)) {
+                $data['image'] = ['url' => $this->image];
+            }
         }
 
-        $converter = new HtmlConverter(['strip_tags' => true]);
+        unset(
+            $data['uid'],
+            $data['agendaId'],
+            $data['agendaUid'],
+            $data['originAgenda'],
+            $data['location']
+        );
 
-        return $converter->convert($html);
+        return $data;
     }
 
     /**
-     * @param int|string $value
-     * @return int
-     */
-    protected function _setAgendaUid($value)
-    {
-        return (int)$value;
-    }
-
-    /**
-     * set event age
+     * Event titles is multilingual
      *
-     * @param int $min min age
-     * @param int $max max age
-     * @retur self
+     * @param array|string|null $value Event title
+     * @return array<string, string>|null
      */
-    public function setAge(int $min = 0, int $max = 120)
+    protected function _setTitle($value): ?array
     {
-        $this->_properties['age'] = [
-            'min' => $min,
-            'max' => $max,
-        ];
+        return static::setMultilingual($value, true, 140);
+    }
 
-        $this->setDirty('age', true);
+    /**
+     * Event descriptions is multilingual
+     *
+     * @param array|string|null $value Event description
+     * @return array<string, string>|null
+     */
+    protected function _setDescription($value): ?array
+    {
+        return static::setMultilingual($value, true, 200);
+    }
 
-        return $this;
+    /**
+     * Event long description is multilingual
+     *
+     * @param array|string|null $value Event long description
+     * @return array<string, string>|null
+     */
+    protected function _setLongDescription($value): ?array
+    {
+        if (is_string($value)) {
+            $value = [OpenAgenda::getDefaultLang() => $value];
+        }
+
+        if (is_array($value)) {
+            foreach ($value as $lang => $text) {
+                $text = static::cleanupHtml($text);
+                $text = static::htmlToMarkdown($text);
+
+                if (mb_strlen($text) > 10000) {
+                    $text = mb_substr($text, 0, 9996) . ' ...';
+                }
+
+                $value[$lang] = $text;
+            }
+        }
+
+        return $value;
+    }
+
+    /**
+     * Event conditions is multilingual
+     *
+     * @param array|string|null $value Event conditions
+     * @return array<string, string>|null
+     */
+    protected function _setConditions($value): ?array
+    {
+        return static::setMultilingual($value, true, 255);
+    }
+
+    /**
+     * Event keywords is multilingual
+     *
+     * @param array|string|null $keywords Event keywords
+     * @return array<string, string>|null
+     */
+    protected function _setKeywords($keywords): ?array
+    {
+        if (is_string($keywords)) {
+            $keywords = [OpenAgenda::getDefaultLang() => [$keywords]];
+        }
+
+        if (is_array($keywords)) {
+            // Has lang keys ?
+            $hasLang = array_filter(array_keys($keywords), function ($value) {
+                return !is_int($value);
+            });
+            if (!$hasLang) {
+                $keywords = [OpenAgenda::getDefaultLang() => $keywords];
+            }
+
+            /** @var array<string, array> $keywords */
+            foreach ($keywords as $lang => $items) {
+                $items = array_map([$this, 'noHtml'], $items);
+
+                $keywords[$lang] = $items;
+            }
+        }
+
+        return $keywords;
+    }
+
+    /**
+     * Set event image
+     *
+     * @param string|resource|null $file Absolute path, resource file or null
+     * @return string|resource|null
+     */
+    protected function _setImage($file)
+    {
+        $value = null;
+        if ((is_string($file) && $file) || is_resource($file)) {
+            $value = $file;
+        }
+
+        return $value;
     }
 }

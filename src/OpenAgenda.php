@@ -3,431 +3,277 @@ declare(strict_types=1);
 
 namespace OpenAgenda;
 
-use Exception;
-use OpenAgenda\Entity\Agenda;
-use OpenAgenda\Entity\Event;
-use OpenAgenda\Entity\Location;
+use Cake\Validation\Validation as CakeValidation;
+use OpenAgenda\Endpoint\Agenda;
+use OpenAgenda\Endpoint\EndpointFactory;
+use OpenAgenda\Endpoint\Event;
+use OpenAgenda\Endpoint\Location;
+use OpenAgenda\Wrapper\HttpWrapper;
+use Psr\SimpleCache\CacheInterface;
+use Ramsey\Collection\Collection;
 
+/**
+ * OpenAgenda
+ */
 class OpenAgenda
 {
     /**
-     * http client
+     * OpenAgenda client
      *
      * @var \OpenAgenda\Client|null
      */
-    protected $client = null;
+    protected static $client = null;
+
+    protected static $defaultLang = 'fr';
 
     /**
-     * Api public key
-     */
-    protected $public;
-
-    /**
-     * api secret token
+     * Project base url.
      *
      * @var string|null
      */
-    protected $secret = null;
-
-    protected $baseUrl = null;
+    protected static $projectBaseUrl = null;
 
     /**
-     * openagenda uid to publish
+     * OpenAgenda.
      *
-     * @var int|null
+     * @param array $params OpenAgenda params.
+     * @throws \OpenAgenda\OpenAgendaException
      */
-    protected $_uid = null;
-
-    /**
-     * constuctor
-     *
-     * @param string $apiPublic
-     * @param string $apiSecret openagenda api secret
-     */
-    public function __construct(string $apiPublic, string $apiSecret)
+    public function __construct(array $params = [])
     {
-        $this->public = $apiPublic;
-        $this->secret = $apiSecret;
-    }
+        $params += [
+            'public_key' => null,
+            'private_key' => null,
+            'wrapper' => null,
+            'cache' => null,
+            'defaultLang' => 'fr',
+            'projectUrl' => null,
+        ];
 
-    /**
-     * base url for relative links
-     *
-     * @param string $url base url
-     */
-    public function setBaseUrl(string $url)
-    {
-        $last = substr($url, -1, 1);
-        if ($last !== '/') {
-            $url .= '/';
+        if (!$params['public_key']) {
+            throw new OpenAgendaException('Missing `public_key`.');
         }
 
-        $this->baseUrl = $url;
+        if (!($params['wrapper'] instanceof HttpWrapper)) {
+            throw new OpenAgendaException('Invalid or missing `wrapper`.');
+        }
 
-        return $this;
+        if ($params['cache'] && !($params['cache'] instanceof CacheInterface)) {
+            throw new OpenAgendaException('Cache should implement \Psr\SimpleCache\CacheInterface.');
+        }
+
+        if (!Validation::lang($params['defaultLang'])) {
+            throw new OpenAgendaException('Invalid defaultLang.');
+        }
+
+        if ($params['projectUrl'] && !CakeValidation::url($params['projectUrl'])) {
+            throw new OpenAgendaException('Invalid project url.');
+        }
+
+        self::$client = new Client($params);
+        self::$defaultLang = $params['defaultLang'];
+        self::$projectBaseUrl = $params['projectUrl'];
     }
 
     /**
-     * set agenda uid
+     * Set static client.
      *
-     * @param int $uid agenda uid
-     * @return $this
+     * @param \OpenAgenda\Client $client OpenAgenda client.
+     * @return void
      */
-    public function setAgendaUid(int $uid)
+    public static function setClient(Client $client)
     {
-        $this->_uid = $uid;
-
-        return $this;
+        self::$client = $client;
     }
 
     /**
-     * get agenda uid
+     * Get OpenAgenda client.
      *
-     * @return int|null
+     * @return \OpenAgenda\Client|null
      */
-    public function getAgendaUid(): ?int
+    public static function getClient(): ?Client
     {
-        return $this->_uid;
-    }
-
-    public function newEvent()
-    {
-        $event = new Event();
-
-        $event->set('baseUrl', $this->baseUrl);
-
-        return $event;
+        return self::$client;
     }
 
     /**
-     * get access token from API or local cache
+     * Reset client
+     *
+     * @return void
+     */
+    public static function resetClient()
+    {
+        self::$client = null;
+    }
+
+    /**
+     * OpenAgenda default lang
+     *
+     * @return string
+     */
+    public static function getDefaultLang(): string
+    {
+        return self::$defaultLang;
+    }
+
+    /**
+     * Get project url.
      *
      * @return string|null
      */
-    public function getAccessToken(): ?string
+    public static function getProjectUrl(): ?string
     {
-        $accessToken = Cache::get('openagenda-token');
-
-        if (empty($accessToken)) {
-            try {
-                $response = $this->getClient()->post('/requestAccessToken', [
-                    'json' => [
-                        'grant-type' => 'authorization_code',
-                        'code' => $this->secret,
-                    ],
-                ]);
-
-                $data = json_decode((string)$response->getBody(), true);
-
-                if ($response->getStatusCode() !== 200 || empty($data['access_token'])) {
-                    return null;
-                }
-
-                $accessToken = $data['access_token'];
-
-                Cache::set('openagenda-token', $accessToken, $data['expires_in']);
-            } catch (OpenAgendaException $e) {
-                return null;
-            }
-        }
-
-        return $accessToken;
+        return self::$projectBaseUrl;
     }
 
     /**
-     * get Location object with uid
+     * Set project url.
      *
-     * @param array|int $datas location id or datas
-     * @return Location object
-     * @throws \OpenAgenda\OpenAgendaException
+     * @param string|null $projectUrl Project url. Used for `a` tags in html description.
+     * @return void
      */
-    public function getLocation($datas)
+    public static function setProjectUrl(?string $projectUrl): void
     {
-        // create location
-        $location = new Location();
-
-        if (is_numeric($datas)) {
-            $datas = ['id' => $datas];
-        } elseif (!is_array($datas)) {
-            throw new OpenAgendaException('invalid location data', 1);
-        }
-
-        if (!isset($datas['id'])) {
-            $datas['id'] = $this->createLocation($datas);
-            $location->isNew(true);
-        } else {
-            $location->isNew(false);
-        }
-
-        // set Id
-        $location->id = $datas['id'];
-
-        // set latitude if exists
-        if (isset($datas['latitude'])) {
-            $location->latitude = $datas['latitude'];
-        }
-        // set longitude if exists
-        if (isset($datas['longitude'])) {
-            $location->longitude = $datas['longitude'];
-        }
-        // mark as not dirty
-        $location->markAsNotDirty();
-
-        return $location;
+        self::$projectBaseUrl = $projectUrl;
     }
 
     /**
-     * create location
+     * Do a GET request on $path.
      *
-     * @param array $options location options
-     * @return int|null Location id
-     * @throws \OpenAgenda\OpenAgendaException
+     * @param string $path Endpoint path. Relative, not real OpenAgenda endpoint.
+     * @param array $params Client options
+     * @return \Ramsey\Collection\Collection|\OpenAgenda\Entity\Entity|\Psr\Http\Message\ResponseInterface
      */
-    public function createLocation(array $options): ?int
+    public function get(string $path, array $params = [])
     {
-        if (!isset($options['name'])) {
-            throw new OpenAgendaException('missing name field', 1);
-        }
-        if (!isset($options['latitude'])) {
-            throw new OpenAgendaException('missing latitude field', 1);
-        }
-        if (!isset($options['longitude'])) {
-            throw new OpenAgendaException('missing longitude field', 1);
-        }
-        if (!isset($options['address'])) {
-            throw new OpenAgendaException('missing address field', 1);
-        }
-        if (!isset($options['countryCode'])) {
-            throw new OpenAgendaException('missing countryCode field', 1);
-        }
-
-        // format
-        $options['latitude'] = (float)$options['latitude'];
-        $options['longitude'] = (float)$options['longitude'];
-
-        try {
-            $response = $this->getClient()
-                ->setAccessToken($this->getAccessToken())
-                ->post(
-                    sprintf('/agendas/%d/locations', $this->_uid),
-                    ['data' => json_encode($options)]
-                );
-
-            if ($response->getStatusCode() !== 200) {
-                throw new OpenAgendaException('Location creation failed');
-            }
-
-            $data = json_decode((string)$response->getBody(), true);
-
-            return $data['location']['uid'] ?? null;
-        } catch (OpenAgendaException $e) {
-            return null;
-        }
+        // todo: allow passing raw OpenAgenda endpoint url and return ResponseInterface.
+        // todo: return response or json payload
     }
 
     /**
-     * @return \OpenAgenda\Client
-     */
-    public function getClient(): Client
-    {
-        if (!$this->client) {
-            $this->client = new Client();
-
-            $this->client->setPublicKey($this->public);
-        }
-
-        return $this->client;
-    }
-
-    /**
-     * @param \OpenAgenda\Client $client
-     * @return $this
-     */
-    public function setClient(Client $client)
-    {
-        $this->client = $client;
-
-        $this->client->setPublicKey($this->public);
-
-        return $this;
-    }
-
-    /**
-     * @param $slug
-     * @return \OpenAgenda\Entity\Agenda
-     * @throws \OpenAgenda\OpenAgendaException
-     */
-    public function getUidFromSlug($slug): ?Agenda
-    {
-        if (is_numeric($slug)) {
-            return new Agenda(['uid' => $slug]);
-        }
-
-        $agendaIds = Cache::get('openagenda-id');
-
-        if (empty($agendaIds)) {
-            $agendaIds = [];
-        }
-
-        if (empty($agendaIds[$slug])) {
-            $options = [
-                'query' => [
-                    'limit' => 1,
-                    'slug[]' => $slug,
-                ],
-            ];
-
-            $response = $this->getClient()->get('/agendas', $options);
-            $data = json_decode((string)$response->getBody(), true);
-
-            if ($response->getStatusCode() !== 200 || empty($data['agendas'][0]['uid'])) {
-                return null;
-            }
-
-            $uid = $data['agendas'][0]['uid'];
-            $agendaIds[$slug] = $uid;
-
-            Cache::set('openagenda-id', $agendaIds, 86400 * 365);
-        } else {
-            $uid = $agendaIds[$slug];
-        }
-
-        return new Agenda(['uid' => $uid]);
-    }
-
-    /**
-     * @return array|null
-     */
-    public function getAgendaSettings(): ?array
-    {
-        try {
-            $response = $this->getClient()->get('/agendas/' . $this->_uid);
-
-            $return = json_decode((string)$response->getBody(), true);
-
-            return $return ?? null;
-        } catch (OpenAgendaException $e) {
-            return null;
-        }
-    }
-
-    /**
-     * publish event to openagenda and set uid to entity
+     * Do a POST request on $path.
      *
-     * @param Event $event entity
-     * @return int
-     * @throws \OpenAgenda\OpenAgendaException
+     * @param string $path Endpoint path. Relative, not real OpenAgenda endpoint.
+     * @param array $params Client options
+     * @return \Ramsey\Collection\Collection|\OpenAgenda\Entity\Entity|\Psr\Http\Message\ResponseInterface
      */
-    public function publishEvent(Event $event): int
+    public function post(string $path, array $params = [])
     {
-        $response = $this->getClient()
-            ->setAccessToken($this->getAccessToken())
-            ->post('/agendas/' . $this->_uid . '/events', $event->toDatas());
-
-        $data = json_decode((string)$response->getBody(), true);
-        if (!$data || empty($data['event']['uid'])) {
-            throw new OpenAgendaException('Publish event failed');
-        }
-
-        $event->id = $event->uid = $data['event']['uid'];
-
-        return $event->id;
+        // todo: allow passing raw OpenAgenda endpoint url and return ResponseInterface.
+        // todo: return response or json payload
     }
 
     /**
-     * update event to openagenda
+     * Do a PATCH request on $path.
      *
-     * @param Event $event entity
-     * @return bool
+     * @param string $path Endpoint path. Relative, not real OpenAgenda endpoint.
+     * @param array $params Client options
+     * @return \Ramsey\Collection\Collection|\OpenAgenda\Entity\Entity|\Psr\Http\Message\ResponseInterface
      */
-    public function updateEvent(Event $event): bool
+    public function patch(string $path, array $params = [])
     {
-        if (!$event->uid) {
-            return false;
-        }
-
-        try {
-            if (empty($event->getDirty())) {
-                return true;
-            }
-
-            $response = $this->getClient()
-                ->setAccessToken($this->getAccessToken())
-                ->post('/agendas/' . $this->_uid . '/events/' . $event->uid, $event->toDatas());
-            $data = json_decode((string)$response->getBody(), true);
-
-            return $response->getStatusCode() === 200 && !empty($data['success']);
-        } catch (Exception $e) {
-            return false;
-        }
+        // todo: allow passing raw OpenAgenda endpoint url and return ResponseInterface.
+        // todo: return response or json payload
     }
 
     /**
-     * get event from openagenda and return Entity
+     * Do a DELETE request on $path.
      *
-     * @param int $eventId openagenda event id
-     * @return \OpenAgenda\Entity\Event
+     * @param string $path Endpoint path. Relative, not real OpenAgenda endpoint.
+     * @param array $params Client options
+     * @return \Ramsey\Collection\Collection|\OpenAgenda\Entity\Entity|\Psr\Http\Message\ResponseInterface
      */
-    public function getEvent(int $eventId): ?Event
+    public function delete(string $path, array $params = [])
     {
-        try {
-            $response = $this->getClient()->get(sprintf('/agendas/%d/events/%d', $this->_uid, $eventId));
-
-            if ($response->getStatusCode() !== 200) {
-                return null;
-            }
-
-            $decoded = json_decode((string)$response->getBody(), true);
-
-            $data = $decoded['event'];
-
-            // location
-            $location = new Location();
-            if (!empty($data['location'])) {
-                $location->import($data['location']);
-            }
-
-            // create event entity
-            $event = new Event($data, ['useSetters' => false, 'markClean' => true]);
-            $event->set(['id' => $data['uid'], 'baseUrl' => $this->baseUrl])
-                ->setLocation($location)
-                ->setDirty('location', false);
-        } catch (OpenAgendaException $e) {
-            return null;
-        }
-
-        return $event;
+        // todo: allow passing raw OpenAgenda endpoint url and return ResponseInterface.
+        // todo: return response or json payload
     }
 
     /**
-     * delete event from open agenda.
-     * Detach from agenda if attached
+     * Get agendas from OpenAgenda.
      *
-     * @param \OpenAgenda\Entity\Event|int $event entity or uid
-     * @return bool
-     * @throws \OpenAgenda\OpenAgendaException
+     * @param array $params Query params.
+     * @return \OpenAgenda\Entity\Agenda[]|\Ramsey\Collection\Collection
+     * @throws \OpenAgenda\Endpoint\UnknownEndpointException
+     * @uses \OpenAgenda\Endpoint\Agendas::get()
      */
-    public function deleteEvent($event): bool
+    public function agendas(array $params = []): Collection
     {
-        if (is_numeric($event)) {
-            $event = $this->getEvent((int)$event);
-        }
+        return EndpointFactory::make('/agendas', $params)->get();
+    }
 
-        // not an event
-        if (!$event || !$event->uid) {
-            throw new OpenAgendaException('require valid event');
-        }
+    /**
+     * Get agendas from OpenAgenda.
+     *
+     * @param array $params Query params.
+     * @return \OpenAgenda\Entity\Agenda[]|\Ramsey\Collection\Collection
+     * @throws \OpenAgenda\Endpoint\UnknownEndpointException
+     * @uses \OpenAgenda\Endpoint\Agendas
+     */
+    public function myAgendas(array $params = []): Collection
+    {
+        return EndpointFactory::make('/agendas/mines', $params)->get();
+    }
 
-        $response = $this->getClient()
-            ->setAccessToken($this->getAccessToken())
-            ->delete('/agendas/' . $this->_uid . '/events/' . $event->uid);
+    /**
+     * Get one agenda from OpenAgenda.
+     *
+     * @param array $params Query params.
+     * @return \OpenAgenda\Endpoint\Agenda|\OpenAgenda\Endpoint\Endpoint
+     * @throws \OpenAgenda\Endpoint\UnknownEndpointException
+     */
+    public function agenda(array $params): Agenda
+    {
+        return EndpointFactory::make('/agenda', $params);
+    }
 
-        if ($response->getStatusCode() !== 200) {
-            return false;
-        }
+    /**
+     * Get OpenAgenda locations for an agenda.
+     *
+     * @param array $params Query params.
+     * @return \OpenAgenda\Entity\Location[]|\Ramsey\Collection\Collection
+     * @throws \OpenAgenda\Endpoint\UnknownEndpointException
+     * @uses \OpenAgenda\Endpoint\Locations
+     */
+    public function locations(array $params = []): Collection
+    {
+        return EndpointFactory::make('/locations', $params)->get();
+    }
 
-        $data = json_decode((string)$response->getBody(), true);
+    /**
+     * Get OpenAgenda location endpoint.
+     *
+     * @param array $params Endpoint params.
+     * @return \OpenAgenda\Endpoint\Location|\OpenAgenda\Endpoint\Endpoint
+     * @throws \OpenAgenda\Endpoint\UnknownEndpointException
+     */
+    public function location(array $params = []): Location
+    {
+        return EndpointFactory::make('/location', $params);
+    }
 
-        return $data['success'] ?? false;
+    /**
+     * Get OpenAgenda events for an agenda.
+     *
+     * @param array $params Query params.
+     * @return \OpenAgenda\Entity\Event[]|\Ramsey\Collection\Collection
+     * @throws \OpenAgenda\Endpoint\UnknownEndpointException
+     * @uses \OpenAgenda\Endpoint\Events
+     */
+    public function events(array $params = []): Collection
+    {
+        return EndpointFactory::make('/events', $params)->get();
+    }
+
+    /**
+     * Get OpenAgenda event endpoint.
+     *
+     * @param array $params Endpoint params.
+     * @return \OpenAgenda\Endpoint\Event|\OpenAgenda\Endpoint\Endpoint
+     * @throws \OpenAgenda\Endpoint\UnknownEndpointException
+     */
+    public function event(array $params = []): Event
+    {
+        return EndpointFactory::make('/event', $params);
     }
 }

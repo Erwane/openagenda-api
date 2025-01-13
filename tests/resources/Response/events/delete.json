@@ -1,0 +1,68 @@
+{
+  "success": true,
+  "event": {
+    "uid": 41294774,
+    "slug": "my-event",
+    "private": 0,
+    "timezone": "Europe/Paris",
+    "draft": 0,
+    "updatedAt": "2025-01-10T08:49:38.000Z",
+    "createdAt": "2025-01-10T08:49:38.000Z",
+    "creatorUid": 64654720,
+    "ownerUid": 64654720,
+    "agendaUid": 41630080,
+    "fileKey": "8f332f1800414e2ba839031a983f9930",
+    "attendanceMode": 1,
+    "onlineAccessLink": null,
+    "locationUid": 42921249,
+    "image": null,
+    "imageCredits": null,
+    "title": {
+      "fr": "My event"
+    },
+    "description": {
+      "fr": "My event description"
+    },
+    "longDescription": {},
+    "keywords": {},
+    "conditions": {},
+    "age": {
+      "min": null,
+      "max": null
+    },
+    "registration": [],
+    "accessibility": {
+      "hi": false,
+      "ii": false,
+      "vi": false,
+      "mi": false,
+      "pi": false
+    },
+    "timings": [
+      {
+        "begin": "2025-01-06T11:00:00.000+01:00",
+        "end": "2025-01-06T15:00:00.000+01:00"
+      }
+    ],
+    "extIds": null,
+    "status": 1,
+    "links": [],
+    "addMethod": "contribution",
+    "type": [],
+    "state": 0,
+    "featured": false,
+    "sourcePaths": [],
+    "aggregated": null,
+    "canEdit": true,
+    "motive": null,
+    "removed": false,
+    "originAgenda": {
+      "uid": 41630080,
+      "slug": "agendatradwip",
+      "title": "AgendaTradWip",
+      "description": "Plateforme de développement AgendaTrad",
+      "image": null,
+      "url": null
+    }
+  }
+}

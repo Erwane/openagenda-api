@@ -1,0 +1,15 @@
+meta {
+  name: Location
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}/agendas/{{agenda_id}}/locations/{{location_id}}
+  body: none
+  auth: none
+}
+
+headers {
+  key: {{public_key}}
+}
