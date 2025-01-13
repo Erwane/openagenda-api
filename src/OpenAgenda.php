@@ -5,7 +5,6 @@ namespace OpenAgenda;
 
 use Cake\Validation\Validation as CakeValidation;
 use OpenAgenda\Endpoint\Agenda;
-use OpenAgenda\Endpoint\Endpoint;
 use OpenAgenda\Endpoint\EndpointFactory;
 use OpenAgenda\Endpoint\Event;
 use OpenAgenda\Endpoint\Location;

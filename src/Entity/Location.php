@@ -15,7 +15,6 @@ declare(strict_types=1);
 namespace OpenAgenda\Entity;
 
 use Exception;
-use libphonenumber\PhoneNumber;
 use libphonenumber\PhoneNumberFormat;
 use libphonenumber\PhoneNumberUtil;
 use OpenAgenda\Endpoint\EndpointFactory;
@@ -155,7 +154,7 @@ class Location extends Entity
      */
     protected function _setDescription($value)
     {
-        return $this->_setMultilingual($value, true, 5000);
+        return static::setMultilingual($value, true, 5000);
     }
 
     /**
@@ -166,7 +165,7 @@ class Location extends Entity
      */
     protected function _setAccess($value)
     {
-        return $this->_setMultilingual($value, true, 1000);
+        return static::setMultilingual($value, true, 1000);
     }
 
     /**
@@ -207,9 +206,9 @@ class Location extends Entity
     }
 
     /**
-     * // todo tests
+     * Phone value
      *
-     * @param string|null $value
+     * @param string|null $value Phone value
      * @return string|null
      */
     protected function _setPhone(?string $value)

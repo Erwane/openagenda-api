@@ -115,15 +115,12 @@ class Location extends Endpoint
         return $this->validationUriPathGet($validator)
             // name
             ->requirePresence('name', 'create')
-            ->scalar('name')
             ->maxLength('name', 100)
             // address
             ->requirePresence('address', 'create')
-            ->scalar('address')
             ->maxLength('address', 255)
             // countryCode
             ->requirePresence('countryCode', 'create')
-            ->scalar('countryCode')
             ->lengthBetween('countryCode', [2, 2])
             // state
             ->allowEmptyString('state')
@@ -148,8 +145,7 @@ class Location extends Endpoint
             ->allowEmptyString('phone')
             ->add('phone', 'phone', [
                     'rule' => [[Validation::class, 'phone'], 'FR'],
-                ]
-            )
+                ])
             // links
             ->allowEmptyArray('links')
             ->isArray('links')

@@ -133,7 +133,6 @@ class LocationTest extends EndpointTestCase
         $field = $v->field('name');
         $this->assertEquals('create', $field->isPresenceRequired());
         $rules = $field->rules();
-        $this->assertArrayHasKey('scalar', $rules);
         $this->assertArrayHasKey('maxLength', $rules);
         $this->assertEquals([100], $rules['maxLength']->get('pass'));
 
@@ -141,7 +140,6 @@ class LocationTest extends EndpointTestCase
         $field = $v->field('address');
         $this->assertEquals('create', $field->isPresenceRequired());
         $rules = $field->rules();
-        $this->assertArrayHasKey('scalar', $rules);
         $this->assertArrayHasKey('maxLength', $rules);
         $this->assertEquals([255], $rules['maxLength']->get('pass'));
 
@@ -149,7 +147,6 @@ class LocationTest extends EndpointTestCase
         $field = $v->field('countryCode');
         $this->assertEquals('create', $field->isPresenceRequired());
         $rules = $field->rules();
-        $this->assertArrayHasKey('scalar', $rules);
         $this->assertArrayHasKey('lengthBetween', $rules);
         $this->assertEquals([2, 2], $rules['lengthBetween']->get('pass'));
 

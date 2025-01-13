@@ -88,7 +88,6 @@ class Locations extends Endpoint
 
             // order
             ->allowEmptyString('order')
-            ->scalar('order')
             ->inList('order', [
                 'name.asc',
                 'name.desc',

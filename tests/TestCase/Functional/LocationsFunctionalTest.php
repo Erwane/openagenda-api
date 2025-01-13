@@ -15,7 +15,6 @@ declare(strict_types=1);
 namespace OpenAgenda\Test\TestCase\Functional;
 
 use Cake\Chronos\Chronos;
-use GuzzleHttp\Psr7\Response;
 use OpenAgenda\Entity\Agenda;
 use OpenAgenda\Entity\Location;
 use OpenAgenda\Test\OpenAgendaTestCase;
@@ -272,7 +271,7 @@ class LocationsFunctionalTest extends OpenAgendaTestCase
                 'email' => 'email@example.com',
                 'phone' => '+33123456789',
                 'links' => ['https://www.louvre.fr', 'https://www.facebook.com/museedulouvre'],
-                // 'image' => '',
+                // 'image' => '', // todo image
                 'imageCredits' => 'Image credits',
                 'region' => 'Normandie',
                 'department' => 'Oise',

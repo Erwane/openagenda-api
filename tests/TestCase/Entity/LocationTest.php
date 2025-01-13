@@ -173,6 +173,25 @@ class LocationTest extends OpenAgendaTestCase
         $this->assertFalse($new->state);
     }
 
+    public function testUpdateWithExtId()
+    {
+        $wrapper = $this->clientWrapper(['auth' => true]);
+
+        $entity = new Location([
+            'agendaUid' => 123,
+            'extId' => 'my-id',
+            'name' => 'My location',
+        ]);
+
+        $payload = FileResource::instance($this)->getContent('Response/locations/location.json');
+        $wrapper->expects($this->once())
+            ->method('patch')
+            ->with('https://api.openagenda.com/v2/agendas/123/locations/ext/my-id')
+            ->willReturn(new Response(200, [], $payload));
+
+        $entity->update();
+    }
+
     public function testDelete()
     {
         $wrapper = $this->clientWrapper(['auth' => true]);
@@ -251,5 +270,19 @@ class LocationTest extends OpenAgendaTestCase
     {
         $entity = new Location(['longitude' => '1.23450']);
         $this->assertEquals(1.2345, $entity->longitude);
+    }
+
+    /** @covers \OpenAgenda\Entity\Location::_setPhone */
+    public function testSetPhone()
+    {
+        $entity = new Location(['phone' => 'O102030405']);
+        $this->assertEquals('+33102030405', $entity->phone);
+    }
+
+    /** @covers \OpenAgenda\Entity\Location::_setPhone */
+    public function testSetPhoneInvalid()
+    {
+        $entity = new Location(['phone' => 'testing']);
+        $this->assertNull($entity->phone);
     }
 }

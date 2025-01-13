@@ -31,7 +31,7 @@ $locations = $oa->locations(['agendaUid' => 123, 'name' => 'My Location']);
 $locations = $agenda->locations(['name' => 'My Location']);
 ```
 
-**note** for `$agenda->locations()` way, an OpenAgenda object should be created before. See [basics](basics.md).
+**note** for `$agenda->locations()` method, an OpenAgenda object should be created before. See [basics](basics.md).
 
 **Params**:
 
@@ -97,12 +97,8 @@ Check [Location object](#schema) for more details.
 Update a location in an agenda.  
 Return the updated Location object.
 
-You can use `post` or `patch` method.  
-If using `post`, all required update fields should be sets in `$data`.  
-If using `patch` only passed (or changed) fields will be updated.
-
-You can update a location with `extId` instead of `id`.  
-In this case, `id` should not exist in `$data`.
+You can update a location with `extId` instead of `uid`.  
+In this case, `uid` should not exist in `$data`.
 
 ```php
 // Using previous fetched OpenAgenda\Entity\Location object
