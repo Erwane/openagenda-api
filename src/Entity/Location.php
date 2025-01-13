@@ -24,20 +24,26 @@ use OpenAgenda\OpenAgendaException;
 /**
  * @property int|null $uid
  * @property int|null $agendaUid
- * @property int|null $locationSetId
- * @property int|string|null $extId
  * @property string|null $slug
- * @property string|null $name
- * @property array|null $description
- * @property bool|null $state
- * @property array|null $access
+ * @property int|null $setUid
+ * @property string|int|null $extId
+ * @property array|null $name
  * @property string|null $address
+ * @property string|null $countryCode
+ * @property int|null $state
+ * @property array|null $description
+ * @property array|null $access
+ * @property string|null $website
+ * @property string|null $email
+ * @property string|null $phone
+ * @property string[]|null $links
+ * @property string|resource|null $image
+ * @property string|null $imageCredits
+ * @property string|null $region
+ * @property string|null $department
+ * @property string|null $district
  * @property string|null $city
  * @property string|null $postalCode
- * @property string|null $district
- * @property string|null $department
- * @property string|null $region
- * @property string|null $countryCode
  * @property string|null $insee
  * @property float|null $latitude
  * @property float|null $longitude
@@ -57,7 +63,7 @@ class Location extends Entity
         'image' => ['type' => 'file'],
         'imageCredits' => [],
         'slug' => [],
-        'location_set_id' => [],
+        'locationSetId' => [],
         'city' => [],
         'department' => [],
         'region' => [],

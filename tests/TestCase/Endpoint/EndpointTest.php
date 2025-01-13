@@ -139,7 +139,7 @@ class EndpointTest extends EndpointTestCase
 
     public function testFieldNotInSchema(): void
     {
-        $endpoint = new Endpoint(['unkown' => ['a' => 1]]);
+        $endpoint = new Endpoint(['unknown' => ['a' => 1]]);
         $uri = $endpoint->getUri('get');
         $this->assertNull($uri->getQuery());
     }

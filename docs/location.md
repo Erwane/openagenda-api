@@ -69,11 +69,11 @@ $exists = $agenda->location(['uid' => 456])->exists();
 
 **Params**:
 
-| field     | type    | Required | description                            |
-|-----------|---------|:--------:|----------------------------------------|
+| field     | type    | Required | description                             |
+|-----------|---------|:--------:|-----------------------------------------|
 | agendaUid | integer |    Y     | Agenda uid. Required if using endpoint. |
-| uid       | integer |    n     | Location uid.                          |
-| extId     | mixed   |    n     | Your internal location id.             |
+| uid       | integer |    n     | Location uid.                           |
+| extId     | mixed   |    n     | Your internal location id.              |
 
 ### Create
 

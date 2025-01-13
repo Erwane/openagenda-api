@@ -15,6 +15,7 @@ declare(strict_types=1);
 namespace OpenAgenda\Test\TestCase\Entity;
 
 use Cake\Chronos\Chronos;
+use InvalidArgumentException;
 use OpenAgenda\Entity\Agenda;
 use OpenAgenda\Entity\Entity;
 use OpenAgenda\Entity\Event;
@@ -60,7 +61,7 @@ class EntityTest extends TestCase
         $this->assertTrue($ent->state);
 
         // Unknown field exists in fields / property
-        $this->assertEquals('value', $ent->unknownField);
+        $this->assertEquals('value', $ent->get('unknownField'));
     }
 
     public function testConstructNoSetter()
@@ -96,14 +97,14 @@ class EntityTest extends TestCase
     public function testSetEmpty(): void
     {
         $ent = new Ent();
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(InvalidArgumentException::class);
         $ent->set(null, '');
     }
 
     public function testGetEmpty(): void
     {
         $ent = new Ent();
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(InvalidArgumentException::class);
         $ent->get('');
     }
 
