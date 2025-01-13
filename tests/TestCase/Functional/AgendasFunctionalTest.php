@@ -139,7 +139,8 @@ class AgendasFunctionalTest extends OpenAgendaTestCase
             '_status' => 200,
             '_success' => true,
         ];
-        $this->assertClientCall($client,
+        $this->assertClientCall(
+            $client,
             $this->once(),
             'get',
             $payload,

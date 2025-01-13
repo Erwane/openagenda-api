@@ -85,7 +85,7 @@ class Agenda extends Entity
      * Get Location endpoint with params.
      *
      * @param array $params Endpoint params
-     * @return \OpenAgenda\Endpoint\Location|\OpenAgenda\Endpoint\Endpoint|
+     * @return \OpenAgenda\Endpoint\Location|\OpenAgenda\Endpoint\Endpoint
      * @throws \OpenAgenda\Endpoint\UnknownEndpointException
      * @throws \OpenAgenda\OpenAgendaException
      */
@@ -94,5 +94,36 @@ class Agenda extends Entity
         $params['agendaUid'] = $this->uid;
 
         return EndpointFactory::make('/location', $params);
+    }
+
+    /**
+     * Search events for this agenda.
+     *
+     * @param array $params Endpoint params
+     * @return \Ramsey\Collection\Collection
+     * @throws \OpenAgenda\OpenAgendaException
+     */
+    public function events(array $params = []): Collection
+    {
+        $this->_requireClient();
+
+        $params['agendaUid'] = $this->uid;
+
+        return EndpointFactory::make('/events', $params)->get();
+    }
+
+    /**
+     * Get Event endpoint with params.
+     *
+     * @param array $params Endpoint params
+     * @return \OpenAgenda\Endpoint\Event|\OpenAgenda\Endpoint\Endpoint
+     * @throws \OpenAgenda\Endpoint\UnknownEndpointException
+     * @throws \OpenAgenda\OpenAgendaException
+     */
+    public function event(array $params = [])
+    {
+        $params['agendaUid'] = $this->uid;
+
+        return EndpointFactory::make('/event', $params);
     }
 }

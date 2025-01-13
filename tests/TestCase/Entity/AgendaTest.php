@@ -16,8 +16,11 @@ namespace OpenAgenda\Test\TestCase\Entity;
 
 use Cake\Chronos\Chronos;
 use GuzzleHttp\Psr7\Response;
+use OpenAgenda\Endpoint\Event as EventEndpoint;
 use OpenAgenda\Endpoint\Location as LocationEndpoint;
 use OpenAgenda\Entity\Agenda;
+use OpenAgenda\Entity\Event;
+use OpenAgenda\Entity\Location;
 use OpenAgenda\OpenAgenda;
 use OpenAgenda\OpenAgendaException;
 use OpenAgenda\Test\OpenAgendaTestCase;
@@ -92,6 +95,7 @@ class AgendaTest extends OpenAgendaTestCase
     {
         return [
             ['locations'],
+            ['events'],
         ];
     }
 
@@ -120,6 +124,7 @@ class AgendaTest extends OpenAgendaTestCase
         $locations = $entity->locations(['name' => 'My Location']);
 
         $this->assertInstanceOf(Collection::class, $locations);
+        $this->assertInstanceOf(Location::class, $locations->first());
     }
 
     public function testLocation()
@@ -148,6 +153,48 @@ class AgendaTest extends OpenAgendaTestCase
                 'name' => 'My location',
                 'address' => 'Random address',
                 'countryCode' => 'FR',
+            ],
+        ], $endpoint->toArray());
+    }
+
+    public function testGetEvents()
+    {
+        $entity = new Agenda(['uid' => 123]);
+
+        $wrapper = $this->clientWrapper();
+        $payload = FileResource::instance($this)->getContent('Response/events/events.json');
+        $wrapper->expects($this->once())
+            ->method('get')
+            ->willReturn(new Response(200, [], $payload));
+
+        $events = $entity->events(['title' => 'My Event']);
+
+        $this->assertInstanceOf(Collection::class, $events);
+        $this->assertInstanceOf(Event::class, $events->first());
+    }
+
+    public function testEvent()
+    {
+        $entity = new Agenda(['uid' => 123]);
+
+        $endpoint = $entity->event([
+            'uid' => 456,
+            'agendaUid' => 123,
+            'title' => 'My event',
+        ]);
+
+        $this->assertInstanceOf(EventEndpoint::class, $endpoint);
+        $this->assertEquals([
+            'exists' => 'https://api.openagenda.com/v2/agendas/123/events/456',
+            'get' => 'https://api.openagenda.com/v2/agendas/123/events/456',
+            'create' => 'https://api.openagenda.com/v2/agendas/123/events',
+            'update' => 'https://api.openagenda.com/v2/agendas/123/events/456',
+            'delete' => 'https://api.openagenda.com/v2/agendas/123/events/456',
+            'params' => [
+                '_path' => '/event',
+                'uid' => 456,
+                'agendaUid' => 123,
+                'title' => 'My event',
             ],
         ], $endpoint->toArray());
     }
