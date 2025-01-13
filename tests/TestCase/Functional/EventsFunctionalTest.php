@@ -15,12 +15,16 @@ declare(strict_types=1);
 namespace OpenAgenda\Test\TestCase\Functional;
 
 use Cake\Chronos\Chronos;
+use GuzzleHttp\Psr7\Response;
 use OpenAgenda\Endpoint\Event as EventEndpoint;
 use OpenAgenda\Entity\Agenda;
 use OpenAgenda\Entity\Event;
 use OpenAgenda\Test\OpenAgendaTestCase;
 use OpenAgenda\Test\Utility\FileResource;
 
+/**
+ * @coversNothing
+ */
 class EventsFunctionalTest extends OpenAgendaTestCase
 {
     /**
@@ -270,6 +274,7 @@ class EventsFunctionalTest extends OpenAgendaTestCase
             '_status' => 200,
             '_success' => true,
         ];
+
         $this->assertClientCall(
             $client,
             $this->once(),
@@ -282,8 +287,8 @@ class EventsFunctionalTest extends OpenAgendaTestCase
                 'longDescription' => ['fr' => 'Long **html** description'],
                 'conditions' => ['fr' => 'conditions FR', 'en' => 'conditions EN'],
                 'keywords' => ['fr' => ['tag1', 'tag2']],
-                // 'image' => '', // todo image
-                'imageCredits' => 'Image credits',
+                'image' => null,
+                'imageCredits' => null,
                 'registration' => [
                     'https://formationcontinue.univ-rennes1.fr/cafeinfo',
                     '0203040506',
@@ -317,8 +322,8 @@ class EventsFunctionalTest extends OpenAgendaTestCase
             'longDescription' => 'Long <b>html</b> description',
             'conditions' => ['fr' => 'conditions FR', 'en' => 'conditions EN'],
             'keywords' => ['tag1', 'tag2'],
-            // 'image' => '', // todo image
-            'imageCredits' => 'Image credits',
+            'image' => null,
+            'imageCredits' => null,
             'registration' => [
                 'https://formationcontinue.univ-rennes1.fr/cafeinfo',
                 '0203040506',
@@ -347,7 +352,12 @@ class EventsFunctionalTest extends OpenAgendaTestCase
      */
     public function testCreateFromAgenda(): void
     {
-        [, $client] = $this->oa();
+        [, $client, $wrapper] = $this->oa();
+
+        // Url image check
+        $wrapper->expects($this->once())
+            ->method('head')
+            ->willReturn(new Response(200, ['content-type' => 'image/jpeg', 'content-length' => 848153]));
 
         $payload = json_decode(FileResource::instance($this)->getContent('Response/events/event.json'), true);
         $payload += [
@@ -370,6 +380,7 @@ class EventsFunctionalTest extends OpenAgendaTestCase
                         'end' => '2023-06-30T23:00:00+01:00',
                     ],
                 ],
+                'image' => ['url' => 'https://httpbin.org/image/jpeg'],
             ]
         );
 
@@ -386,6 +397,7 @@ class EventsFunctionalTest extends OpenAgendaTestCase
                     'end' => '2023-06-30T23:00:00+01:00',
                 ],
             ],
+            'image' => 'https://httpbin.org/image/jpeg',
         ];
         $event = $agenda->event($data)->create();
         $this->assertInstanceOf(Event::class, $event);

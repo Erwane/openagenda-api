@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace OpenAgenda\Entity;
 
 use Cake\Chronos\Chronos;
+use Cake\Validation\Validation;
 use OpenAgenda\Endpoint\EndpointFactory;
 use OpenAgenda\OpenAgenda;
 use OpenAgenda\OpenAgendaException;
@@ -71,7 +72,7 @@ class Event extends Entity
         'longDescription' => ['type' => 'multilingual'],
         'conditions' => ['type' => 'multilingual'],
         'keywords' => ['type' => 'multilingual'],
-        'image' => [],
+        'image' => ['type' => 'file'],
         'imageCredits' => [],
         'registration' => [],
         'accessibility' => [],
@@ -269,6 +270,13 @@ class Event extends Entity
             $data['timings'] = $timings;
         }
 
+        // image
+        if ($this->image) {
+            if (Validation::url($this->image)) {
+                $data['image'] = ['url' => $this->image];
+            }
+        }
+
         unset(
             $data['uid'],
             $data['agendaId'],
@@ -374,26 +382,18 @@ class Event extends Entity
     }
 
     /**
-     * set event image
+     * Set event image
      *
-     * @param string|null $file Absolute path
-     * @return $this
-     * @throws \OpenAgenda\OpenAgendaException
+     * @param string|resource|null $file Absolute path, resource file or null
+     * @return string|resource|null
      */
-    protected function _setImage(?string $file)
+    protected function _setImage($file)
     {
-        // Todo handle images
-        if (empty($file)) {
-            return $file;
+        $value = null;
+        if ((is_string($file) && $file) || is_resource($file)) {
+            $value = $file;
         }
 
-        if (!file_exists($file)) {
-            throw new OpenAgendaException('image file does not exists', 1);
-        }
-
-        // set properties, not image to skip auto setDirty
-        $this->_fields['image'] = fopen($file, 'r');
-
-        return $file;
+        return $value;
     }
 }

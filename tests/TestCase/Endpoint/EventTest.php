@@ -16,12 +16,15 @@ namespace OpenAgenda\Test\TestCase\Endpoint;
 
 use Cake\Chronos\Chronos;
 use Cake\Validation\Validator;
+use GuzzleHttp\Psr7\Response;
 use OpenAgenda\Endpoint\Event;
 use OpenAgenda\Entity\Event as EventEntity;
+use OpenAgenda\OpenAgenda;
 use OpenAgenda\OpenAgendaException;
 use OpenAgenda\Test\EndpointTestCase;
 use OpenAgenda\Test\Utility\FileResource;
 use OpenAgenda\Validation;
+use OpenAgenda\Wrapper\HttpWrapperException;
 
 /**
  * Endpoint\Events tests
@@ -192,10 +195,13 @@ class EventTest extends EndpointTestCase
         $this->assertEquals([Validation::class, 'multilingual'], $rules['multilingual']->get('rule'));
         $this->assertEquals(255, $rules['multilingual']->get('pass')[0]);
 
-        // todo image
+        // image
         $field = $v->field('image');
         $this->assertTrue($field->isEmptyAllowed());
-        // $rules = $field->rules();
+        $rules = $field->rules();
+        $this->assertIsCallable($rules['image']->get('rule'));
+        $this->assertEquals('checkImage', $rules['image']->get('rule')[1]);
+        $this->assertEquals(20, $rules['image']->get('pass')[0]);
 
         // imageCredits
         $field = $v->field('imageCredits');
@@ -274,6 +280,78 @@ class EventTest extends EndpointTestCase
             EventEntity::STATE_READY,
             EventEntity::STATE_PUBLISHED,
         ], $rules['inList']->get('pass')[0]);
+    }
+
+    public static function dataCheckImage(): array
+    {
+        $path = 'resources/wendywei-1537637.jpg';
+        $realPath = TESTS . $path;
+
+        return [
+            [['file'], 1, false],
+            ['resources/wendywei-1537637.jpg', 1, false],
+            [$realPath, 0.001, false],
+            [fopen($realPath, 'r'), 0.001, false],
+            [$realPath, 1, true],
+            [fopen($realPath, 'r'), 1, true],
+        ];
+    }
+
+    /** @dataProvider dataCheckImage */
+    public function testCheckImageUseValidationImage($check, $limit, $expected): void
+    {
+        $success = Event::checkImage($check, $limit);
+        $this->assertSame($expected, $success);
+    }
+
+    public function testCheckImageNoClient(): void
+    {
+        OpenAgenda::resetClient();
+        $this->expectException(OpenAgendaException::class);
+        Event::checkImage('https://httpbin.org/image/png');
+    }
+
+    public function testCheckImageUrlNotJpeg(): void
+    {
+        $this->wrapper->expects($this->once())
+            ->method('head')
+            ->with('https://httpbin.org/image/png')
+            ->willReturn(new Response(200, ['content-type' => 'image/png', 'content-length' => 1000]));
+
+        $success = Event::checkImage('https://httpbin.org/image/png');
+        $this->assertFalse($success);
+    }
+
+    public function testCheckImageWrapperException(): void
+    {
+        $this->wrapper->expects($this->once())
+            ->method('head')
+            ->willThrowException(new HttpWrapperException());
+
+        $success = Event::checkImage('https://httpbin.org/image/png');
+        $this->assertFalse($success);
+    }
+
+    public function testCheckImageUrlJpegTooLarge(): void
+    {
+        $this->wrapper->expects($this->once())
+            ->method('head')
+            ->with('https://httpbin.org/image/jpeg')
+            ->willReturn(new Response(200, ['content-type' => 'image/jpeg', 'content-length' => 20000]));
+
+        $success = Event::checkImage('https://httpbin.org/image/jpeg', 0.001);
+        $this->assertFalse($success);
+    }
+
+    public function testCheckImageUrlSuccess(): void
+    {
+        $this->wrapper->expects($this->once())
+            ->method('head')
+            ->with('https://httpbin.org/image/jpeg')
+            ->willReturn(new Response(200, ['content-type' => 'image/jpeg', 'content-length' => 848153]));
+
+        $success = Event::checkImage('https://httpbin.org/image/jpeg');
+        $this->assertTrue($success);
     }
 
     public static function dataCheckTimings(): array

@@ -15,11 +15,14 @@ declare(strict_types=1);
 namespace OpenAgenda\Endpoint;
 
 use Cake\Chronos\Chronos;
+use Cake\Validation\Validation as CakeValidation;
 use Cake\Validation\Validator;
 use Exception;
 use OpenAgenda\Entity\Event as EventEntity;
 use OpenAgenda\OpenAgenda;
+use OpenAgenda\OpenAgendaException;
 use OpenAgenda\Validation;
+use OpenAgenda\Wrapper\HttpWrapperException;
 
 /**
  * Event endpoint
@@ -156,6 +159,7 @@ class Event extends Endpoint
             ])
             // image
             ->allowEmptyFile('image')
+            ->add('image', 'image', ['rule' => [[$this, 'checkImage'], 20]])
             // imageCredits
             ->allowEmptyString('imageCredits')
             ->maxLength('imageCredits', 255)
@@ -213,6 +217,39 @@ class Event extends Endpoint
     public function validationUpdate(Validator $validator)
     {
         return $this->validationCreate($validator);
+    }
+
+    /**
+     * Check image and URL images too.
+     *
+     * @param string|resource $check Absolute path, url or file resource
+     * @param float $max Maximum size in MegaBytes (MB)
+     * @return bool
+     * @throws \OpenAgenda\OpenAgendaException
+     */
+    public static function checkImage($check, float $max = 10): bool
+    {
+        $success = Validation::image($check, $max);
+        if (!$success && CakeValidation::url($check)) {
+            if (!OpenAgenda::getClient()) {
+                throw new OpenAgendaException('OpenAgenda object was not previously created or Client not set.');
+            }
+            $wrapper = OpenAgenda::getClient()->getWrapper();
+            try {
+                $response = $wrapper->head($check);
+
+                $max = $max * 1024 * 1024;
+                $type = $response->getHeaderLine('Content-Type');
+                $size = $response->getHeaderLine('Content-Length');
+                $success = $type && $size
+                    && in_array($type, ['image/jpg', 'image/jpeg'])
+                    && $size <= $max;
+            } catch (HttpWrapperException $e) {
+                $success = false;
+            }
+        }
+
+        return $success;
     }
 
     /**

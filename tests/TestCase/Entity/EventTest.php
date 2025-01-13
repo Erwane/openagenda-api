@@ -34,7 +34,7 @@ use OpenAgenda\Test\Utility\FileResource;
  */
 class EventTest extends OpenAgendaTestCase
 {
-    public function testAliasesIn()
+    public function testFromOpenAgenda()
     {
         $json = FileResource::instance($this)->getContent('Response/events/event.json');
         $payload = json_decode($json, true);
@@ -124,7 +124,7 @@ class EventTest extends OpenAgendaTestCase
         ], $result);
     }
 
-    public function testAliasesOut()
+    public function testToOpenAgenda()
     {
         $ent = new Event([
             'uid' => 9906334,
@@ -135,8 +135,8 @@ class EventTest extends OpenAgendaTestCase
             'agenda' => new Agenda(['uid' => 456]),
             'location' => new Location(['uid' => 123, 'agendaUid' => 456]),
             'type' => [41],
-            'image' => null,
-            'imageCredits' => null,
+            'image' => 'https://httpbin.org/image/jpeg',
+            'imageCredits' => 'Image credits',
             'title' => ['en' => 'My event', 'fr' => 'Mon évènement'],
             'description' => ['en' => 'Short description', 'fr' => 'Description courte'],
             'longDescription' => ['en' => 'Long description', 'fr' => 'Description longue'],
@@ -169,8 +169,8 @@ class EventTest extends OpenAgendaTestCase
             'status' => 1,
             'featured' => 0,
             'type' => [41],
-            'image' => null,
-            'imageCredits' => null,
+            'image' => ['url' => 'https://httpbin.org/image/jpeg'],
+            'imageCredits' => 'Image credits',
             'title' => ['en' => 'My event', 'fr' => 'Mon évènement'],
             'description' => ['en' => 'Short description', 'fr' => 'Description courte'],
             'longDescription' => ['en' => 'Long description', 'fr' => 'Description longue'],
@@ -203,6 +203,19 @@ class EventTest extends OpenAgendaTestCase
             'updatedAt' => '2024-12-27T15:42:32',
             'locationUid' => 123,
         ], $ent->toOpenAgenda());
+    }
+
+    public function testToOpenAgendaImageResource(): void
+    {
+        $resource = fopen(TESTS . 'resources/wendywei-1537637.jpg', 'r');
+        $ent = new Event(['image' => $resource]);
+        $this->assertSame(['image' => $resource], $ent->toOpenAgenda());
+    }
+
+    public function testToOpenAgendaImagePath(): void
+    {
+        $ent = new Event(['image' => TESTS . 'resources/wendywei-1537637.jpg']);
+        $this->assertIsResource($ent->toOpenAgenda()['image']);
     }
 
     public static function dataSetTimings()
@@ -539,12 +552,35 @@ MD
     }
 
     /**
-     * @covers       \OpenAgenda\Entity\Event::_setKeywords
      * @dataProvider dataSetKeywords
+     * @covers       \OpenAgenda\Entity\Event::_setKeywords
      */
     public function testSetKeywords($keywords, $expected): void
     {
         $entity = new Event(['keywords' => $keywords]);
         $this->assertSame($expected, $entity->keywords);
+    }
+
+    public static function dataSetImage(): array
+    {
+        $realPath = TESTS . 'resources/wendywei-1537637.jpg';
+        $resource = fopen($realPath, 'r');
+
+        return [
+            [null, null],
+            [$realPath, $realPath],
+            ['https://example.com', 'https://example.com'],
+            [$resource, $resource],
+        ];
+    }
+
+    /**
+     * @dataProvider dataSetImage
+     * @covers       \OpenAgenda\Entity\Event::_setImage
+     */
+    public function testSetImage($image, $expected): void
+    {
+        $entity = new Event(['image' => $image]);
+        $this->assertSame($expected, $entity->image);
     }
 }
