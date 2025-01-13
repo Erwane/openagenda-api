@@ -97,7 +97,7 @@ class Client
         }
 
         if (!$payload['_success'] || (isset($payload['success']) && !$payload['success'])) {
-            $exception = new OpenAgendaException($payload['message'] ?? 'Request error', $status ?? 0);
+            $exception = new OpenAgendaException($payload['message'] ?? 'Request error', $status);
             $exception->setResponse($response);
             $exception->setPayload($payload);
             throw $exception;
@@ -151,7 +151,6 @@ class Client
      * @param array $params Request params.
      * @return array
      * @throws \OpenAgenda\OpenAgendaException
-     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function post($uri, array $data = [], array $params = []): array
     {
@@ -171,7 +170,6 @@ class Client
      * @param array $params Request params.
      * @return array
      * @throws \OpenAgenda\OpenAgendaException
-     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function patch($uri, array $data = [], array $params = []): array
     {
@@ -190,7 +188,6 @@ class Client
      * @param array $params Request params.
      * @return array
      * @throws \OpenAgenda\OpenAgendaException
-     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function delete($uri, array $params = []): array
     {
@@ -208,7 +205,6 @@ class Client
      * @param array $params Request params
      * @return array
      * @throws \OpenAgenda\OpenAgendaException
-     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     protected function _addAuthenticationHeaders(array $params)
     {
@@ -223,13 +219,14 @@ class Client
      *
      * @return string|null
      * @throws \OpenAgenda\OpenAgendaException
-     * @throws \Psr\SimpleCache\InvalidArgumentException
+     * @noinspection PhpDocMissingThrowsInspection
      */
     public function getAccessToken(): ?string
     {
         $token = null;
         $cacheKey = 'openagenda_api_access_token';
         if ($this->cache) {
+            /** @noinspection PhpUnhandledExceptionInspection */
             $token = $this->cache->get($cacheKey);
         }
         if (!$token) {
@@ -249,6 +246,7 @@ class Client
 
             $token = $payload['access_token'] ?? null;
             if ($this->cache && !empty($payload['expires_in'])) {
+                /** @noinspection PhpUnhandledExceptionInspection */
                 $this->cache->set($cacheKey, $token, $payload['expires_in']);
             }
         }

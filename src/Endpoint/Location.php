@@ -144,8 +144,8 @@ class Location extends Endpoint
             // phone
             ->allowEmptyString('phone')
             ->add('phone', 'phone', [
-                    'rule' => [[Validation::class, 'phone'], 'FR'],
-                ])
+                'rule' => [[Validation::class, 'phone'], 'FR'],
+            ])
             // links
             ->allowEmptyArray('links')
             ->isArray('links')
@@ -231,7 +231,9 @@ class Location extends Endpoint
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
+     *
+     * @throws \OpenAgenda\OpenAgendaException
      */
     public function exists(): bool
     {
@@ -245,6 +247,7 @@ class Location extends Endpoint
      * Get location.
      *
      * @return \OpenAgenda\Entity\Location|null
+     * @throws \OpenAgenda\OpenAgendaException
      */
     public function get(): ?LocationEntity
     {
@@ -266,7 +269,6 @@ class Location extends Endpoint
      * @param bool $validate Validate data
      * @return \OpenAgenda\Entity\Location|null
      * @throws \OpenAgenda\OpenAgendaException
-     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function create(bool $validate = true)
     {
@@ -296,7 +298,6 @@ class Location extends Endpoint
      * @param bool $validate Validate data
      * @return \OpenAgenda\Entity\Location|null
      * @throws \OpenAgenda\OpenAgendaException
-     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function update(bool $validate = true)
     {
@@ -324,6 +325,7 @@ class Location extends Endpoint
      * Delete location
      *
      * @return \OpenAgenda\Entity\Location|null
+     * @throws \OpenAgenda\OpenAgendaException
      */
     public function delete()
     {

@@ -397,7 +397,6 @@ class Event extends Endpoint
      * @param bool $validate Validate data
      * @return \OpenAgenda\Entity\Event|null
      * @throws \OpenAgenda\OpenAgendaException
-     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function create(bool $validate = true)
     {
@@ -428,7 +427,6 @@ class Event extends Endpoint
      * @param bool $validate Validate data
      * @return \OpenAgenda\Entity\Event|null
      * @throws \OpenAgenda\OpenAgendaException
-     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function update(bool $validate = true)
     {
@@ -458,7 +456,6 @@ class Event extends Endpoint
      *
      * @return \OpenAgenda\Entity\Event|null
      * @throws \OpenAgenda\OpenAgendaException
-     * @throws \Psr\SimpleCache\InvalidArgumentException
      */
     public function delete()
     {

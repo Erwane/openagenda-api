@@ -414,7 +414,7 @@ abstract class Entity implements ArrayAccess
 
     /**
      * Sets the entire entity as clean, which means that it will appear as
-     * no fields being modified or added at all. This is an useful call
+     * no fields being modified or added at all. This is a useful call
      * for an initial object hydration
      *
      * @return void

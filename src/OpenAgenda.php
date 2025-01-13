@@ -143,7 +143,6 @@ class OpenAgenda
      * @param string $path Endpoint path. Relative, not real OpenAgenda endpoint.
      * @param array $params Client options
      * @return \Ramsey\Collection\Collection|\OpenAgenda\Entity\Entity|\Psr\Http\Message\ResponseInterface
-     * @throws \OpenAgenda\Endpoint\UnknownEndpointException
      */
     public function get(string $path, array $params = [])
     {
@@ -157,7 +156,6 @@ class OpenAgenda
      * @param string $path Endpoint path. Relative, not real OpenAgenda endpoint.
      * @param array $params Client options
      * @return \Ramsey\Collection\Collection|\OpenAgenda\Entity\Entity|\Psr\Http\Message\ResponseInterface
-     * @throws \OpenAgenda\Endpoint\UnknownEndpointException
      */
     public function post(string $path, array $params = [])
     {
@@ -171,7 +169,6 @@ class OpenAgenda
      * @param string $path Endpoint path. Relative, not real OpenAgenda endpoint.
      * @param array $params Client options
      * @return \Ramsey\Collection\Collection|\OpenAgenda\Entity\Entity|\Psr\Http\Message\ResponseInterface
-     * @throws \OpenAgenda\Endpoint\UnknownEndpointException
      */
     public function patch(string $path, array $params = [])
     {
@@ -185,7 +182,6 @@ class OpenAgenda
      * @param string $path Endpoint path. Relative, not real OpenAgenda endpoint.
      * @param array $params Client options
      * @return \Ramsey\Collection\Collection|\OpenAgenda\Entity\Entity|\Psr\Http\Message\ResponseInterface
-     * @throws \OpenAgenda\Endpoint\UnknownEndpointException
      */
     public function delete(string $path, array $params = [])
     {

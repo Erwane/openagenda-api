@@ -110,6 +110,7 @@ class Locations extends Endpoint
      * Get locations.
      *
      * @return \OpenAgenda\Entity\Location[]|\Ramsey\Collection\Collection
+     * @throws \OpenAgenda\OpenAgendaException
      */
     public function get(): Collection
     {
