@@ -435,15 +435,17 @@ class LocationTest extends EndpointTestCase
     {
         $payload = FileResource::instance($this)->getContent('Response/locations/location.json');
         $this->mockRequest(false, 'get', [
-            'https://api.openagenda.com/v2/agendas/123/locations/456',
+            'https://api.openagenda.com/v2/agendas/123/locations/35867424',
             ['headers' => ['key' => 'publicKey']],
         ], [200, $payload]);
 
-        $endpoint = new Location(['agendaUid' => 123, 'uid' => 456]);
+        $endpoint = new Location(['agendaUid' => 123, 'uid' => 35867424]);
 
         $entity = $endpoint->get();
 
         $this->assertInstanceOf(LocationEntity::class, $entity);
+        $this->assertEquals(35867424, $entity->uid);
+        $this->assertEquals(123, $entity->agendaUid);
     }
 
     public function testExists()
@@ -475,7 +477,7 @@ class LocationTest extends EndpointTestCase
 
         $endpoint = new Location([
             'agendaUid' => 123,
-            'uid' => 456,
+            'uid' => 16153029,
             'name' => 'My location',
             'address' => '1, place liberté, 75001 Paris, France',
             'countryCode' => 'FR',
@@ -484,13 +486,15 @@ class LocationTest extends EndpointTestCase
 
         $entity = $endpoint->create();
         $this->assertInstanceOf(LocationEntity::class, $entity);
+        $this->assertEquals(16153029, $entity->uid);
+        $this->assertEquals(123, $entity->agendaUid);
     }
 
     public function testUpdate()
     {
         $payload = FileResource::instance($this)->getContent('Response/locations/post.json');
         $this->mockRequest(true, 'patch', [
-            'https://api.openagenda.com/v2/agendas/123/locations/456',
+            'https://api.openagenda.com/v2/agendas/123/locations/16153029',
             [
                 'state' => 1,
             ],
@@ -499,12 +503,14 @@ class LocationTest extends EndpointTestCase
 
         $endpoint = new Location([
             'agendaUid' => 123,
-            'uid' => 456,
+            'uid' => 16153029,
             'state' => 1,
         ]);
 
         $entity = $endpoint->update();
         $this->assertInstanceOf(LocationEntity::class, $entity);
+        $this->assertEquals(16153029, $entity->uid);
+        $this->assertEquals(123, $entity->agendaUid);
     }
 
     public function testCreateException(): void
@@ -527,12 +533,14 @@ class LocationTest extends EndpointTestCase
     {
         $payload = FileResource::instance($this)->getContent('Response/locations/delete.json');
         $this->mockRequest(true, 'delete', [
-            'https://api.openagenda.com/v2/agendas/123/locations/456',
+            'https://api.openagenda.com/v2/agendas/123/locations/82680484',
             ['headers' => ['access-token' => 'authorization-key', 'nonce' => 1734957296123456]],
         ], [200, $payload]);
 
-        $endpoint = new Location(['agendaUid' => 123, 'uid' => 456]);
+        $endpoint = new Location(['agendaUid' => 123, 'uid' => 82680484]);
         $entity = $endpoint->delete();
         $this->assertInstanceOf(LocationEntity::class, $entity);
+        $this->assertEquals(82680484, $entity->uid);
+        $this->assertEquals(123, $entity->agendaUid);
     }
 }

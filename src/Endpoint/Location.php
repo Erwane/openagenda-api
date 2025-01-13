@@ -252,16 +252,10 @@ class Location extends Endpoint
      */
     public function get(): ?LocationEntity
     {
-        $entity = null;
-
         $response = OpenAgenda::getClient()
             ->get($this->getUri(__FUNCTION__));
 
-        if ($response['_success'] && !empty($response['location'])) {
-            $entity = new LocationEntity($response['location'], ['markClean' => true]);
-        }
-
-        return $entity;
+        return $this->_parseResponse($response);
     }
 
     /**
@@ -349,7 +343,9 @@ class Location extends Endpoint
     {
         $entity = null;
         if ($response['_success'] && !empty($response['location'])) {
-            $entity = new LocationEntity($response['location'], ['markClean' => true]);
+            $data = $response['location'];
+            $data['agendaUid'] = $this->params['agendaUid'];
+            $entity = new LocationEntity($data, ['markClean' => true]);
         }
 
         // todo handle errors and define what to return

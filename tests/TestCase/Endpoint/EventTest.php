@@ -674,15 +674,18 @@ class EventTest extends EndpointTestCase
     {
         $payload = FileResource::instance($this)->getContent('Response/events/event.json');
         $this->mockRequest(false, 'get', [
-            'https://api.openagenda.com/v2/agendas/123/events/456',
+            'https://api.openagenda.com/v2/agendas/123/events/9906334',
             ['headers' => ['key' => 'publicKey']],
         ], [200, $payload]);
 
-        $endpoint = new Event(['agendaUid' => 123, 'uid' => 456]);
+        $endpoint = new Event(['agendaUid' => 123, 'uid' => 9906334]);
 
         $entity = $endpoint->get();
 
         $this->assertInstanceOf(EventEntity::class, $entity);
+        $this->assertEquals(9906334, $entity->uid);
+        $this->assertEquals(123, $entity->agendaUid);
+        $this->assertEquals(456, $entity->locationUid);
     }
 
     public function testExists()
@@ -702,9 +705,9 @@ class EventTest extends EndpointTestCase
     {
         $payload = FileResource::instance($this)->getContent('Response/events/post.json');
         $this->mockRequest(true, 'post', [
-            'https://api.openagenda.com/v2/agendas/123/events',
+            'https://api.openagenda.com/v2/agendas/41630080/events',
             [
-                'locationUid' => 789,
+                'locationUid' => 42921249,
                 'title' => ['fr' => 'My Event'],
                 'description' => ['fr' => 'Event description'],
                 'timings' => [
@@ -715,9 +718,9 @@ class EventTest extends EndpointTestCase
         ], [200, $payload]);
 
         $endpoint = new Event([
-            'agendaUid' => 123,
+            'agendaUid' => 41630080,
             'uid' => 456,
-            'locationUid' => 789,
+            'locationUid' => 42921249,
             'title' => 'My Event',
             'description' => 'Event description',
             'timings' => [['begin' => '2025-01-06T11:00:00.000+01:00', 'end' => '2025-01-06T15:00:00.000+01:00']],
@@ -725,13 +728,16 @@ class EventTest extends EndpointTestCase
 
         $entity = $endpoint->create();
         $this->assertInstanceOf(EventEntity::class, $entity);
+        $this->assertEquals(41294774, $entity->uid);
+        $this->assertEquals(41630080, $entity->agendaUid);
+        $this->assertEquals(42921249, $entity->locationUid);
     }
 
     public function testUpdate()
     {
         $payload = FileResource::instance($this)->getContent('Response/events/post.json');
         $this->mockRequest(true, 'patch', [
-            'https://api.openagenda.com/v2/agendas/123/events/456',
+            'https://api.openagenda.com/v2/agendas/41630080/events/41294774',
             [
                 'state' => EventEntity::STATE_PUBLISHED,
             ],
@@ -739,26 +745,32 @@ class EventTest extends EndpointTestCase
         ], [200, $payload]);
 
         $endpoint = new Event([
-            'agendaUid' => 123,
-            'uid' => 456,
+            'agendaUid' => 41630080,
+            'uid' => 41294774,
             'state' => EventEntity::STATE_PUBLISHED,
         ]);
 
         $entity = $endpoint->update();
         $this->assertInstanceOf(EventEntity::class, $entity);
+        $this->assertEquals(41294774, $entity->uid);
+        $this->assertEquals(41630080, $entity->agendaUid);
+        $this->assertEquals(42921249, $entity->locationUid);
     }
 
     public function testDelete()
     {
         $payload = FileResource::instance($this)->getContent('Response/events/delete.json');
         $this->mockRequest(true, 'delete', [
-            'https://api.openagenda.com/v2/agendas/123/events/456',
+            'https://api.openagenda.com/v2/agendas/41630080/events/41294774',
             ['headers' => ['access-token' => 'authorization-key', 'nonce' => 1734957296123456]],
         ], [200, $payload]);
 
-        $endpoint = new Event(['agendaUid' => 123, 'uid' => 456]);
+        $endpoint = new Event(['agendaUid' => 41630080, 'uid' => 41294774]);
         $entity = $endpoint->delete();
         $this->assertInstanceOf(EventEntity::class, $entity);
+        $this->assertEquals(41294774, $entity->uid);
+        $this->assertEquals(41630080, $entity->agendaUid);
+        $this->assertEquals(42921249, $entity->locationUid);
     }
 
     public function testCreateException(): void

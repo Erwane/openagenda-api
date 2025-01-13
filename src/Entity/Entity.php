@@ -309,7 +309,11 @@ abstract class Entity implements ArrayAccess
 
         $value = null;
 
-        if (isset($this->_fields[$field])) {
+        $getter = static::_accessor($field, 'get');
+
+        if ($getter) {
+            $value = $this->$getter();
+        } elseif (isset($this->_fields[$field])) {
             $value = &$this->_fields[$field];
         }
 

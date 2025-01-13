@@ -15,10 +15,10 @@ use OpenAgenda\OpenAgendaException;
  * @property int|null $state
  * @property int|null $status
  * @property bool|null $featured
- * @property string|null $agenda
  * @property int|null $agendaUid
- * @property string|null $location
+ * @property \OpenAgenda\Entity\Agenda|null $agenda
  * @property int|null $locationUid
+ * @property \OpenAgenda\Entity\Location|null $location
  * @property string|null $type
  * @property string|null $image
  * @property string|null $imageCredits
@@ -243,6 +243,63 @@ class Event extends Entity
         }
 
         return $out;
+    }
+
+    /**
+     * Get agenda.
+     *
+     * @return \OpenAgenda\Entity\Agenda|null
+     */
+    protected function _getAgenda()
+    {
+        $agenda = null;
+        if (isset($this->_fields['agenda'])) {
+            $agenda = $this->_fields['agenda'];
+        } elseif (isset($this->_fields['originAgenda'])) {
+            $agenda = $this->_fields['originAgenda'];
+        }
+
+        return $agenda;
+    }
+
+    /**
+     * Get agenda uid.
+     *
+     * @return int|null
+     */
+    protected function _getAgendaUid(): ?int
+    {
+        $value = $this->_fields['agendaUid'] ?? null;
+        if (!$value && $this->agenda instanceof Agenda) {
+            $value = $this->agenda->uid;
+        }
+
+        return $value;
+    }
+
+    /**
+     * Get location.
+     *
+     * @return \OpenAgenda\Entity\Location|null
+     */
+    protected function _getLocation(): ?Location
+    {
+        return $this->_fields['location'] ?? null;
+    }
+
+    /**
+     * Get location uid.
+     *
+     * @return int|null
+     */
+    protected function _getLocationUid(): ?int
+    {
+        $value = $this->_fields['locationUid'] ?? null;
+        if (!$value && $this->location instanceof Location) {
+            $value = $this->location->uid;
+        }
+
+        return $value;
     }
 
     /**

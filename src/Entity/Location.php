@@ -63,7 +63,7 @@ class Location extends Entity
         'image' => ['type' => 'file'],
         'imageCredits' => [],
         'slug' => [],
-        'locationSetId' => [],
+        'locationSetUid' => [],
         'city' => [],
         'department' => [],
         'region' => [],

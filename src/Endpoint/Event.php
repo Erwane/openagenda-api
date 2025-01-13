@@ -416,16 +416,10 @@ class Event extends Endpoint
      */
     public function get(): ?EventEntity
     {
-        $entity = null;
-
         $response = OpenAgenda::getClient()
             ->get($this->getUri(__FUNCTION__));
 
-        if ($response['_success'] && !empty($response['event'])) {
-            $entity = new EventEntity($response['event'], ['markClean' => true]);
-        }
-
-        return $entity;
+        return $this->_parseResponse($response);
     }
 
     /**
@@ -513,7 +507,8 @@ class Event extends Endpoint
     {
         $entity = null;
         if ($response['_success'] && !empty($response['event'])) {
-            $entity = new EventEntity($response['event'], ['markClean' => true]);
+            $data = $response['event'];
+            $entity = new EventEntity($data, ['markClean' => true]);
         }
 
         // todo handle errors and define what to return
