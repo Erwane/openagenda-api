@@ -546,7 +546,15 @@ abstract class Entity implements ArrayAccess
         return $converter->convert($html);
     }
 
-    protected function _setMultilingual($value, bool $clean, ?int $truncate = null)
+    /**
+     * Return a multilingual value, clean and truncate.
+     *
+     * @param string|array $value Input value
+     * @param bool $clean Remove html tags and extra spaces.
+     * @param int|null $truncate Truncate value to this length
+     * @return array<string, string>
+     */
+    public static function setMultilingual($value, bool $clean, ?int $truncate = null)
     {
         if (is_string($value)) {
             $value = [OpenAgenda::getDefaultLang() => $value];

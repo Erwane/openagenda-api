@@ -80,8 +80,16 @@ class Validation
                 return sprintf('`%s` is an invalid ISO 639-1 language code.', $lang);
             }
 
-            if ($maxLength && strlen($value) > $maxLength) {
-                return sprintf('Value for `%s` exceed size limit.', $lang);
+            if ($maxLength) {
+                if (is_array($value)) {
+                    $toCheck = json_encode($value, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+                } else {
+                    $toCheck = $value;
+                }
+
+                if (strlen($toCheck) > $maxLength) {
+                    return sprintf('Value for `%s` exceed size limit.', $lang);
+                }
             }
         }
 

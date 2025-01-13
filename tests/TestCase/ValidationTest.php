@@ -61,6 +61,8 @@ class ValidationTest extends TestCase
             [[['fra' => 'Lorem ipsum']], '`fra` is an invalid ISO 639-1 language code.'],
             // Max length overflow
             [[['fr' => 'Lorem ipsum'], 5], 'Value for `fr` exceed size limit.'],
+            // Max length overflow for array
+            [[['fr' => ['tag1']], 4], 'Value for `fr` exceed size limit.'],
         ];
     }
 

@@ -335,4 +335,12 @@ Hello',
         $result = Entity::htmlToMarkdown($html);
         $this->assertSame($expected, $result);
     }
+
+    /** @covers \OpenAgenda\Entity\Entity::setMultilingual */
+    public function testSetMultilingual(): void
+    {
+        $string = 'A <b>Multilingual</b> string with html';
+        $result = Entity::setMultilingual($string, true, 10);
+        $this->assertEquals(['fr' => 'A Mult ...'], $result);
+    }
 }
