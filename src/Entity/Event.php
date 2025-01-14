@@ -393,9 +393,6 @@ class Event extends Entity
 
         if (is_array($value)) {
             foreach ($value as $lang => $text) {
-                $text = static::cleanupHtml($text);
-                $text = static::htmlToMarkdown($text);
-
                 if (mb_strlen($text) > 10000) {
                     $text = mb_substr($text, 0, 9996) . ' ...';
                 }

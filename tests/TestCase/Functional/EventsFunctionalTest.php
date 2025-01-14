@@ -284,7 +284,7 @@ class EventsFunctionalTest extends OpenAgendaTestCase
             [
                 'title' => ['fr' => 'Event title'],
                 'description' => ['fr' => 'Event description'],
-                'longDescription' => ['fr' => 'Long **html** description'],
+                'longDescription' => ['fr' => 'Long <b>html</b> description'],
                 'conditions' => ['fr' => 'conditions FR', 'en' => 'conditions EN'],
                 'keywords' => ['fr' => ['tag1', 'tag2']],
                 'image' => null,

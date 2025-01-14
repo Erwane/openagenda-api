@@ -16,7 +16,6 @@ namespace OpenAgenda\Endpoint;
 
 use Cake\Validation\Validation as CakeValidation;
 use Cake\Validation\Validator;
-use Exception;
 use OpenAgenda\DateTime;
 use OpenAgenda\Entity\Event as EventEntity;
 use OpenAgenda\OpenAgenda;
@@ -402,6 +401,7 @@ class Event extends Endpoint
 
     /**
      * {@inheritDoc}
+     *
      * @throws \OpenAgenda\OpenAgendaException
      */
     public function exists(): bool

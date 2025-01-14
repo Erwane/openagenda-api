@@ -5,11 +5,7 @@ namespace OpenAgenda\Entity;
 
 use ArrayAccess;
 use Cake\Validation\Validation;
-use HTMLPurifier;
-use HTMLPurifier_Config;
-use HTMLPurifier_TagTransform_Simple;
 use InvalidArgumentException;
-use League\HTMLToMarkdown\HtmlConverter;
 use OpenAgenda\DateTime;
 use OpenAgenda\OpenAgenda;
 
@@ -499,61 +495,6 @@ abstract class Entity implements ArrayAccess
         $text = preg_replace('/\pZ+/u', ' ', $text);
 
         return trim($text);
-    }
-
-    /**
-     * clean description html tags
-     *
-     * @param string $value worse html ever
-     * @return string
-     */
-    public static function cleanupHtml(string $value)
-    {
-        $projectUrl = OpenAgenda::getProjectUrl();
-        $config = HTMLPurifier_Config::createDefault();
-
-        $config->set('Cache.DefinitionImpl', null);
-        $config->set('HTML.AllowedElements', [
-            'a', 'b', 'strong', 'i', 'em', 'u', 'p', 'img', 'hr', 'span',
-            'ul', 'ol', 'li', 'h1', 'h2', 'h3', 'h4', 'h5',
-        ]);
-        $config->set('HTML.AllowedAttributes', ['a.href', 'a.target', 'img.src', 'img.alt', 'img.width', 'img.height']);
-        $config->set('HTML.TargetBlank', true);
-        $config->set('Attr.AllowedFrameTargets', ['_blank', '_self']);
-        $config->set('Attr.AllowedRel', ['noopener', 'noreferrer']);
-        $config->set('AutoFormat.RemoveEmpty', true);
-        $config->set('AutoFormat.RemoveSpansWithoutAttributes', true);
-        $config->set('URI.AllowedSchemes', ['http', 'https']);
-        if ($projectUrl) {
-            $config->set('URI.Base', $projectUrl);
-            $config->set('URI.MakeAbsolute', true);
-        }
-
-        // tag transformation
-        $def = $config->getHTMLDefinition(true);
-        $def->info_tag_transform['h1'] = new HTMLPurifier_TagTransform_Simple('h3');
-        $def->info_tag_transform['h2'] = new HTMLPurifier_TagTransform_Simple('h3');
-
-        $purifier = new HTMLPurifier($config);
-
-        return trim($purifier->purify($value));
-    }
-
-    /**
-     * html to markdown converter
-     *
-     * @param string $html html input
-     * @return string
-     */
-    public static function htmlToMarkdown(string $html)
-    {
-        if ($html === strip_tags($html)) {
-            return $html;
-        }
-
-        $converter = new HtmlConverter(['strip_tags' => true]);
-
-        return $converter->convert($html);
     }
 
     /**

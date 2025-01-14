@@ -491,35 +491,6 @@ HTML
     }
 
     /** @covers \OpenAgenda\Entity\Event::_setLongDescription */
-    public function testSetLongDescription(): void
-    {
-        OpenAgenda::setProjectUrl('https://my-domain.org');
-        $entity = new Event([
-            'longDescription' => <<<HTML
-<h1>This</h1>
-description
-<p>should be <a href="to-link">clean</a></p>
-<ul>
-<li>and in </li>
-<li>markdown</li>
-</ul>
-HTML
-            ,
-        ]);
-        $this->assertEquals([
-            'fr' => <<<MD
-### This
-
-description should be [clean](https://my-domain.org/to-link)
-
-- and in
-- markdown
-MD
-            ,
-        ], $entity->longDescription);
-    }
-
-    /** @covers \OpenAgenda\Entity\Event::_setLongDescription */
     public function testSetLongDescriptionTruncate(): void
     {
         $string = str_pad('start_', 10009, '-');
