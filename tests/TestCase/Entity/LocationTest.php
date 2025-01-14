@@ -280,18 +280,4 @@ class LocationTest extends OpenAgendaTestCase
         $entity = new Location(['longitude' => '1.23450']);
         $this->assertEquals(1.2345, $entity->longitude);
     }
-
-    /** @covers \OpenAgenda\Entity\Location::_setPhone */
-    public function testSetPhone()
-    {
-        $entity = new Location(['phone' => 'O102030405']);
-        $this->assertEquals('+33102030405', $entity->phone);
-    }
-
-    /** @covers \OpenAgenda\Entity\Location::_setPhone */
-    public function testSetPhoneInvalid()
-    {
-        $entity = new Location(['phone' => 'testing']);
-        $this->assertNull($entity->phone);
-    }
 }

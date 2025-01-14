@@ -14,9 +14,6 @@ declare(strict_types=1);
  */
 namespace OpenAgenda\Entity;
 
-use Exception;
-use libphonenumber\PhoneNumberFormat;
-use libphonenumber\PhoneNumberUtil;
 use OpenAgenda\Endpoint\EndpointFactory;
 use OpenAgenda\OpenAgenda;
 use OpenAgenda\OpenAgendaException;
@@ -209,27 +206,6 @@ class Location extends Entity
     protected function _setLongitude($value)
     {
         return (float)$value;
-    }
-
-    /**
-     * Phone value
-     *
-     * @param string|null $value Phone value
-     * @return string|null
-     */
-    protected function _setPhone(?string $value)
-    {
-        if ($value) {
-            $instance = PhoneNumberUtil::getInstance();
-            try {
-                $phone = $instance->parse($value, OpenAgenda::getDefaultLang());
-                $value = $instance->format($phone, PhoneNumberFormat::E164);
-            } catch (Exception $e) {
-                $value = null;
-            }
-        }
-
-        return $value;
     }
 
     /**

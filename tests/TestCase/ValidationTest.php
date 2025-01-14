@@ -30,7 +30,7 @@ class ValidationTest extends TestCase
         return [
             [[''], false],
             [['+44 20 1234 5678'], true],
-            [['020 1234 5678', 'GB'], true],
+            [['01.02_03-04 05'], true],
         ];
     }
 

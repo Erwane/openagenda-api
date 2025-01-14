@@ -105,7 +105,7 @@ class OpenAgendaTestCase extends TestCase
             ->method($method)
             ->with($this->callback(function (Uri $uri) use ($uriExpect) {
                 parse_str((string)$uri->getQuery(), $q);
-                $this->assertEquals($uriExpect['path'] ?? '/v2', $uri->getPath());
+                $this->assertSame($uriExpect['path'] ?? '/v2', $uri->getPath());
                 $this->assertSame($uriExpect['query'] ?? [], $q);
 
                 return true;
