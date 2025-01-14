@@ -12,7 +12,6 @@ declare(strict_types=1);
  * @see         https://github.com/Erwane/openagenda-api
  * @license     https://opensource.org/licenses/mit-license.php MIT License
  */
-
 namespace OpenAgenda\Test\TestCase\Endpoint;
 
 use Cake\Validation\Validator;
