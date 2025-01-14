@@ -15,11 +15,11 @@ declare(strict_types=1);
 namespace OpenAgenda\Test\TestCase\Endpoint;
 
 use Cake\Validation\Validator;
+use OpenAgenda\Collection;
 use OpenAgenda\Endpoint\Agendas;
 use OpenAgenda\Entity\Agenda as AgendaEntity;
 use OpenAgenda\Test\EndpointTestCase;
 use OpenAgenda\Test\Utility\FileResource;
-use Ramsey\Collection\Collection;
 
 /**
  * Endpoint\Agendas tests
@@ -172,11 +172,11 @@ class AgendasTest extends EndpointTestCase
 
         $endpoint = new Agendas(['size' => 2]);
 
-        $agendas = $endpoint->get();
+        $results = $endpoint->get();
 
-        $this->assertInstanceOf(Collection::class, $agendas);
-        $this->assertEquals(AgendaEntity::class, $agendas->getType());
-        $this->assertCount(2, $agendas);
+        $this->assertInstanceOf(Collection::class, $results);
+        $this->assertInstanceOf(AgendaEntity::class, $results->first());
+        $this->assertCount(2, $results);
     }
 
     public function testGetMines()
@@ -189,10 +189,10 @@ class AgendasTest extends EndpointTestCase
 
         $endpoint = new Agendas(['size' => 1, '_path' => '/agendas/mines']);
 
-        $agendas = $endpoint->get();
+        $results = $endpoint->get();
 
-        $this->assertInstanceOf(Collection::class, $agendas);
-        $this->assertEquals(AgendaEntity::class, $agendas->getType());
-        $this->assertCount(1, $agendas);
+        $this->assertInstanceOf(Collection::class, $results);
+        $this->assertInstanceOf(AgendaEntity::class, $results->first());
+        $this->assertCount(1, $results);
     }
 }

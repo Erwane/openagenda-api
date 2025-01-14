@@ -16,9 +16,9 @@ namespace OpenAgenda\Endpoint;
 
 use Cake\Validation\Validation;
 use Cake\Validation\Validator;
+use OpenAgenda\Collection;
 use OpenAgenda\Entity\Location;
 use OpenAgenda\OpenAgenda;
-use Ramsey\Collection\Collection;
 
 /**
  * Locations endpoint
@@ -109,22 +109,21 @@ class Locations extends Endpoint
     /**
      * Get locations.
      *
-     * @return \OpenAgenda\Entity\Location[]|\Ramsey\Collection\Collection
+     * @return \OpenAgenda\Entity\Location[]|\OpenAgenda\Collection
      * @throws \OpenAgenda\OpenAgendaException
      */
     public function get(): Collection
     {
-        $collection = new Collection(Location::class);
-
         $response = OpenAgenda::getClient()->get($this->getUri(__FUNCTION__));
 
+        $items = [];
         if ($response['_success'] && !empty($response['locations'])) {
             foreach ($response['locations'] as $item) {
                 $entity = new Location($item, ['markClean' => true]);
-                $collection->add($entity);
+                $items[] = $entity;
             }
         }
 
-        return $collection;
+        return new Collection($items);
     }
 }

@@ -8,6 +8,7 @@ namespace OpenAgenda\Test\TestCase;
 
 use GuzzleHttp\Psr7\Response;
 use OpenAgenda\Client;
+use OpenAgenda\Collection;
 use OpenAgenda\Endpoint\Agenda;
 use OpenAgenda\Endpoint\Event;
 use OpenAgenda\Endpoint\Location;
@@ -20,7 +21,6 @@ use OpenAgenda\Test\Utility\FileResource;
 use OpenAgenda\Wrapper\HttpWrapper;
 use PHPUnit\Framework\TestCase;
 use Psr\SimpleCache\CacheInterface;
-use Ramsey\Collection\Collection;
 use stdClass;
 
 /**
@@ -189,9 +189,9 @@ class OpenAgendaTest extends TestCase
             )
             ->willReturn(new Response(200, ['Content-Type' => 'application/json'], $payload));
 
-        $agendas = $this->oa->agendas();
-        $this->assertInstanceOf(Collection::class, $agendas);
-        $this->assertInstanceOf(AgendaEntity::class, $agendas->first());
+        $results = $this->oa->agendas();
+        $this->assertInstanceOf(Collection::class, $results);
+        $this->assertInstanceOf(AgendaEntity::class, $results->first());
     }
 
     public function testMyAgendas()
@@ -206,9 +206,9 @@ class OpenAgendaTest extends TestCase
             )
             ->willReturn(new Response(200, ['Content-Type' => 'application/json'], $payload));
 
-        $agendas = $this->oa->myAgendas();
-        $this->assertInstanceOf(Collection::class, $agendas);
-        $this->assertInstanceOf(AgendaEntity::class, $agendas->first());
+        $results = $this->oa->myAgendas();
+        $this->assertInstanceOf(Collection::class, $results);
+        $this->assertInstanceOf(AgendaEntity::class, $results->first());
     }
 
     public function testAgenda()
@@ -231,8 +231,8 @@ class OpenAgendaTest extends TestCase
             )
             ->willReturn(new Response(200, ['Content-Type' => 'application/json'], $payload));
 
-        $locations = $this->oa->locations(['agendaUid' => 123456]);
-        $this->assertInstanceOf(LocationEntity::class, $locations->first());
+        $results = $this->oa->locations(['agendaUid' => 123456]);
+        $this->assertInstanceOf(LocationEntity::class, $results->first());
     }
 
     public function testGetLocation()
@@ -254,8 +254,8 @@ class OpenAgendaTest extends TestCase
             )
             ->willReturn(new Response(200, ['Content-Type' => 'application/json'], $payload));
 
-        $locations = $this->oa->events(['agendaUid' => 123456]);
-        $this->assertInstanceOf(EventEntity::class, $locations->first());
+        $results = $this->oa->events(['agendaUid' => 123456]);
+        $this->assertInstanceOf(EventEntity::class, $results->first());
     }
 
     public function testEvent()

@@ -16,6 +16,7 @@ namespace OpenAgenda\Test\TestCase\Entity;
 
 use Cake\Chronos\Chronos;
 use GuzzleHttp\Psr7\Response;
+use OpenAgenda\Collection;
 use OpenAgenda\Endpoint\Event as EventEndpoint;
 use OpenAgenda\Endpoint\Location as LocationEndpoint;
 use OpenAgenda\Entity\Agenda;
@@ -25,7 +26,6 @@ use OpenAgenda\OpenAgenda;
 use OpenAgenda\OpenAgendaException;
 use OpenAgenda\Test\OpenAgendaTestCase;
 use OpenAgenda\Test\Utility\FileResource;
-use Ramsey\Collection\Collection;
 
 /**
  * @uses \OpenAgenda\Entity\Agenda
@@ -121,10 +121,10 @@ class AgendaTest extends OpenAgendaTestCase
             ->method('get')
             ->willReturn(new Response(200, [], $payload));
 
-        $locations = $entity->locations(['name' => 'My Location']);
+        $results = $entity->locations(['name' => 'My Location']);
 
-        $this->assertInstanceOf(Collection::class, $locations);
-        $this->assertInstanceOf(Location::class, $locations->first());
+        $this->assertInstanceOf(Collection::class, $results);
+        $this->assertInstanceOf(Location::class, $results->first());
     }
 
     public function testLocation()
@@ -167,10 +167,10 @@ class AgendaTest extends OpenAgendaTestCase
             ->method('get')
             ->willReturn(new Response(200, [], $payload));
 
-        $events = $entity->events(['title' => 'My Event']);
+        $results = $entity->events(['title' => 'My Event']);
 
-        $this->assertInstanceOf(Collection::class, $events);
-        $this->assertInstanceOf(Event::class, $events->first());
+        $this->assertInstanceOf(Collection::class, $results);
+        $this->assertInstanceOf(Event::class, $results->first());
     }
 
     public function testEvent()

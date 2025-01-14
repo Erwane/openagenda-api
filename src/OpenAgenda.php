@@ -10,7 +10,6 @@ use OpenAgenda\Endpoint\Event;
 use OpenAgenda\Endpoint\Location;
 use OpenAgenda\Wrapper\HttpWrapper;
 use Psr\SimpleCache\CacheInterface;
-use Ramsey\Collection\Collection;
 
 /**
  * OpenAgenda
@@ -142,7 +141,7 @@ class OpenAgenda
      *
      * @param string $path Endpoint path. Relative, not real OpenAgenda endpoint.
      * @param array $params Client options
-     * @return \Ramsey\Collection\Collection|\OpenAgenda\Entity\Entity|\Psr\Http\Message\ResponseInterface
+     * @return \OpenAgenda\Collection|\OpenAgenda\Entity\Entity|\Psr\Http\Message\ResponseInterface
      */
     public function get(string $path, array $params = [])
     {
@@ -155,7 +154,7 @@ class OpenAgenda
      *
      * @param string $path Endpoint path. Relative, not real OpenAgenda endpoint.
      * @param array $params Client options
-     * @return \Ramsey\Collection\Collection|\OpenAgenda\Entity\Entity|\Psr\Http\Message\ResponseInterface
+     * @return \OpenAgenda\Collection|\OpenAgenda\Entity\Entity|\Psr\Http\Message\ResponseInterface
      */
     public function post(string $path, array $params = [])
     {
@@ -168,7 +167,7 @@ class OpenAgenda
      *
      * @param string $path Endpoint path. Relative, not real OpenAgenda endpoint.
      * @param array $params Client options
-     * @return \Ramsey\Collection\Collection|\OpenAgenda\Entity\Entity|\Psr\Http\Message\ResponseInterface
+     * @return \OpenAgenda\Collection|\OpenAgenda\Entity\Entity|\Psr\Http\Message\ResponseInterface
      */
     public function patch(string $path, array $params = [])
     {
@@ -181,7 +180,7 @@ class OpenAgenda
      *
      * @param string $path Endpoint path. Relative, not real OpenAgenda endpoint.
      * @param array $params Client options
-     * @return \Ramsey\Collection\Collection|\OpenAgenda\Entity\Entity|\Psr\Http\Message\ResponseInterface
+     * @return \OpenAgenda\Collection|\OpenAgenda\Entity\Entity|\Psr\Http\Message\ResponseInterface
      */
     public function delete(string $path, array $params = [])
     {
@@ -193,7 +192,7 @@ class OpenAgenda
      * Get agendas from OpenAgenda.
      *
      * @param array $params Query params.
-     * @return \OpenAgenda\Entity\Agenda[]|\Ramsey\Collection\Collection
+     * @return \OpenAgenda\Entity\Agenda[]|\OpenAgenda\Collection
      * @throws \OpenAgenda\Endpoint\UnknownEndpointException
      * @uses \OpenAgenda\Endpoint\Agendas::get()
      */
@@ -206,7 +205,7 @@ class OpenAgenda
      * Get agendas from OpenAgenda.
      *
      * @param array $params Query params.
-     * @return \OpenAgenda\Entity\Agenda[]|\Ramsey\Collection\Collection
+     * @return \OpenAgenda\Entity\Agenda[]|\OpenAgenda\Collection
      * @throws \OpenAgenda\Endpoint\UnknownEndpointException
      * @uses \OpenAgenda\Endpoint\Agendas
      */
@@ -231,7 +230,7 @@ class OpenAgenda
      * Get OpenAgenda locations for an agenda.
      *
      * @param array $params Query params.
-     * @return \OpenAgenda\Entity\Location[]|\Ramsey\Collection\Collection
+     * @return \OpenAgenda\Entity\Location[]|\OpenAgenda\Collection
      * @throws \OpenAgenda\Endpoint\UnknownEndpointException
      * @uses \OpenAgenda\Endpoint\Locations
      */
@@ -256,7 +255,7 @@ class OpenAgenda
      * Get OpenAgenda events for an agenda.
      *
      * @param array $params Query params.
-     * @return \OpenAgenda\Entity\Event[]|\Ramsey\Collection\Collection
+     * @return \OpenAgenda\Entity\Event[]|\OpenAgenda\Collection
      * @throws \OpenAgenda\Endpoint\UnknownEndpointException
      * @uses \OpenAgenda\Endpoint\Events
      */

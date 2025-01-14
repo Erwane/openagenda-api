@@ -1,19 +1,37 @@
 # Collection
 
-When the OpenAgenda `GET` endpoint could return multiple results, a Collection is created to iterate over.
+When OpenAgenda API return multiple results, they are append in a Collection object.
 
-Collection implements `Iterator` and `JsonSerializable`.
+Collection implements `Countable`, `Iterator` and `JsonSerializable`.
 
-## Collection methods
+## Methods
 
-### toArray() `array`
-Return all results as array.
+### count()
+```php
+$c = new Collection(['red', 'blue', 'green']);
+count($c); // return 3
+```
 
-### toJson() `string`
-Return all results and collection as JSON string.
+### first()
+Get first Collection element.
+```php
+$c = new Collection(['red', 'blue', 'green']);
+$c->first(); // 'red'
+```
 
-### first() `mixed`
-Get first element.
+### last()
+Get last Collection element.
+```php
+$c = new Collection(['red', 'blue', 'green']);
+$c->last(); // 'green'
+```
 
-### last() `mixed`
-Get last element.
+### toArray()
+Return Collection as array.
+All object elements with `toArray()` are also converted.
+
+### json encode
+```php
+$c = new Collection(['red', 'blue', 'green']);
+json_encode($c); // '["red","blue","green"]'
+```

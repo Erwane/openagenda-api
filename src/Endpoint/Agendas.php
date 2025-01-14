@@ -15,9 +15,9 @@ declare(strict_types=1);
 namespace OpenAgenda\Endpoint;
 
 use Cake\Validation\Validator;
+use OpenAgenda\Collection;
 use OpenAgenda\Entity\Agenda;
 use OpenAgenda\OpenAgenda;
-use Ramsey\Collection\Collection;
 
 /**
  * Agendas endpoint
@@ -96,13 +96,11 @@ class Agendas extends Endpoint
     /**
      * Get agendas.
      *
-     * @return \OpenAgenda\Entity\Agenda[]|\Ramsey\Collection\Collection
+     * @return \OpenAgenda\Entity\Agenda[]|\OpenAgenda\Collection
      * @throws \OpenAgenda\OpenAgendaException
      */
     public function get(): Collection
     {
-        $collection = new Collection(Agenda::class);
-
         $uri = $this->getUri(__FUNCTION__);
         $response = OpenAgenda::getClient()->get($uri);
 
@@ -111,13 +109,14 @@ class Agendas extends Endpoint
             $target = 'items';
         }
 
+        $items = [];
         if ($response['_success'] && !empty($response[$target])) {
             foreach ($response[$target] as $item) {
                 $agenda = new Agenda($item, ['markClean' => true]);
-                $collection->add($agenda);
+                $items[] = $agenda;
             }
         }
 
-        return $collection;
+        return new Collection($items);
     }
 }

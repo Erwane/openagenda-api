@@ -15,13 +15,13 @@ declare(strict_types=1);
 namespace OpenAgenda\Test\TestCase\Endpoint;
 
 use Cake\Validation\Validator;
+use OpenAgenda\Collection;
 use OpenAgenda\Endpoint\Events;
 use OpenAgenda\Entity\Event as EventEntity;
 use OpenAgenda\OpenAgendaException;
 use OpenAgenda\Test\EndpointTestCase;
 use OpenAgenda\Test\Utility\FileResource;
 use OpenAgenda\Validation;
-use Ramsey\Collection\Collection;
 
 /**
  * Endpoint\Events tests
@@ -372,7 +372,7 @@ class EventsTest extends EndpointTestCase
         $results = $endpoint->get();
 
         $this->assertInstanceOf(Collection::class, $results);
-        $this->assertEquals(EventEntity::class, $results->getType());
+        $this->assertInstanceOf(EventEntity::class, $results->first());
         $this->assertCount(1, $results);
     }
 }

@@ -16,12 +16,12 @@ namespace OpenAgenda\Test\TestCase\Endpoint;
 
 use Cake\Validation\Validation;
 use Cake\Validation\Validator;
+use OpenAgenda\Collection;
 use OpenAgenda\Endpoint\Locations;
 use OpenAgenda\Entity\Location as LocationEntity;
 use OpenAgenda\OpenAgendaException;
 use OpenAgenda\Test\EndpointTestCase;
 use OpenAgenda\Test\Utility\FileResource;
-use Ramsey\Collection\Collection;
 
 /**
  * Endpoint\Locations tests
@@ -208,10 +208,10 @@ class LocationsTest extends EndpointTestCase
 
         $endpoint = new Locations(['agendaUid' => 123, 'size' => 2]);
 
-        $locations = $endpoint->get();
+        $results = $endpoint->get();
 
-        $this->assertInstanceOf(Collection::class, $locations);
-        $this->assertEquals(LocationEntity::class, $locations->getType());
-        $this->assertCount(1, $locations);
+        $this->assertInstanceOf(Collection::class, $results);
+        $this->assertInstanceOf(LocationEntity::class, $results->first());
+        $this->assertCount(1, $results);
     }
 }
