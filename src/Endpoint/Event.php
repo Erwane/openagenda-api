@@ -268,20 +268,16 @@ class Event extends Endpoint
                 return false;
             }
 
-            try {
-                /**
-                 * @var \DateTimeInterface|string $begin
-                 * @var \DateTimeInterface|string $end
-                 */
-                extract($item);
-                if (is_string($begin)) {
-                    $begin = DateTime::parse($begin);
-                }
-                if (is_string($end)) {
-                    $end = DateTime::parse($end);
-                }
-            } catch (Exception $e) {
-                return false;
+            /**
+             * @var \DateTimeInterface|string $begin
+             * @var \DateTimeInterface|string $end
+             */
+            extract($item);
+            if (is_string($begin)) {
+                $begin = DateTime::parse($begin);
+            }
+            if (is_string($end)) {
+                $end = DateTime::parse($end);
             }
 
             if (!$begin || !$end || $begin >= $end) {
@@ -406,7 +402,6 @@ class Event extends Endpoint
 
     /**
      * {@inheritDoc}
-     *
      * @throws \OpenAgenda\OpenAgendaException
      */
     public function exists(): bool
