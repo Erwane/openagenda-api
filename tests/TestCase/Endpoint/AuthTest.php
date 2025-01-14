@@ -28,8 +28,8 @@ class AuthTest extends EndpointTestCase
     public function testGetUriSuccess()
     {
         $endpoint = new Auth();
-        $uri = $endpoint->getUri('post');
-        $this->assertEquals('/v2/requestAccessToken', $uri->getPath());
-        $this->assertNull($uri->getQuery());
+        $url = $endpoint->getUrl('post');
+        $this->assertEquals('/v2/requestAccessToken', parse_url($url, PHP_URL_PATH));
+        $this->assertNull(parse_url($url, PHP_URL_QUERY));
     }
 }

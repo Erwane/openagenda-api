@@ -16,10 +16,10 @@ namespace OpenAgenda\Endpoint;
 
 use Cake\Validation\Validation as CakeValidation;
 use Cake\Validation\Validator;
+use OpenAgenda\Collection;
 use OpenAgenda\Entity\Event as EventEntity;
 use OpenAgenda\OpenAgenda;
 use OpenAgenda\Validation;
-use Ramsey\Collection\Collection;
 
 /**
  * Events endpoint
@@ -209,23 +209,22 @@ class Events extends Endpoint
     /**
      * Get locations.
      *
-     * @return \OpenAgenda\Entity\Event[]|\Ramsey\Collection\Collection
+     * @return \OpenAgenda\Entity\Event[]|\OpenAgenda\Collection
      * @throws \OpenAgenda\OpenAgendaException
      */
     public function get(): Collection
     {
-        $collection = new Collection(EventEntity::class);
-
         $response = OpenAgenda::getClient()
-            ->get($this->getUri(__FUNCTION__));
+            ->get($this->getUrl(__FUNCTION__));
 
+        $items = [];
         if ($response['_success'] && !empty($response['events'])) {
             foreach ($response['events'] as $item) {
                 $entity = new EventEntity($item, ['markClean' => true]);
-                $collection->add($entity);
+                $items[] = $entity;
             }
         }
 
-        return $collection;
+        return new Collection($items);
     }
 }

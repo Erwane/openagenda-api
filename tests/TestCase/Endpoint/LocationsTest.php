@@ -16,12 +16,12 @@ namespace OpenAgenda\Test\TestCase\Endpoint;
 
 use Cake\Validation\Validation;
 use Cake\Validation\Validator;
+use OpenAgenda\Collection;
 use OpenAgenda\Endpoint\Locations;
 use OpenAgenda\Entity\Location as LocationEntity;
 use OpenAgenda\OpenAgendaException;
 use OpenAgenda\Test\EndpointTestCase;
 use OpenAgenda\Test\Utility\FileResource;
-use Ramsey\Collection\Collection;
 
 /**
  * Endpoint\Locations tests
@@ -135,7 +135,7 @@ class LocationsTest extends EndpointTestCase
     /**
      * @dataProvider dataGetUriErrors
      */
-    public function testGetUriErrors($method, $params, $expected)
+    public function testGetUrlErrors($method, $params, $expected)
     {
         $endpoint = new Locations($params);
         $message = [
@@ -144,7 +144,7 @@ class LocationsTest extends EndpointTestCase
         ];
         $this->expectException(OpenAgendaException::class);
         $this->expectExceptionMessage(json_encode($message, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
-        $endpoint->getUri($method);
+        $endpoint->getUrl($method);
     }
 
     public static function dataGetUriSuccess(): array
@@ -189,12 +189,12 @@ class LocationsTest extends EndpointTestCase
     /**
      * @dataProvider dataGetUriSuccess
      */
-    public function testGetUriSuccess($method, $params, $expected)
+    public function testGetUrlSuccess($method, $params, $expected)
     {
         $endpoint = new Locations($params);
-        $uri = $endpoint->getUri($method);
-        $this->assertEquals($expected['path'], $uri->getPath());
-        parse_str((string)$uri->getQuery(), $query);
+        $url = $endpoint->getUrl($method);
+        $this->assertEquals($expected['path'], parse_url($url, PHP_URL_PATH));
+        parse_str((string)parse_url($url, PHP_URL_QUERY), $query);
         $this->assertEquals($expected['query'], $query);
     }
 
@@ -208,10 +208,10 @@ class LocationsTest extends EndpointTestCase
 
         $endpoint = new Locations(['agendaUid' => 123, 'size' => 2]);
 
-        $locations = $endpoint->get();
+        $results = $endpoint->get();
 
-        $this->assertInstanceOf(Collection::class, $locations);
-        $this->assertEquals(LocationEntity::class, $locations->getType());
-        $this->assertCount(1, $locations);
+        $this->assertInstanceOf(Collection::class, $results);
+        $this->assertInstanceOf(LocationEntity::class, $results->first());
+        $this->assertCount(1, $results);
     }
 }

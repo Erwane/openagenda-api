@@ -14,10 +14,10 @@ declare(strict_types=1);
  */
 namespace OpenAgenda\Entity;
 
+use OpenAgenda\Collection;
 use OpenAgenda\Endpoint\EndpointFactory;
 use OpenAgenda\OpenAgenda;
 use OpenAgenda\OpenAgendaException;
-use Ramsey\Collection\Collection;
 
 /**
  * @property int|null $uid
@@ -69,7 +69,7 @@ class Agenda extends Entity
      * Search locations for this agenda.
      *
      * @param array $params Endpoint params
-     * @return \Ramsey\Collection\Collection
+     * @return \OpenAgenda\Collection
      * @throws \OpenAgenda\OpenAgendaException
      */
     public function locations(array $params = []): Collection
@@ -100,7 +100,7 @@ class Agenda extends Entity
      * Search events for this agenda.
      *
      * @param array $params Endpoint params
-     * @return \Ramsey\Collection\Collection
+     * @return \OpenAgenda\Collection
      * @throws \OpenAgenda\OpenAgendaException
      */
     public function events(array $params = []): Collection

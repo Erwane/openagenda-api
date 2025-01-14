@@ -14,9 +14,9 @@ declare(strict_types=1);
  */
 namespace OpenAgenda\Test\TestCase\Endpoint;
 
-use Cake\Chronos\Chronos;
 use Cake\Validation\Validator;
 use GuzzleHttp\Psr7\Response;
+use OpenAgenda\DateTime;
 use OpenAgenda\Endpoint\Event;
 use OpenAgenda\Entity\Event as EventEntity;
 use OpenAgenda\OpenAgenda;
@@ -372,8 +372,8 @@ class EventTest extends EndpointTestCase
             [
                 [
                     [
-                        'begin' => Chronos::parse('2025-01-06T11:00:00+01:00'),
-                        'end' => Chronos::parse('2025-01-06T12:00:00+01:00'),
+                        'begin' => DateTime::parse('2025-01-06T11:00:00+01:00'),
+                        'end' => DateTime::parse('2025-01-06T12:00:00+01:00'),
                     ],
                 ],
                 true,
@@ -626,7 +626,7 @@ class EventTest extends EndpointTestCase
         ];
         $this->expectException(OpenAgendaException::class);
         $this->expectExceptionMessage(json_encode($message, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
-        $endpoint->getUri($method);
+        $endpoint->getUrl($method);
     }
 
     public static function dataGetUriSuccess(): array
@@ -666,8 +666,8 @@ class EventTest extends EndpointTestCase
     public function testGetUriSuccess($method, $params, $expected)
     {
         $endpoint = new Event($params);
-        $uri = $endpoint->getUri($method);
-        $this->assertEquals($expected, $uri->getPath());
+        $url = $endpoint->getUrl($method);
+        $this->assertEquals($expected, parse_url($url, PHP_URL_PATH));
     }
 
     public function testGet()
@@ -714,7 +714,6 @@ class EventTest extends EndpointTestCase
                     ['begin' => '2025-01-06T11:00:00+01:00', 'end' => '2025-01-06T15:00:00+01:00'],
                 ],
             ],
-            ['headers' => ['access-token' => 'authorization-key', 'nonce' => 1734957296123456]],
         ], [200, $payload]);
 
         $endpoint = new Event([
@@ -741,7 +740,6 @@ class EventTest extends EndpointTestCase
             [
                 'state' => EventEntity::STATE_PUBLISHED,
             ],
-            ['headers' => ['access-token' => 'authorization-key', 'nonce' => 1734957296123456]],
         ], [200, $payload]);
 
         $endpoint = new Event([
@@ -762,7 +760,6 @@ class EventTest extends EndpointTestCase
         $payload = FileResource::instance($this)->getContent('Response/events/delete.json');
         $this->mockRequest(true, 'delete', [
             'https://api.openagenda.com/v2/agendas/41630080/events/41294774',
-            ['headers' => ['access-token' => 'authorization-key', 'nonce' => 1734957296123456]],
         ], [200, $payload]);
 
         $endpoint = new Event(['agendaUid' => 41630080, 'uid' => 41294774]);

@@ -14,9 +14,6 @@ declare(strict_types=1);
  */
 namespace OpenAgenda\Wrapper;
 
-use League\Uri\Contracts\UriInterface;
-use League\Uri\Uri;
-
 /**
  * Abstract HttpWrapper
  */
@@ -40,22 +37,5 @@ abstract class HttpWrapper implements HttpWrapperInterface
     {
         // Create PSR-18 Http client and store it.
         // $this->http = new Psr18Client(params)
-    }
-
-    /**
-     * Build Uri from string or uri.
-     *
-     * @param \League\Uri\Contracts\UriInterface|\Psr\Http\Message\UriInterface|string $uri Base uri to build.
-     * @return \League\Uri\Contracts\UriInterface
-     */
-    public function buildUri($uri): UriInterface
-    {
-        if (is_string($uri)) {
-            $uri = Uri::createFromString($uri);
-        } else {
-            $uri = Uri::createFromUri($uri);
-        }
-
-        return $uri;
     }
 }

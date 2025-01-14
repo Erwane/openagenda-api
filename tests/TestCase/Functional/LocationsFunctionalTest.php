@@ -14,8 +14,7 @@ declare(strict_types=1);
  */
 namespace OpenAgenda\Test\TestCase\Functional;
 
-use Cake\Chronos\Chronos;
-use League\Uri\Uri;
+use OpenAgenda\DateTime;
 use OpenAgenda\Entity\Agenda;
 use OpenAgenda\Entity\Location;
 use OpenAgenda\Test\OpenAgendaTestCase;
@@ -70,10 +69,10 @@ class LocationsFunctionalTest extends OpenAgendaTestCase
             'detailed' => true,
             'search' => 'my location',
             'state' => true,
-            'createdAt[gte]' => Chronos::parse('2023-06-01'),
-            'createdAt[lte]' => Chronos::parse('2023-06-30T23:59:59'),
+            'createdAt[gte]' => DateTime::parse('2023-06-01'),
+            'createdAt[lte]' => DateTime::parse('2023-06-30T23:59:59'),
             'updatedAt[gte]' => '2023-06-10',
-            'updatedAt[lte]' => Chronos::parse('2023-06-20T23:59:59'),
+            'updatedAt[lte]' => DateTime::parse('2023-06-20T23:59:59'),
             'order' => 'name.desc',
         ]);
         $this->assertCount(1, $locations);
@@ -125,10 +124,10 @@ class LocationsFunctionalTest extends OpenAgendaTestCase
             'detailed' => true,
             'search' => 'my location',
             'state' => true,
-            'createdAt[gte]' => Chronos::parse('2023-06-01'),
-            'createdAt[lte]' => Chronos::parse('2023-06-30T23:59:59'),
+            'createdAt[gte]' => DateTime::parse('2023-06-01'),
+            'createdAt[lte]' => DateTime::parse('2023-06-30T23:59:59'),
             'updatedAt[gte]' => '2023-06-10',
-            'updatedAt[lte]' => Chronos::parse('2023-06-20T23:59:59'),
+            'updatedAt[lte]' => DateTime::parse('2023-06-20T23:59:59'),
             'order' => 'name.desc',
         ]);
         $this->assertCount(1, $locations);
@@ -271,7 +270,7 @@ class LocationsFunctionalTest extends OpenAgendaTestCase
                 'access' => ['fr' => 'Location access'],
                 'website' => 'https://example.com',
                 'email' => 'email@example.com',
-                'phone' => '+33123456789',
+                'phone' => '0123456789',
                 'links' => ['https://www.louvre.fr', 'https://www.facebook.com/museedulouvre'],
                 'image' => null,
                 'imageCredits' => 'Image credits',
@@ -281,8 +280,8 @@ class LocationsFunctionalTest extends OpenAgendaTestCase
                 'city' => 'Paris',
                 'postalCode' => '75011',
                 'insee' => '75011',
-                'latitude' => '1.2345',
-                'longitude' => '6.7890',
+                'latitude' => 1.2345,
+                'longitude' => 6.7890,
                 'timezone' => 'Europe/Paris',
             ]
         );
@@ -330,8 +329,8 @@ class LocationsFunctionalTest extends OpenAgendaTestCase
         $client->expects($this->once())
             ->method('post')
             ->with(
-                $this->callback(function ($uri) {
-                    $this->assertInstanceOf(Uri::class, $uri);
+                $this->callback(function ($url) {
+                    $this->assertStringStartsWith('https://api.openagenda.com/v2/', $url);
 
                     return true;
                 }),

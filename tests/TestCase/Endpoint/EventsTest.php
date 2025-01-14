@@ -15,13 +15,13 @@ declare(strict_types=1);
 namespace OpenAgenda\Test\TestCase\Endpoint;
 
 use Cake\Validation\Validator;
+use OpenAgenda\Collection;
 use OpenAgenda\Endpoint\Events;
 use OpenAgenda\Entity\Event as EventEntity;
 use OpenAgenda\OpenAgendaException;
 use OpenAgenda\Test\EndpointTestCase;
 use OpenAgenda\Test\Utility\FileResource;
 use OpenAgenda\Validation;
-use Ramsey\Collection\Collection;
 
 /**
  * Endpoint\Events tests
@@ -265,7 +265,7 @@ class EventsTest extends EndpointTestCase
         ];
         $this->expectException(OpenAgendaException::class);
         $this->expectExceptionMessage(json_encode($message, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
-        $endpoint->getUri('GET');
+        $endpoint->getUrl('GET');
     }
 
     public static function dataGetUriSuccess(): array
@@ -353,9 +353,9 @@ class EventsTest extends EndpointTestCase
     public function testGetUriSuccess($method, $params, $expected)
     {
         $endpoint = new Events($params);
-        $uri = $endpoint->getUri($method);
-        $this->assertEquals($expected['path'], $uri->getPath());
-        parse_str((string)$uri->getQuery(), $query);
+        $url = $endpoint->getUrl($method);
+        $this->assertEquals($expected['path'], parse_url($url, PHP_URL_PATH));
+        parse_str((string)parse_url($url, PHP_URL_QUERY), $query);
         $this->assertEquals($expected['query'], $query);
     }
 
@@ -372,7 +372,7 @@ class EventsTest extends EndpointTestCase
         $results = $endpoint->get();
 
         $this->assertInstanceOf(Collection::class, $results);
-        $this->assertEquals(EventEntity::class, $results->getType());
+        $this->assertInstanceOf(EventEntity::class, $results->first());
         $this->assertCount(1, $results);
     }
 }

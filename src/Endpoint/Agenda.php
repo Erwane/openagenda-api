@@ -70,7 +70,7 @@ class Agenda extends Endpoint
     public function exists(): bool
     {
         $status = OpenAgenda::getClient()
-            ->head($this->getUri(__FUNCTION__));
+            ->head($this->getUrl(__FUNCTION__));
 
         return $status >= 200 && $status < 300;
     }
@@ -86,7 +86,7 @@ class Agenda extends Endpoint
         $agenda = null;
 
         $response = OpenAgenda::getClient()
-            ->get($this->getUri(__FUNCTION__));
+            ->get($this->getUrl(__FUNCTION__));
 
         if ($response['_success'] && !empty($response['uid'])) {
             $agenda = new AgendaEntity($response, ['markClean' => true]);

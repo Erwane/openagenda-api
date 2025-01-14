@@ -372,7 +372,7 @@ class LocationTest extends EndpointTestCase
         ];
         $this->expectException(OpenAgendaException::class);
         $this->expectExceptionMessage(json_encode($message, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
-        $endpoint->getUri($method);
+        $endpoint->getUrl($method);
     }
 
     public static function dataGetUriSuccess(): array
@@ -427,8 +427,8 @@ class LocationTest extends EndpointTestCase
     public function testGetUriSuccess($method, $params, $expected)
     {
         $endpoint = new Location($params);
-        $uri = $endpoint->getUri($method);
-        $this->assertEquals($expected, $uri->getPath());
+        $url = $endpoint->getUrl($method);
+        $this->assertEquals($expected, parse_url($url, PHP_URL_PATH));
     }
 
     public function testGet()
@@ -472,7 +472,6 @@ class LocationTest extends EndpointTestCase
                 'countryCode' => 'FR',
                 'state' => '1',
             ],
-            ['headers' => ['access-token' => 'authorization-key', 'nonce' => 1734957296123456]],
         ], [200, $payload]);
 
         $endpoint = new Location([
@@ -498,7 +497,6 @@ class LocationTest extends EndpointTestCase
             [
                 'state' => 1,
             ],
-            ['headers' => ['access-token' => 'authorization-key', 'nonce' => 1734957296123456]],
         ], [200, $payload]);
 
         $endpoint = new Location([
@@ -534,7 +532,6 @@ class LocationTest extends EndpointTestCase
         $payload = FileResource::instance($this)->getContent('Response/locations/delete.json');
         $this->mockRequest(true, 'delete', [
             'https://api.openagenda.com/v2/agendas/123/locations/82680484',
-            ['headers' => ['access-token' => 'authorization-key', 'nonce' => 1734957296123456]],
         ], [200, $payload]);
 
         $endpoint = new Location(['agendaUid' => 123, 'uid' => 82680484]);

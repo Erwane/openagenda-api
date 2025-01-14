@@ -1,10 +1,22 @@
 <?php
 declare(strict_types=1);
 
+/**
+ * OpenAgenda API client.
+ * Copyright (c) Erwane BRETON
+ * Licensed under The MIT License
+ * For full copyright and license information, please see the LICENSE.txt
+ * Redistributions of files must retain the above copyright notice.
+ *
+ * @copyright   Copyright (c) Erwane BRETON
+ * @see         https://github.com/Erwane/openagenda-api
+ * @license     https://opensource.org/licenses/mit-license.php MIT License
+ */
 namespace OpenAgenda\Entity;
 
-use Cake\Chronos\Chronos;
 use Cake\Validation\Validation;
+use DateTimeInterface;
+use OpenAgenda\DateTime;
 use OpenAgenda\Endpoint\EndpointFactory;
 use OpenAgenda\OpenAgenda;
 use OpenAgenda\OpenAgendaException;
@@ -184,10 +196,10 @@ class Event extends Entity
     {
         foreach ($timings as $key => $timing) {
             if (isset($timing['begin']) && is_string($timing['begin'])) {
-                $timing['begin'] = Chronos::parse($timing['begin']);
+                $timing['begin'] = DateTime::parse($timing['begin']);
             }
             if (isset($timing['end']) && is_string($timing['end'])) {
-                $timing['end'] = Chronos::parse($timing['end']);
+                $timing['end'] = DateTime::parse($timing['end']);
             }
             $timings[$key] = $timing;
         }
@@ -317,10 +329,10 @@ class Event extends Entity
         $timings = $data['timings'] ?? null;
         if (is_array($timings)) {
             foreach ($timings as &$timing) {
-                if ($timing['begin'] instanceof Chronos) {
+                if ($timing['begin'] instanceof DateTimeInterface) {
                     $timing['begin'] = $timing['begin']->toAtomString();
                 }
-                if ($timing['end'] instanceof Chronos) {
+                if ($timing['end'] instanceof DateTimeInterface) {
                     $timing['end'] = $timing['end']->toAtomString();
                 }
             }
@@ -381,9 +393,6 @@ class Event extends Entity
 
         if (is_array($value)) {
             foreach ($value as $lang => $text) {
-                $text = static::cleanupHtml($text);
-                $text = static::htmlToMarkdown($text);
-
                 if (mb_strlen($text) > 10000) {
                     $text = mb_substr($text, 0, 9996) . ' ...';
                 }

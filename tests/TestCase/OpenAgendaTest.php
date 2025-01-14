@@ -1,13 +1,22 @@
 <?php
-/**
- * @noinspection PhpUnhandledExceptionInspection
- */
 declare(strict_types=1);
 
+/**
+ * OpenAgenda API client.
+ * Copyright (c) Erwane BRETON
+ * Licensed under The MIT License
+ * For full copyright and license information, please see the LICENSE.txt
+ * Redistributions of files must retain the above copyright notice.
+ *
+ * @copyright   Copyright (c) Erwane BRETON
+ * @see         https://github.com/Erwane/openagenda-api
+ * @license     https://opensource.org/licenses/mit-license.php MIT License
+ */
 namespace OpenAgenda\Test\TestCase;
 
 use GuzzleHttp\Psr7\Response;
 use OpenAgenda\Client;
+use OpenAgenda\Collection;
 use OpenAgenda\Endpoint\Agenda;
 use OpenAgenda\Endpoint\Event;
 use OpenAgenda\Endpoint\Location;
@@ -20,7 +29,6 @@ use OpenAgenda\Test\Utility\FileResource;
 use OpenAgenda\Wrapper\HttpWrapper;
 use PHPUnit\Framework\TestCase;
 use Psr\SimpleCache\CacheInterface;
-use Ramsey\Collection\Collection;
 use stdClass;
 
 /**
@@ -189,9 +197,9 @@ class OpenAgendaTest extends TestCase
             )
             ->willReturn(new Response(200, ['Content-Type' => 'application/json'], $payload));
 
-        $agendas = $this->oa->agendas();
-        $this->assertInstanceOf(Collection::class, $agendas);
-        $this->assertInstanceOf(AgendaEntity::class, $agendas->first());
+        $results = $this->oa->agendas();
+        $this->assertInstanceOf(Collection::class, $results);
+        $this->assertInstanceOf(AgendaEntity::class, $results->first());
     }
 
     public function testMyAgendas()
@@ -206,18 +214,18 @@ class OpenAgendaTest extends TestCase
             )
             ->willReturn(new Response(200, ['Content-Type' => 'application/json'], $payload));
 
-        $agendas = $this->oa->myAgendas();
-        $this->assertInstanceOf(Collection::class, $agendas);
-        $this->assertInstanceOf(AgendaEntity::class, $agendas->first());
+        $results = $this->oa->myAgendas();
+        $this->assertInstanceOf(Collection::class, $results);
+        $this->assertInstanceOf(AgendaEntity::class, $results->first());
     }
 
     public function testAgenda()
     {
         $endpoint = $this->oa->agenda(['uid' => 12345, 'detailed' => true]);
         $this->assertInstanceOf(Agenda::class, $endpoint);
-        $uri = $endpoint->getUri('get');
-        $this->assertEquals('/v2/agendas/12345', $uri->getPath());
-        $this->assertEquals('detailed=1', $uri->getQuery());
+        $url = $endpoint->getUrl('get');
+        $this->assertEquals('/v2/agendas/12345', parse_url($url, PHP_URL_PATH));
+        $this->assertEquals('detailed=1', parse_url($url, PHP_URL_QUERY));
     }
 
     public function testLocations()
@@ -231,16 +239,16 @@ class OpenAgendaTest extends TestCase
             )
             ->willReturn(new Response(200, ['Content-Type' => 'application/json'], $payload));
 
-        $locations = $this->oa->locations(['agendaUid' => 123456]);
-        $this->assertInstanceOf(LocationEntity::class, $locations->first());
+        $results = $this->oa->locations(['agendaUid' => 123456]);
+        $this->assertInstanceOf(LocationEntity::class, $results->first());
     }
 
     public function testGetLocation()
     {
         $endpoint = $this->oa->location(['uid' => 123, 'agendaUid' => 456]);
         $this->assertInstanceOf(Location::class, $endpoint);
-        $uri = $endpoint->getUri('get');
-        $this->assertEquals('/v2/agendas/456/locations/123', $uri->getPath());
+        $url = $endpoint->getUrl('get');
+        $this->assertEquals('/v2/agendas/456/locations/123', parse_url($url, PHP_URL_PATH));
     }
 
     public function testEvents()
@@ -254,15 +262,15 @@ class OpenAgendaTest extends TestCase
             )
             ->willReturn(new Response(200, ['Content-Type' => 'application/json'], $payload));
 
-        $locations = $this->oa->events(['agendaUid' => 123456]);
-        $this->assertInstanceOf(EventEntity::class, $locations->first());
+        $results = $this->oa->events(['agendaUid' => 123456]);
+        $this->assertInstanceOf(EventEntity::class, $results->first());
     }
 
     public function testEvent()
     {
         $endpoint = $this->oa->event(['uid' => 123, 'agendaUid' => 456]);
         $this->assertInstanceOf(Event::class, $endpoint);
-        $uri = $endpoint->getUri('get');
-        $this->assertEquals('/v2/agendas/456/events/123', $uri->getPath());
+        $url = $endpoint->getUrl('get');
+        $this->assertEquals('/v2/agendas/456/events/123', parse_url($url, PHP_URL_PATH));
     }
 }

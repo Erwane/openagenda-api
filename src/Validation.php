@@ -14,31 +14,20 @@ declare(strict_types=1);
  */
 namespace OpenAgenda;
 
-use Exception;
-use libphonenumber\PhoneNumberUtil;
-
 /**
  * Validations tools.
  */
 class Validation
 {
     /**
-     * Validate a phone with libphonenumber library
+     * Validate a phone
      *
      * @param string $check Input phone number
-     * @param string $country Country code number
      * @return bool
      */
-    public static function phone(string $check, string $country = 'FR'): bool
+    public static function phone(string $check): bool
     {
-        $phoneNumberUtil = PhoneNumberUtil::getInstance();
-        try {
-            $number = $phoneNumberUtil->parse($check, $country);
-
-            return $phoneNumberUtil->isValidNumber($number);
-        } catch (Exception $exception) {
-            return false;
-        }
+        return (bool)preg_match('/^\+?[\d\s._-]{2,20}$/', $check);
     }
 
     /**

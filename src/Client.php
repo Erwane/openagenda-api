@@ -14,7 +14,6 @@ declare(strict_types=1);
  */
 namespace OpenAgenda;
 
-use Cake\Chronos\Chronos;
 use OpenAgenda\Endpoint\Auth;
 use OpenAgenda\Wrapper\HttpWrapper;
 use OpenAgenda\Wrapper\HttpWrapperInterface;
@@ -136,16 +135,16 @@ class Client
     /**
      * Query OpenAgenda endpoint with a HEAD request and return Response status code.
      *
-     * @param \League\Uri\Uri|string $uri OpenAgenda uri
+     * @param string $url OpenAgenda url
      * @param array $params Request params
      * @return int
      * @throws \OpenAgenda\OpenAgendaException
      */
-    public function head($uri, array $params = []): int
+    public function head(string $url, array $params = []): int
     {
         $params['headers']['key'] = $this->publicKey;
 
-        $response = $this->_doRequest('head', [(string)$uri, $params]);
+        $response = $this->_doRequest('head', [$url, $params]);
 
         return $response->getStatusCode();
     }
@@ -153,17 +152,17 @@ class Client
     /**
      * Query OpenAgenda endpoint and return Collection or Entity
      *
-     * @param \League\Uri\Uri|string $uri OpenAgenda uri
+     * @param string $url OpenAgenda url
      * @param array $params Request params
      * @return array
      * @throws \OpenAgenda\OpenAgendaException
      */
-    public function get($uri, array $params = []): array
+    public function get(string $url, array $params = []): array
     {
         // Add key
         $params['headers']['key'] = $this->publicKey;
 
-        $response = $this->_doRequest('get', [(string)$uri, $params]);
+        $response = $this->_doRequest('get', [$url, $params]);
 
         return $this->payload($response);
     }
@@ -171,17 +170,17 @@ class Client
     /**
      * POST to OpenAgenda endpoint and return Entity or payload.
      *
-     * @param \League\Uri\Uri|string $uri OpenAgenda uri
+     * @param string $url OpenAgenda url
      * @param array $data POST data.
      * @param array $params Request params.
      * @return array
      * @throws \OpenAgenda\OpenAgendaException
      */
-    public function post($uri, array $data = [], array $params = []): array
+    public function post(string $url, array $data = [], array $params = []): array
     {
         $params = $this->_addAuthenticationHeaders($params);
 
-        $response = $this->_doRequest('post', [(string)$uri, $data, $params]);
+        $response = $this->_doRequest('post', [$url, $data, $params]);
 
         return $this->payload($response);
     }
@@ -189,17 +188,17 @@ class Client
     /**
      * PATCH to OpenAgenda endpoint and return Entity or payload.
      *
-     * @param \League\Uri\Uri|string $uri OpenAgenda uri
+     * @param string $url OpenAgenda uri
      * @param array $data PATCH data.
      * @param array $params Request params.
      * @return array
      * @throws \OpenAgenda\OpenAgendaException
      */
-    public function patch($uri, array $data = [], array $params = []): array
+    public function patch(string $url, array $data = [], array $params = []): array
     {
         $params = $this->_addAuthenticationHeaders($params);
 
-        $response = $this->_doRequest('patch', [(string)$uri, $data, $params]);
+        $response = $this->_doRequest('patch', [$url, $data, $params]);
 
         return $this->payload($response);
     }
@@ -207,16 +206,16 @@ class Client
     /**
      * DELETE something in OpenAgenda endpoint and return Entity or payload.
      *
-     * @param \League\Uri\Uri|string $uri OpenAgenda uri
+     * @param string $url OpenAgenda uri
      * @param array $params Request params.
      * @return array
      * @throws \OpenAgenda\OpenAgendaException
      */
-    public function delete($uri, array $params = []): array
+    public function delete(string $url, array $params = []): array
     {
         $params = $this->_addAuthenticationHeaders($params);
 
-        $response = $this->_doRequest('delete', [(string)$uri, $params]);
+        $response = $this->_doRequest('delete', [$url, $params]);
 
         return $this->payload($response);
     }
@@ -228,7 +227,7 @@ class Client
      * @return array
      * @throws \OpenAgenda\OpenAgendaException
      */
-    protected function _addAuthenticationHeaders(array $params)
+    protected function _addAuthenticationHeaders(array $params): array
     {
         $params['headers']['access-token'] = $this->getAccessToken();
         $params['headers']['nonce'] = $this->nonce();
@@ -256,10 +255,10 @@ class Client
                 throw new OpenAgendaException('Missing secret_key');
             }
             $endpoint = new Auth();
-            $uri = $endpoint->getUri('post');
+            $url = $endpoint->getUrl('post');
 
             $response = $this->_doRequest('post', [
-                (string)$uri,
+                $url,
                 [
                     'grant_type' => 'authorization_code',
                     'code' => $this->secretKey,
@@ -285,8 +284,6 @@ class Client
      */
     public function nonce(): int
     {
-        $time = Chronos::now();
-
-        return intval($time->timestamp . $time->microsecond);
+        return intval(microtime(true) * 100000);
     }
 }

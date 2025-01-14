@@ -1,6 +1,17 @@
 <?php
 declare(strict_types=1);
 
+/**
+ * OpenAgenda API client.
+ * Copyright (c) Erwane BRETON
+ * Licensed under The MIT License
+ * For full copyright and license information, please see the LICENSE.txt
+ * Redistributions of files must retain the above copyright notice.
+ *
+ * @copyright   Copyright (c) Erwane BRETON
+ * @see         https://github.com/Erwane/openagenda-api
+ * @license     https://opensource.org/licenses/mit-license.php MIT License
+ */
 namespace OpenAgenda\Test\TestCase;
 
 use Exception;
@@ -173,6 +184,54 @@ class ClientTest extends TestCase
         ], $response);
     }
 
+    public static function dataHasAuthenticationHeader()
+    {
+        return [
+            [
+                'post',
+                [
+                    'https://example.com',
+                    ['uid' => 123],
+                    ['headers' => ['nonce' => 1234567890, 'access-token' => 'testing']],
+                ],
+            ],
+            [
+                'patch',
+                [
+                    'https://example.com',
+                    ['uid' => 123],
+                    ['headers' => ['nonce' => 1234567890, 'access-token' => 'testing']],
+                ],
+            ],
+            [
+                'delete',
+                [
+                    'https://example.com',
+                    ['headers' => ['nonce' => 1234567890, 'access-token' => 'testing']],
+                ],
+            ],
+        ];
+    }
+
+    /** @dataProvider dataHasAuthenticationHeader */
+    public function testPostHasAuthenticationHeader($method, $expected): void
+    {
+        $client = $this->createPartialMock(Client::class, ['_addAuthenticationHeaders', '_doRequest']);
+        $client->expects($this->once())
+            ->method('_addAuthenticationHeaders')
+            ->willReturn(['headers' => ['nonce' => 1234567890, 'access-token' => 'testing']]);
+
+        $client->expects($this->once())
+            ->method('_doRequest')
+            ->with($method, $expected)
+            ->willReturn(new Response(200, [], ''));
+
+        $client->$method(
+            'https://example.com',
+            ['uid' => 123]
+        );
+    }
+
     public function testPost(): void
     {
         $this->wrapper->expects($this->exactly(2))
@@ -185,7 +244,6 @@ class ClientTest extends TestCase
                 [
                     'https://api.openagenda.com/v2/agendas',
                     ['uid' => 123],
-                    ['headers' => ['access-token' => 'my authorization token', 'nonce' => 1734957296123456]],
                 ]
             )
             ->willReturnOnConsecutiveCalls(
@@ -218,8 +276,7 @@ class ClientTest extends TestCase
             ->method('patch')
             ->with(
                 'https://api.openagenda.com/v2/agendas/123/locations/456',
-                ['uid' => 123, 'name' => 'My agenda'],
-                ['headers' => ['access-token' => 'my authorization token', 'nonce' => 1734957296123456]]
+                ['uid' => 123, 'name' => 'My agenda']
             )
             ->willReturn(new Response(200, ['content-type' => 'application/json'], '{"json":"object"}'));
 
@@ -247,8 +304,7 @@ class ClientTest extends TestCase
         $this->wrapper->expects($this->once())
             ->method('delete')
             ->with(
-                'https://api.openagenda.com/v2/agendas/123/locations/456',
-                ['headers' => ['access-token' => 'my authorization token', 'nonce' => 1734957296123456]]
+                'https://api.openagenda.com/v2/agendas/123/locations/456'
             )
             ->willReturn(new Response(200, ['content-type' => 'application/json'], '{"json":"object"}'));
 

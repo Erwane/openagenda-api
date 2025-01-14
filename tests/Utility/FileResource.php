@@ -2,10 +2,14 @@
 declare(strict_types=1);
 
 /**
- * @author Erwane Breton: erwane [ at ] phea [ dot ] fr
- * @copyright 2024 MIT Licence
+ * Copyright (c) Erwane BRETON
+ * Licensed under The MIT License
+ * For full copyright and license information, please see the LICENSE.txt
+ * Redistributions of files must retain the above copyright notice.
+ *
+ * @copyright   Copyright (c) Erwane BRETON
+ * @license     https://opensource.org/licenses/mit-license.php MIT License
  */
-
 namespace OpenAgenda\Test\Utility;
 
 use InvalidArgumentException;

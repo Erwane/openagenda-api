@@ -14,8 +14,8 @@ declare(strict_types=1);
  */
 namespace OpenAgenda\Test\TestCase\Entity;
 
-use Cake\Chronos\Chronos;
 use GuzzleHttp\Psr7\Response;
+use OpenAgenda\DateTime;
 use OpenAgenda\Endpoint\Agenda as AgendaEndpoint;
 use OpenAgenda\Endpoint\Location as LocationEndpoint;
 use OpenAgenda\Entity\Agenda;
@@ -77,8 +77,8 @@ class EventTest extends OpenAgendaTestCase
             'district' => 'Quartier Sainte-Marguerite',
             'latitude' => 48.854969,
             'longitude' => 2.386696,
-            'createdAt' => Chronos::parse('2025-01-06T18:09:50.000Z'),
-            'updatedAt' => Chronos::parse('2025-01-09T08:56:52.000Z'),
+            'createdAt' => DateTime::parse('2025-01-06T18:09:50.000Z'),
+            'updatedAt' => DateTime::parse('2025-01-09T08:56:52.000Z'),
             'website' => null,
             'email' => null,
             'phone' => null,
@@ -110,17 +110,17 @@ class EventTest extends OpenAgendaTestCase
             'onlineAccessLink' => null,
             'timings' => [
                 [
-                    'begin' => Chronos::parse('2025-01-06T11:00:00+01:00'),
-                    'end' => Chronos::parse('2025-01-06T15:00:00+01:00'),
+                    'begin' => DateTime::parse('2025-01-06T11:00:00+01:00'),
+                    'end' => DateTime::parse('2025-01-06T15:00:00+01:00'),
                 ],
                 [
-                    'begin' => Chronos::parse('2025-01-06T15:00:00+01:00'),
-                    'end' => Chronos::parse('2025-01-06T18:00:00+01:00'),
+                    'begin' => DateTime::parse('2025-01-06T15:00:00+01:00'),
+                    'end' => DateTime::parse('2025-01-06T18:00:00+01:00'),
                 ],
             ],
             'timezone' => 'Europe/Paris',
-            'createdAt' => Chronos::parse('2025-01-09T13:53:29.658Z'),
-            'updatedAt' => Chronos::parse('2025-01-09T13:53:30.000Z'),
+            'createdAt' => DateTime::parse('2025-01-09T13:53:29.658Z'),
+            'updatedAt' => DateTime::parse('2025-01-09T13:53:30.000Z'),
         ], $result);
     }
 
@@ -150,17 +150,17 @@ class EventTest extends OpenAgendaTestCase
             'onlineAccessLink' => null,
             'timings' => [
                 [
-                    'begin' => Chronos::parse('2025-01-06T11:00:00+01:00'),
-                    'end' => Chronos::parse('2025-01-06T15:00:00+01:00'),
+                    'begin' => DateTime::parse('2025-01-06T11:00:00+01:00'),
+                    'end' => DateTime::parse('2025-01-06T15:00:00+01:00'),
                 ],
                 [
-                    'begin' => Chronos::parse('2025-01-06T15:00:00+01:00'),
-                    'end' => Chronos::parse('2025-01-06T18:00:00+01:00'),
+                    'begin' => DateTime::parse('2025-01-06T15:00:00+01:00'),
+                    'end' => DateTime::parse('2025-01-06T18:00:00+01:00'),
                 ],
             ],
             'timezone' => 'Europe/Paris',
-            'createdAt' => Chronos::parse('2024-12-27T15:41:32.000Z'),
-            'updatedAt' => Chronos::parse('2024-12-27T15:42:32.000Z'),
+            'createdAt' => DateTime::parse('2024-12-27T15:41:32.000Z'),
+            'updatedAt' => DateTime::parse('2024-12-27T15:42:32.000Z'),
         ]);
 
         $this->assertSame([
@@ -220,14 +220,18 @@ class EventTest extends OpenAgendaTestCase
 
     public static function dataSetTimings()
     {
-        $end = Chronos::now();
-        $begin = $end->subHours(2);
+        $begin = DateTime::parse(NOW);
+        $end = $begin->modify('2 hour');
 
         return [
             [[], []],
             [
                 [['begin' => $begin, 'end' => $end->toAtomString()]],
-                [['begin' => $begin, 'end' => Chronos::parse($end->toAtomString())]],
+                [
+                    [
+                        'begin' => $begin,
+                        'end' => $end],
+                ],
             ],
         ];
     }
@@ -484,35 +488,6 @@ HTML
         $entity = new Event(['description' => $string]);
         $this->assertEquals(200, strlen($entity->description['fr']));
         $this->assertStringEndsWith('-- ...', $entity->description['fr']);
-    }
-
-    /** @covers \OpenAgenda\Entity\Event::_setLongDescription */
-    public function testSetLongDescription(): void
-    {
-        OpenAgenda::setProjectUrl('https://my-domain.org');
-        $entity = new Event([
-            'longDescription' => <<<HTML
-<h1>This</h1>
-description
-<p>should be <a href="to-link">clean</a></p>
-<ul>
-<li>and in </li>
-<li>markdown</li>
-</ul>
-HTML
-            ,
-        ]);
-        $this->assertEquals([
-            'fr' => <<<MD
-### This
-
-description should be [clean](https://my-domain.org/to-link)
-
-- and in
-- markdown
-MD
-            ,
-        ], $entity->longDescription);
     }
 
     /** @covers \OpenAgenda\Entity\Event::_setLongDescription */
