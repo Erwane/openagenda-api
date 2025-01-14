@@ -239,7 +239,7 @@ class Location extends Endpoint
     public function exists(): bool
     {
         $status = OpenAgenda::getClient()
-            ->head($this->getUri(__FUNCTION__));
+            ->head($this->getUrl(__FUNCTION__));
 
         return $status >= 200 && $status < 300;
     }
@@ -253,7 +253,7 @@ class Location extends Endpoint
     public function get(): ?LocationEntity
     {
         $response = OpenAgenda::getClient()
-            ->get($this->getUri(__FUNCTION__));
+            ->get($this->getUrl(__FUNCTION__));
 
         return $this->_parseResponse($response);
     }
@@ -279,10 +279,10 @@ class Location extends Endpoint
             }
         }
 
-        $uri = $this->getUri(__FUNCTION__);
+        $url = $this->getUrl(__FUNCTION__);
 
         $response = OpenAgenda::getClient()
-            ->post($uri, $entity->toOpenAgenda());
+            ->post($url, $entity->toOpenAgenda());
 
         return $this->_parseResponse($response);
     }
@@ -309,9 +309,9 @@ class Location extends Endpoint
 
         // todo: no data to update, skip. Maybe an option ?
 
-        $uri = $this->getUri(__FUNCTION__);
+        $url = $this->getUrl(__FUNCTION__);
         $response = OpenAgenda::getClient()
-            ->patch($uri, $entity->toOpenAgenda());
+            ->patch($url, $entity->toOpenAgenda());
 
         return $this->_parseResponse($response);
     }
@@ -328,7 +328,7 @@ class Location extends Endpoint
         $entity->setNew(false);
 
         $response = OpenAgenda::getClient()
-            ->delete($this->getUri(__FUNCTION__));
+            ->delete($this->getUrl(__FUNCTION__));
 
         return $this->_parseResponse($response);
     }

@@ -215,9 +215,9 @@ class OpenAgendaTest extends TestCase
     {
         $endpoint = $this->oa->agenda(['uid' => 12345, 'detailed' => true]);
         $this->assertInstanceOf(Agenda::class, $endpoint);
-        $uri = $endpoint->getUri('get');
-        $this->assertEquals('/v2/agendas/12345', $uri->getPath());
-        $this->assertEquals('detailed=1', $uri->getQuery());
+        $url = $endpoint->getUrl('get');
+        $this->assertEquals('/v2/agendas/12345', parse_url($url, PHP_URL_PATH));
+        $this->assertEquals('detailed=1', parse_url($url, PHP_URL_QUERY));
     }
 
     public function testLocations()
@@ -239,8 +239,8 @@ class OpenAgendaTest extends TestCase
     {
         $endpoint = $this->oa->location(['uid' => 123, 'agendaUid' => 456]);
         $this->assertInstanceOf(Location::class, $endpoint);
-        $uri = $endpoint->getUri('get');
-        $this->assertEquals('/v2/agendas/456/locations/123', $uri->getPath());
+        $url = $endpoint->getUrl('get');
+        $this->assertEquals('/v2/agendas/456/locations/123', parse_url($url, PHP_URL_PATH));
     }
 
     public function testEvents()
@@ -262,7 +262,7 @@ class OpenAgendaTest extends TestCase
     {
         $endpoint = $this->oa->event(['uid' => 123, 'agendaUid' => 456]);
         $this->assertInstanceOf(Event::class, $endpoint);
-        $uri = $endpoint->getUri('get');
-        $this->assertEquals('/v2/agendas/456/events/123', $uri->getPath());
+        $url = $endpoint->getUrl('get');
+        $this->assertEquals('/v2/agendas/456/events/123', parse_url($url, PHP_URL_PATH));
     }
 }

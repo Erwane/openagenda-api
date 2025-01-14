@@ -14,7 +14,6 @@ declare(strict_types=1);
  */
 namespace OpenAgenda\Test;
 
-use League\Uri\Uri;
 use OpenAgenda\Client;
 use OpenAgenda\OpenAgenda;
 use OpenAgenda\Wrapper\HttpWrapper;
@@ -87,7 +86,7 @@ class OpenAgendaTestCase extends TestCase
      * @param \PHPUnit\Framework\MockObject\Rule\InvokedCount $count
      * @param string $method
      * @param array|int $payload
-     * @param array $uriExpect
+     * @param array $urlExpect
      * @param array $requestData
      */
     public function assertClientCall(
@@ -95,7 +94,7 @@ class OpenAgendaTestCase extends TestCase
         InvokedCount $count,
         string $method,
         $payload,
-        array $uriExpect = [],
+        array $urlExpect = [],
         array $requestData = []
     ) {
         if (!is_array($payload) && !is_int($payload)) {
@@ -103,10 +102,10 @@ class OpenAgendaTestCase extends TestCase
         }
         $client->expects($count)
             ->method($method)
-            ->with($this->callback(function (Uri $uri) use ($uriExpect) {
-                parse_str((string)$uri->getQuery(), $q);
-                $this->assertSame($uriExpect['path'] ?? '/v2', $uri->getPath());
-                $this->assertSame($uriExpect['query'] ?? [], $q);
+            ->with($this->callback(function ($url) use ($urlExpect) {
+                parse_str((string)parse_url($url, PHP_URL_QUERY), $q);
+                $this->assertSame($urlExpect['path'] ?? '/v2', parse_url($url, PHP_URL_PATH));
+                $this->assertSame($urlExpect['query'] ?? [], $q);
 
                 return true;
             }), $requestData)

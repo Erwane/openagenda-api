@@ -102,7 +102,7 @@ class EndpointTest extends EndpointTestCase
             ->method('getValidator')
             ->withConsecutive([$first], [$second])
             ->willReturn($validator);
-        $endpoint->getUri($method);
+        $endpoint->getUrl($method);
     }
 
     public function testUriPathException(): void
@@ -115,7 +115,7 @@ class EndpointTest extends EndpointTestCase
             ],
         ]));
         $endpoint = new Endpoint(['path' => 'those']);
-        $endpoint->getUri('get');
+        $endpoint->getUrl('get');
     }
 
     public function testUriQueryException(): void
@@ -128,21 +128,27 @@ class EndpointTest extends EndpointTestCase
             ],
         ]));
         $endpoint = new Endpoint(['query' => 'those']);
-        $endpoint->getUri('get');
+        $endpoint->getUrl('get');
+    }
+
+    public function testGetUrl(): void
+    {
+        $endpoint = new Endpoint(['int' => 1, 'bool' => false]);
+        $this->assertEquals('https://api.openagenda.com/v2/testingEndpoint?int=1&bool=0', $endpoint->getUrl('get'));
     }
 
     public function testConvertQueryValue(): void
     {
         $endpoint = new Endpoint(['datetime' => new DateTimeImmutable('2024-12-23T12:34:56+02:00')]);
-        $uri = $endpoint->getUri('get');
-        $this->assertEquals('datetime=2024-12-23T10%3A34%3A56', $uri->getQuery());
+        $url = $endpoint->getUrl('get');
+        $this->assertEquals('datetime=2024-12-23T10%3A34%3A56', parse_url($url, PHP_URL_QUERY));
     }
 
     public function testFieldNotInSchema(): void
     {
         $endpoint = new Endpoint(['unknown' => ['a' => 1]]);
-        $uri = $endpoint->getUri('get');
-        $this->assertNull($uri->getQuery());
+        $url = $endpoint->getUrl('get');
+        $this->assertNull(parse_url($url, PHP_URL_QUERY));
     }
 
     /** @covers \OpenAgenda\Endpoint\Endpoint::toArray */
@@ -154,11 +160,11 @@ class EndpointTest extends EndpointTestCase
         ]);
 
         $this->assertSame([
-            'exists' => 'https://api.openagenda.com/v2?array%5B0%5D=value&bool=1',
-            'get' => 'https://api.openagenda.com/v2?array%5B0%5D=value&bool=1',
-            'create' => 'https://api.openagenda.com/v2?array%5B0%5D=value&bool=1',
-            'update' => 'https://api.openagenda.com/v2?array%5B0%5D=value&bool=1',
-            'delete' => 'https://api.openagenda.com/v2?array%5B0%5D=value&bool=1',
+            'exists' => 'https://api.openagenda.com/v2/testingEndpoint?array%5B0%5D=value&bool=1',
+            'get' => 'https://api.openagenda.com/v2/testingEndpoint?array%5B0%5D=value&bool=1',
+            'create' => 'https://api.openagenda.com/v2/testingEndpoint?array%5B0%5D=value&bool=1',
+            'update' => 'https://api.openagenda.com/v2/testingEndpoint?array%5B0%5D=value&bool=1',
+            'delete' => 'https://api.openagenda.com/v2/testingEndpoint?array%5B0%5D=value&bool=1',
             'params' => [
                 'array' => ['value'],
                 'bool' => true,

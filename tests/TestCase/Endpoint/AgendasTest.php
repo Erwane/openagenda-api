@@ -98,7 +98,7 @@ class AgendasTest extends EndpointTestCase
         $this->assertEquals(['createdAt.desc', 'recentlyAddedEvents.desc'], $rules['inList']->get('pass')[0]);
     }
 
-    public static function dataGetUriSuccess(): array
+    public static function datatestGetUrlSuccess(): array
     {
         return [
             [
@@ -151,14 +151,14 @@ class AgendasTest extends EndpointTestCase
     }
 
     /**
-     * @dataProvider dataGetUriSuccess
+     * @dataProvider datatestGetUrlSuccess
      */
-    public function testGetUriSuccess($method, $params, $expected)
+    public function testtestGetUrlSuccess($method, $params, $expected)
     {
         $endpoint = new Agendas($params);
-        $uri = $endpoint->getUri($method);
-        $this->assertEquals($expected['path'], $uri->getPath());
-        parse_str((string)$uri->getQuery(), $query);
+        $url = $endpoint->getUrl($method);
+        $this->assertEquals($expected['path'], parse_url($url, PHP_URL_PATH));
+        parse_str((string)parse_url($url, PHP_URL_QUERY), $query);
         $this->assertEquals($expected['query'], $query);
     }
 

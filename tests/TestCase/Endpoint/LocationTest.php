@@ -372,7 +372,7 @@ class LocationTest extends EndpointTestCase
         ];
         $this->expectException(OpenAgendaException::class);
         $this->expectExceptionMessage(json_encode($message, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
-        $endpoint->getUri($method);
+        $endpoint->getUrl($method);
     }
 
     public static function dataGetUriSuccess(): array
@@ -427,8 +427,8 @@ class LocationTest extends EndpointTestCase
     public function testGetUriSuccess($method, $params, $expected)
     {
         $endpoint = new Location($params);
-        $uri = $endpoint->getUri($method);
-        $this->assertEquals($expected, $uri->getPath());
+        $url = $endpoint->getUrl($method);
+        $this->assertEquals($expected, parse_url($url, PHP_URL_PATH));
     }
 
     public function testGet()

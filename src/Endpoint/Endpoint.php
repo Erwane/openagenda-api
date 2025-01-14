@@ -19,7 +19,6 @@ use Cake\Validation\ValidatorAwareInterface;
 use Cake\Validation\ValidatorAwareTrait;
 use DateTimeInterface;
 use DateTimeZone;
-use League\Uri\Uri;
 use OpenAgenda\DateTime;
 use OpenAgenda\OpenAgendaException;
 
@@ -168,10 +167,10 @@ abstract class Endpoint implements ValidatorAwareInterface
      *
      * @param string $method Request method
      * @param bool $validate Validate path parameters if true
-     * @return \League\Uri\Uri
+     * @return string
      * @throws \OpenAgenda\OpenAgendaException
      */
-    public function getUri(string $method, bool $validate = true): Uri
+    public function getUrl(string $method, bool $validate = true): string
     {
         $method = strtolower($method);
 
@@ -179,11 +178,12 @@ abstract class Endpoint implements ValidatorAwareInterface
         $query = $this->uriQuery($method, $validate);
 
         $components = parse_url($this->baseUrl . $path);
+        $url = sprintf('%s://%s%s', $components['scheme'], $components['host'], $components['path']);
         if ($query) {
-            $components['query'] = http_build_query($query);
+            $url .= '?' . http_build_query($query);
         }
 
-        return Uri::createFromComponents($components);
+        return $url;
     }
 
     /**
@@ -289,11 +289,11 @@ abstract class Endpoint implements ValidatorAwareInterface
     public function toArray()
     {
         return [
-            'exists' => $this->getUri('exists', false)->__toString(),
-            'get' => $this->getUri('get', false)->__toString(),
-            'create' => $this->getUri('create', false)->__toString(),
-            'update' => $this->getUri('update', false)->__toString(),
-            'delete' => $this->getUri('delete', false)->__toString(),
+            'exists' => $this->getUrl('exists', false),
+            'get' => $this->getUrl('get', false),
+            'create' => $this->getUrl('create', false),
+            'update' => $this->getUrl('update', false),
+            'delete' => $this->getUrl('delete', false),
             'params' => $this->params,
         ];
     }

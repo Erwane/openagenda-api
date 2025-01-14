@@ -14,7 +14,6 @@ declare(strict_types=1);
  */
 namespace OpenAgenda\Test\TestCase\Functional;
 
-use League\Uri\Uri;
 use OpenAgenda\DateTime;
 use OpenAgenda\Entity\Agenda;
 use OpenAgenda\Entity\Location;
@@ -330,8 +329,8 @@ class LocationsFunctionalTest extends OpenAgendaTestCase
         $client->expects($this->once())
             ->method('post')
             ->with(
-                $this->callback(function ($uri) {
-                    $this->assertInstanceOf(Uri::class, $uri);
+                $this->callback(function ($url) {
+                    $this->assertStringStartsWith('https://api.openagenda.com/v2/', $url);
 
                     return true;
                 }),

@@ -29,6 +29,13 @@ class Endpoint extends \OpenAgenda\Endpoint\Endpoint
         'json' => ['type' => 'json'],
     ];
 
+    protected function uriPath(string $method, bool $validate = true): string
+    {
+        parent::uriPath($method, $validate);
+
+        return '/testingEndpoint';
+    }
+
     public function validationUriPathGet(Validator $validator): Validator
     {
         return $validator

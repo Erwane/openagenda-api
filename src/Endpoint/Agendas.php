@@ -101,11 +101,11 @@ class Agendas extends Endpoint
      */
     public function get(): Collection
     {
-        $uri = $this->getUri(__FUNCTION__);
-        $response = OpenAgenda::getClient()->get($uri);
+        $url = $this->getUrl(__FUNCTION__);
+        $response = OpenAgenda::getClient()->get($url);
 
         $target = 'agendas';
-        if ($uri->getPath() === '/v2/me/agendas') {
+        if (parse_url($url, PHP_URL_PATH) === '/v2/me/agendas') {
             $target = 'items';
         }
 

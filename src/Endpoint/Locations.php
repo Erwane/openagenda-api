@@ -114,7 +114,8 @@ class Locations extends Endpoint
      */
     public function get(): Collection
     {
-        $response = OpenAgenda::getClient()->get($this->getUri(__FUNCTION__));
+        $response = OpenAgenda::getClient()
+            ->get($this->getUrl(__FUNCTION__));
 
         $items = [];
         if ($response['_success'] && !empty($response['locations'])) {
