@@ -14,10 +14,10 @@ declare(strict_types=1);
  */
 namespace OpenAgenda\Endpoint;
 
-use Cake\Chronos\Chronos;
 use Cake\Validation\Validation as CakeValidation;
 use Cake\Validation\Validator;
 use Exception;
+use OpenAgenda\DateTime;
 use OpenAgenda\Entity\Event as EventEntity;
 use OpenAgenda\OpenAgenda;
 use OpenAgenda\OpenAgendaException;
@@ -269,13 +269,22 @@ class Event extends Endpoint
             }
 
             try {
-                $begin = Chronos::parse($item['begin']);
-                $end = Chronos::parse($item['end']);
+                /**
+                 * @var \DateTimeInterface|string $begin
+                 * @var \DateTimeInterface|string $end
+                 */
+                extract($item);
+                if (is_string($begin)) {
+                    $begin = DateTime::parse($begin);
+                }
+                if (is_string($end)) {
+                    $end = DateTime::parse($end);
+                }
             } catch (Exception $e) {
                 return false;
             }
 
-            if ($begin->greaterThanOrEquals($end)) {
+            if (!$begin || !$end || $begin >= $end) {
                 return false;
             }
         }

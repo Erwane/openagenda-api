@@ -14,8 +14,8 @@ declare(strict_types=1);
  */
 namespace OpenAgenda\Test\TestCase\Functional;
 
-use Cake\Chronos\Chronos;
 use GuzzleHttp\Psr7\Response;
+use OpenAgenda\DateTime;
 use OpenAgenda\Endpoint\Event as EventEndpoint;
 use OpenAgenda\Entity\Agenda;
 use OpenAgenda\Entity\Event;
@@ -98,10 +98,10 @@ class EventsFunctionalTest extends OpenAgendaTestCase
             'city' => ['Lausanne', 'Genève'],
             'department' => ['Hauts-de-Seine'],
             'region' => 'Normandie',
-            'timings[gte]' => Chronos::parse('2023-06-01'),
-            'timings[lte]' => Chronos::parse('2023-06-30T23:59:59'),
+            'timings[gte]' => DateTime::parse('2023-06-01'),
+            'timings[lte]' => DateTime::parse('2023-06-30T23:59:59'),
             'updatedAt[gte]' => '2023-06-10',
-            'updatedAt[lte]' => Chronos::parse('2023-06-20T23:59:59'),
+            'updatedAt[lte]' => DateTime::parse('2023-06-20T23:59:59'),
             'search' => 'my event',
             'uid' => [56158955, 55895615],
             'slug' => 'festival-dete',

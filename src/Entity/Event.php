@@ -3,8 +3,9 @@ declare(strict_types=1);
 
 namespace OpenAgenda\Entity;
 
-use Cake\Chronos\Chronos;
 use Cake\Validation\Validation;
+use DateTimeInterface;
+use OpenAgenda\DateTime;
 use OpenAgenda\Endpoint\EndpointFactory;
 use OpenAgenda\OpenAgenda;
 use OpenAgenda\OpenAgendaException;
@@ -184,10 +185,10 @@ class Event extends Entity
     {
         foreach ($timings as $key => $timing) {
             if (isset($timing['begin']) && is_string($timing['begin'])) {
-                $timing['begin'] = Chronos::parse($timing['begin']);
+                $timing['begin'] = DateTime::parse($timing['begin']);
             }
             if (isset($timing['end']) && is_string($timing['end'])) {
-                $timing['end'] = Chronos::parse($timing['end']);
+                $timing['end'] = DateTime::parse($timing['end']);
             }
             $timings[$key] = $timing;
         }
@@ -317,10 +318,10 @@ class Event extends Entity
         $timings = $data['timings'] ?? null;
         if (is_array($timings)) {
             foreach ($timings as &$timing) {
-                if ($timing['begin'] instanceof Chronos) {
+                if ($timing['begin'] instanceof DateTimeInterface) {
                     $timing['begin'] = $timing['begin']->toAtomString();
                 }
-                if ($timing['end'] instanceof Chronos) {
+                if ($timing['end'] instanceof DateTimeInterface) {
                     $timing['end'] = $timing['end']->toAtomString();
                 }
             }

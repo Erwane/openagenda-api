@@ -14,8 +14,8 @@ declare(strict_types=1);
  */
 namespace OpenAgenda\Test\TestCase\Entity;
 
-use Cake\Chronos\Chronos;
 use GuzzleHttp\Psr7\Response;
+use OpenAgenda\DateTime;
 use OpenAgenda\Endpoint\Agenda as AgendaEndpoint;
 use OpenAgenda\Entity\Location;
 use OpenAgenda\OpenAgenda;
@@ -56,8 +56,8 @@ class LocationTest extends OpenAgendaTestCase
             'district' => null,
             'latitude' => 50.70428,
             'longitude' => 3.235638,
-            'createdAt' => Chronos::parse('2024-12-27T15:41:32.000Z'),
-            'updatedAt' => Chronos::parse('2024-12-27T15:42:32.000Z'),
+            'createdAt' => DateTime::parse('2024-12-27T15:41:32.000Z'),
+            'updatedAt' => DateTime::parse('2024-12-27T15:42:32.000Z'),
             // 'website' => null,
             'email' => null,
             'phone' => null,
@@ -90,8 +90,8 @@ class LocationTest extends OpenAgendaTestCase
             'district' => null,
             'latitude' => 50.70428,
             'longitude' => 3.235638,
-            'createdAt' => Chronos::parse('2024-12-27T15:41:32.000Z'),
-            'updatedAt' => Chronos::parse('2024-12-27T15:42:32.000Z'),
+            'createdAt' => DateTime::parse('2024-12-27T15:41:32.000Z'),
+            'updatedAt' => DateTime::parse('2024-12-27T15:42:32.000Z'),
             'website' => null,
             'email' => null,
             'phone' => null,

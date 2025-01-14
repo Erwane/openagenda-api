@@ -4,13 +4,13 @@ declare(strict_types=1);
 namespace OpenAgenda\Entity;
 
 use ArrayAccess;
-use Cake\Chronos\Chronos;
 use Cake\Validation\Validation;
 use HTMLPurifier;
 use HTMLPurifier_Config;
 use HTMLPurifier_TagTransform_Simple;
 use InvalidArgumentException;
 use League\HTMLToMarkdown\HtmlConverter;
+use OpenAgenda\DateTime;
 use OpenAgenda\OpenAgenda;
 
 /**
@@ -137,7 +137,7 @@ abstract class Entity implements ArrayAccess
                 switch ($this->_schema[$field]['type']) {
                     case 'datetime':
                     case 'DateTime':
-                        $value = Chronos::parse($value);
+                        $value = DateTime::parse($value);
                         break;
                     case 'array':
                     case 'json':

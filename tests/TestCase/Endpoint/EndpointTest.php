@@ -14,8 +14,9 @@ declare(strict_types=1);
  */
 namespace OpenAgenda\Test\TestCase\Endpoint;
 
-use Cake\Chronos\Chronos;
 use Cake\Validation\Validator;
+use DateTimeImmutable;
+use OpenAgenda\DateTime;
 use OpenAgenda\OpenAgendaException;
 use OpenAgenda\Test\EndpointTestCase;
 use TestApp\Endpoint;
@@ -35,7 +36,7 @@ class EndpointTest extends EndpointTestCase
             ],
             [
                 ['datetime' => '2024-12-23T12:34:56+03:00'],
-                ['datetime' => Chronos::parse('2024-12-23 09:34:56')],
+                ['datetime' => DateTime::parse('2024-12-23 09:34:56')],
             ],
             [
                 ['array' => 'value'],
@@ -132,7 +133,7 @@ class EndpointTest extends EndpointTestCase
 
     public function testConvertQueryValue(): void
     {
-        $endpoint = new Endpoint(['datetime' => Chronos::parse('2024-12-23T12:34:56+02:00')]);
+        $endpoint = new Endpoint(['datetime' => new DateTimeImmutable('2024-12-23T12:34:56+02:00')]);
         $uri = $endpoint->getUri('get');
         $this->assertEquals('datetime=2024-12-23T10%3A34%3A56', $uri->getQuery());
     }

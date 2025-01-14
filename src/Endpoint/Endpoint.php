@@ -14,12 +14,13 @@ declare(strict_types=1);
  */
 namespace OpenAgenda\Endpoint;
 
-use Cake\Chronos\Chronos;
 use Cake\Validation\Validator;
 use Cake\Validation\ValidatorAwareInterface;
 use Cake\Validation\ValidatorAwareTrait;
 use DateTimeInterface;
+use DateTimeZone;
 use League\Uri\Uri;
+use OpenAgenda\DateTime;
 use OpenAgenda\OpenAgendaException;
 
 /**
@@ -98,11 +99,7 @@ abstract class Endpoint implements ValidatorAwareInterface
         if (!empty($this->_schema[$param]['type'])) {
             switch ($this->_schema[$param]['type']) {
                 case 'datetime':
-                    if ($value instanceof DateTimeInterface) {
-                        $value = Chronos::parse($value, $value->getTimezone());
-                    } else {
-                        $value = Chronos::parse($value);
-                    }
+                        $value = DateTime::parse($value);
                     break;
                 case 'array':
                     $value = $this->paramAsArray($value);
@@ -158,8 +155,8 @@ abstract class Endpoint implements ValidatorAwareInterface
      */
     protected function convertQueryValue($value)
     {
-        if ($value instanceof Chronos) {
-            $value = $value->setTimezone('UTC')
+        if ($value instanceof DateTimeInterface) {
+            $value = $value->setTimezone(new DateTimeZone('UTC'))
                 ->format('Y-m-d\TH:i:s');
         }
 

@@ -14,7 +14,6 @@ declare(strict_types=1);
  */
 namespace OpenAgenda;
 
-use Cake\Chronos\Chronos;
 use OpenAgenda\Endpoint\Auth;
 use OpenAgenda\Wrapper\HttpWrapper;
 use OpenAgenda\Wrapper\HttpWrapperInterface;
@@ -228,7 +227,7 @@ class Client
      * @return array
      * @throws \OpenAgenda\OpenAgendaException
      */
-    protected function _addAuthenticationHeaders(array $params)
+    protected function _addAuthenticationHeaders(array $params): array
     {
         $params['headers']['access-token'] = $this->getAccessToken();
         $params['headers']['nonce'] = $this->nonce();
@@ -285,8 +284,6 @@ class Client
      */
     public function nonce(): int
     {
-        $time = Chronos::now();
-
-        return intval($time->timestamp . $time->microsecond);
+        return intval(microtime(true) * 100000);
     }
 }

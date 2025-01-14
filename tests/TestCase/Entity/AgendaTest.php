@@ -14,9 +14,9 @@ declare(strict_types=1);
  */
 namespace OpenAgenda\Test\TestCase\Entity;
 
-use Cake\Chronos\Chronos;
 use GuzzleHttp\Psr7\Response;
 use OpenAgenda\Collection;
+use OpenAgenda\DateTime;
 use OpenAgenda\Endpoint\Event as EventEndpoint;
 use OpenAgenda\Endpoint\Location as LocationEndpoint;
 use OpenAgenda\Entity\Agenda;
@@ -51,8 +51,8 @@ class AgendaTest extends OpenAgendaTestCase
             'indexed' => true,
             'networkUid' => null,
             'locationSetUid' => null,
-            'createdAt' => Chronos::parse('2016-07-27T12:24:08.000Z'),
-            'updatedAt' => Chronos::parse('2025-01-04T10:31:53.000Z'),
+            'createdAt' => DateTime::parse('2016-07-27T12:24:08.000Z'),
+            'updatedAt' => DateTime::parse('2025-01-04T10:31:53.000Z'),
         ], $result);
     }
 
@@ -70,8 +70,8 @@ class AgendaTest extends OpenAgendaTestCase
             'indexed' => true,
             'networkUid' => null,
             'locationSetUid' => null,
-            'createdAt' => Chronos::parse('2016-07-27T12:24:08.000Z'),
-            'updatedAt' => Chronos::parse('2025-01-04T10:31:53.000Z'),
+            'createdAt' => DateTime::parse('2016-07-27T12:24:08.000Z'),
+            'updatedAt' => DateTime::parse('2025-01-04T10:31:53.000Z'),
         ]);
 
         $this->assertSame([

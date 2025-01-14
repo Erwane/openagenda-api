@@ -14,8 +14,8 @@ declare(strict_types=1);
  */
 namespace OpenAgenda\Test\TestCase\Entity;
 
-use Cake\Chronos\Chronos;
 use InvalidArgumentException;
+use OpenAgenda\DateTime;
 use OpenAgenda\Entity\Agenda;
 use OpenAgenda\Entity\Entity;
 use OpenAgenda\Entity\Event;
@@ -37,7 +37,7 @@ class EntityTest extends TestCase
         $ent = new ent([
             'uid' => '1',
             'postalCode' => '12345',
-            'createdAt' => Chronos::now()->toAtomString(),
+            'createdAt' => '2024-12-23T12:34:56+00:00',
             'description' => json_encode(['fr' => 'Lorem ipsum']),
             'state' => 1,
             'unknownField' => 'value',
@@ -49,7 +49,7 @@ class EntityTest extends TestCase
         $this->assertEquals([
             'uid' => 1,
             'postalCode' => '12345',
-            'createdAt' => Chronos::parse('2024-12-23T12:34:56+00:00'),
+            'createdAt' => DateTime::parse('2024-12-23T12:34:56+00:00'),
             'state' => true,
             'description' => ['fr' => 'Lorem ipsum'],
             'agenda' => new Agenda(['uid' => 123]),
@@ -116,11 +116,10 @@ class EntityTest extends TestCase
 
     public function testToOpenAgenda()
     {
-        $now = Chronos::now();
         $ent = new ent([
             'uid' => 1,
             'postalCode' => '12345',
-            'createdAt' => $now,
+            'createdAt' => DateTime::parse(NOW),
             'description' => ['fr' => 'Lorem ipsum'],
             'state' => true,
             'unknownField' => 'value',

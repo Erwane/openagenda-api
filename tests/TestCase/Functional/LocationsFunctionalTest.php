@@ -14,8 +14,8 @@ declare(strict_types=1);
  */
 namespace OpenAgenda\Test\TestCase\Functional;
 
-use Cake\Chronos\Chronos;
 use League\Uri\Uri;
+use OpenAgenda\DateTime;
 use OpenAgenda\Entity\Agenda;
 use OpenAgenda\Entity\Location;
 use OpenAgenda\Test\OpenAgendaTestCase;
@@ -70,10 +70,10 @@ class LocationsFunctionalTest extends OpenAgendaTestCase
             'detailed' => true,
             'search' => 'my location',
             'state' => true,
-            'createdAt[gte]' => Chronos::parse('2023-06-01'),
-            'createdAt[lte]' => Chronos::parse('2023-06-30T23:59:59'),
+            'createdAt[gte]' => DateTime::parse('2023-06-01'),
+            'createdAt[lte]' => DateTime::parse('2023-06-30T23:59:59'),
             'updatedAt[gte]' => '2023-06-10',
-            'updatedAt[lte]' => Chronos::parse('2023-06-20T23:59:59'),
+            'updatedAt[lte]' => DateTime::parse('2023-06-20T23:59:59'),
             'order' => 'name.desc',
         ]);
         $this->assertCount(1, $locations);
@@ -125,10 +125,10 @@ class LocationsFunctionalTest extends OpenAgendaTestCase
             'detailed' => true,
             'search' => 'my location',
             'state' => true,
-            'createdAt[gte]' => Chronos::parse('2023-06-01'),
-            'createdAt[lte]' => Chronos::parse('2023-06-30T23:59:59'),
+            'createdAt[gte]' => DateTime::parse('2023-06-01'),
+            'createdAt[lte]' => DateTime::parse('2023-06-30T23:59:59'),
             'updatedAt[gte]' => '2023-06-10',
-            'updatedAt[lte]' => Chronos::parse('2023-06-20T23:59:59'),
+            'updatedAt[lte]' => DateTime::parse('2023-06-20T23:59:59'),
             'order' => 'name.desc',
         ]);
         $this->assertCount(1, $locations);
