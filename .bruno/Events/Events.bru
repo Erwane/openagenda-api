@@ -5,14 +5,14 @@ meta {
 }
 
 get {
-  url: {{baseUrl}}/agendas/{{agenda_id}}/events/?size=2&state=0
+  url: {{baseUrl}}/agendas/{{agenda_id}}/events/
   body: none
   auth: none
 }
 
 params:query {
-  size: 2
-  state: 0
+  ~size: 2
+  ~state: 0
 }
 
 headers {

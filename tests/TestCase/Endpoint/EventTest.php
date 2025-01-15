@@ -683,6 +683,7 @@ class EventTest extends EndpointTestCase
         $entity = $endpoint->get();
 
         $this->assertInstanceOf(EventEntity::class, $entity);
+        $this->assertFalse($entity->isNew());
         $this->assertEquals(9906334, $entity->uid);
         $this->assertEquals(123, $entity->agendaUid);
         $this->assertEquals(456, $entity->locationUid);
@@ -727,6 +728,7 @@ class EventTest extends EndpointTestCase
 
         $entity = $endpoint->create();
         $this->assertInstanceOf(EventEntity::class, $entity);
+        $this->assertTrue($entity->isNew());
         $this->assertEquals(41294774, $entity->uid);
         $this->assertEquals(41630080, $entity->agendaUid);
         $this->assertEquals(42921249, $entity->locationUid);
@@ -750,6 +752,7 @@ class EventTest extends EndpointTestCase
 
         $entity = $endpoint->update();
         $this->assertInstanceOf(EventEntity::class, $entity);
+        $this->assertFalse($entity->isNew());
         $this->assertEquals(41294774, $entity->uid);
         $this->assertEquals(41630080, $entity->agendaUid);
         $this->assertEquals(42921249, $entity->locationUid);
@@ -765,6 +768,7 @@ class EventTest extends EndpointTestCase
         $endpoint = new Event(['agendaUid' => 41630080, 'uid' => 41294774]);
         $entity = $endpoint->delete();
         $this->assertInstanceOf(EventEntity::class, $entity);
+        $this->assertFalse($entity->isNew());
         $this->assertEquals(41294774, $entity->uid);
         $this->assertEquals(41630080, $entity->agendaUid);
         $this->assertEquals(42921249, $entity->locationUid);

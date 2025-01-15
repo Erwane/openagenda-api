@@ -90,6 +90,7 @@ class Agenda extends Endpoint
 
         if ($response['_success'] && !empty($response['uid'])) {
             $agenda = new AgendaEntity($response, ['markClean' => true]);
+            $agenda->setNew(false);
         }
 
         return $agenda;

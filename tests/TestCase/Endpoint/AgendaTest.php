@@ -159,9 +159,10 @@ class AgendaTest extends EndpointTestCase
 
         $endpoint = new Agenda(['uid' => 12345]);
 
-        $agenda = $endpoint->get();
+        $entity = $endpoint->get();
 
-        $this->assertInstanceOf(\OpenAgenda\Entity\Agenda::class, $agenda);
+        $this->assertInstanceOf(\OpenAgenda\Entity\Agenda::class, $entity);
+        $this->assertFalse($entity->isNew());
     }
 
     public function testExists()

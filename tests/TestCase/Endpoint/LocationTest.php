@@ -444,6 +444,7 @@ class LocationTest extends EndpointTestCase
         $entity = $endpoint->get();
 
         $this->assertInstanceOf(LocationEntity::class, $entity);
+        $this->assertFalse($entity->isNew());
         $this->assertEquals(35867424, $entity->uid);
         $this->assertEquals(123, $entity->agendaUid);
     }
@@ -485,6 +486,7 @@ class LocationTest extends EndpointTestCase
 
         $entity = $endpoint->create();
         $this->assertInstanceOf(LocationEntity::class, $entity);
+        $this->assertTrue($entity->isNew());
         $this->assertEquals(16153029, $entity->uid);
         $this->assertEquals(123, $entity->agendaUid);
     }
@@ -507,6 +509,7 @@ class LocationTest extends EndpointTestCase
 
         $entity = $endpoint->update();
         $this->assertInstanceOf(LocationEntity::class, $entity);
+        $this->assertFalse($entity->isNew());
         $this->assertEquals(16153029, $entity->uid);
         $this->assertEquals(123, $entity->agendaUid);
     }
@@ -537,6 +540,7 @@ class LocationTest extends EndpointTestCase
         $endpoint = new Location(['agendaUid' => 123, 'uid' => 82680484]);
         $entity = $endpoint->delete();
         $this->assertInstanceOf(LocationEntity::class, $entity);
+        $this->assertFalse($entity->isNew());
         $this->assertEquals(82680484, $entity->uid);
         $this->assertEquals(123, $entity->agendaUid);
     }

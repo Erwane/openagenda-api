@@ -128,7 +128,11 @@ class Client
         try {
             return $this->http->$method(...$args);
         } catch (Wrapper\HttpWrapperException $e) {
-            throw new OpenAgendaException($e->getMessage(), $e->getCode(), $e);
+            $new = new OpenAgendaException($e->getMessage(), $e->getCode(), $e);
+            if ($e->getResponse()) {
+                $new->setResponse($e->getResponse());
+            }
+            throw $new;
         }
     }
 
