@@ -89,6 +89,7 @@ class ValidationTest extends TestCase
             [$realPath, 1, true],
             [fopen($realPath, 'r'), 1, true],
             [fopen(__FILE__, 'r'), 10, false],
+            [false, 1, true],
         ];
     }
 

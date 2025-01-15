@@ -536,29 +536,6 @@ HTML
         $this->assertSame($expected, $entity->keywords);
     }
 
-    public static function dataSetImage(): array
-    {
-        $realPath = TESTS . 'resources/wendywei-1537637.jpg';
-        $resource = fopen($realPath, 'r');
-
-        return [
-            [null, null],
-            [$realPath, $realPath],
-            ['https://example.com', 'https://example.com'],
-            [$resource, $resource],
-        ];
-    }
-
-    /**
-     * @dataProvider dataSetImage
-     * @covers       \OpenAgenda\Entity\Event::_setImage
-     */
-    public function testSetImage($image, $expected): void
-    {
-        $entity = new Event(['image' => $image]);
-        $this->assertSame($expected, $entity->image);
-    }
-
     public static function dataGetAgendaUid(): array
     {
         return [

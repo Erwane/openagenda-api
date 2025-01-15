@@ -340,10 +340,8 @@ class Event extends Entity
         }
 
         // image
-        if ($this->image) {
-            if (Validation::url($this->image)) {
-                $data['image'] = ['url' => $this->image];
-            }
+        if (Validation::url($this->image)) {
+            $data['image'] = ['url' => $this->image];
         }
 
         unset(
@@ -445,21 +443,5 @@ class Event extends Entity
         }
 
         return $keywords;
-    }
-
-    /**
-     * Set event image
-     *
-     * @param string|resource|null $file Absolute path, resource file or null
-     * @return string|resource|null
-     */
-    protected function _setImage($file)
-    {
-        $value = null;
-        if ((is_string($file) && $file) || is_resource($file)) {
-            $value = $file;
-        }
-
-        return $value;
     }
 }

@@ -105,6 +105,8 @@ class Validation
             $mime = mime_content_type($check);
             $success = ($stat['size'] && $stat['size'] <= $max)
                 && ($mime && in_array($mime, ['image/jpg', 'image/jpeg']));
+        } elseif ($check === false) {
+            $success = true;
         }
 
         return $success;

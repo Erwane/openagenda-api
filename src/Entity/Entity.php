@@ -195,7 +195,7 @@ abstract class Entity implements ArrayAccess
                         break;
                     case 'file':
                         if (is_string($value) && !Validation::url($value)) {
-                            $value = fopen($value, 'ro');
+                            $value = fopen($value, 'r');
                         }
                         break;
                 }
@@ -470,6 +470,24 @@ abstract class Entity implements ArrayAccess
     protected function _setUid($value): int
     {
         return (int)$value;
+    }
+
+    /**
+     * Set entity image.
+     *
+     * @param string|resource|null $file Absolute path, resource file or null
+     * @return string|resource|null
+     */
+    protected function _setImage($file)
+    {
+        $value = null;
+        if ((is_string($file) && $file) || is_resource($file)) {
+            $value = $file;
+        } elseif ($file === false) {
+            $value = false;
+        }
+
+        return $value;
     }
 
     /**
