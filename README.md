@@ -2,7 +2,7 @@
 
 [![Software License](https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square)](LICENSE)
 [![codecov](https://codecov.io/gh/Erwane/openagenda-api/branch/3.x/graph/badge.svg?token=hF5HhETnkg)](https://codecov.io/gh/Erwane/openagenda-api)
-[![Build Status](https://github.com/Erwane/openagenda-api/actions/workflows/ci.yml/badge.svg?branch=3.x)](https://github.com/Erwane/cakephp-contact/actions)
+[![Build Status](https://github.com/Erwane/openagenda-api/actions/workflows/ci.yml/badge.svg?branch=3.x)](https://github.com/Erwane/openagenda-api/actions)
 [![Packagist Downloads](https://img.shields.io/packagist/dt/Erwane/openagenda-api)](https://packagist.org/packages/Erwane/openagenda-api)
 [![Packagist Version](https://img.shields.io/packagist/v/Erwane/openagenda-api)](https://packagist.org/packages/Erwane/openagenda-api)
 
