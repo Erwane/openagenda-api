@@ -1,4 +1,4 @@
-# PHP sdk for OpenAgenda API
+# PHP lib for OpenAgenda API (all CRUD endpoints)
 
 [![Software License](https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square)](LICENSE)
 [![codecov](https://codecov.io/gh/Erwane/openagenda-api/branch/3.x/graph/badge.svg?token=hF5HhETnkg)](https://codecov.io/gh/Erwane/openagenda-api)
