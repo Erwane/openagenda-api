@@ -68,6 +68,7 @@ abstract class Endpoint implements ValidatorAwareInterface
      */
     public function __construct(array $params = [])
     {
+        $this->_validatorClass = \OpenAgenda\Validator::class;
         $this->set($params);
     }
 

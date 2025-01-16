@@ -50,6 +50,16 @@ class EndpointTest extends EndpointTestCase
     }
 
     /**
+     * @covers \OpenAgenda\Validator::__construct
+     */
+    public function testGetValidator(): void
+    {
+        $endpoint = new Endpoint();
+        $validator = $endpoint->getValidator('default');
+        $this->assertInstanceOf(\OpenAgenda\Validator::class, $validator);
+    }
+
+    /**
      * @dataProvider dataFormatType
      */
     public function testFormatType($params, $expected): void
