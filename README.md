@@ -18,16 +18,21 @@ It supports all endpoints with all methods (HEAD, GET, POST, PATCH & DELETE).
 ## Installation
 
 The sdk is not directly usable.  
-You need to use one client wrapper, compatible with your PSR-18 http client.
+You need to use one client wrapper, compatible with your PSR-18 http client or framework.
 
-Available wrappers are:
+### Wrappers
+_Please check version map in the `README` of your desired wrapper._
 
-* Guzzle: [erwane/openagenda-wrapper-guzzle](https://packagist.org/packages/erwane/openagenda-wrapper-guzzle)
-
-example:
-
+#### CakePHP 
+[erwane/openagenda-wrapper-cakephp](https://github.com/Erwane/openagenda-wrapper-cakephp)
 ```php
-composer require erwane/openagenda-wrapper-guzzle:"1.0.*"
+composer require erwane/openagenda-wrapper-cakephp
+```
+
+#### Guzzle 
+[erwane/openagenda-wrapper-guzzle](https://github.com/Erwane/openagenda-wrapper-guzzle)
+```php
+composer require erwane/openagenda-wrapper-guzzle
 ```
 
 ## Documentations and examples
@@ -47,14 +52,10 @@ composer require erwane/openagenda-wrapper-guzzle
 use OpenAgenda\OpenAgenda;
 use OpenAgenda\Wrapper\GuzzleWrapper
 
-$wrapper = new GuzzleWrapper();
+$wrapper = new GuzzleWrapper($clientOptions = []);
 $oa = new OpenAgenda([
     'public_key' => 'my public key',
     'secret_key' => 'my secret key',
     'wrapper' => $wrapper,
  ]);
 ```
-
-See [wrappers](docs/wrapper.md) for more details and options.
-
-## Contributing

@@ -1,12 +1,12 @@
 # Basics usage
 
-This package need a PSR 18 (`psr/http-client`) HTTP Client.
+This package need a PSR 18 HTTP Client (`psr/http-client`).
 
-For performance, you can configure a PSR 16 (`php-fig/simple-cache`) cache.
+For performance, you can configure a PSR 16 cache (`psr/simple-cache`).
 
 ```php
 use OpenAgenda\OpenAgenda;
-use Nimbly\Shuttle\Shuttle;
+use OpenAgenda\Wrapper\GuzzleWrapper
 
 // PSR-18 Http client.
 $guzzleOptions = ['timeout'  => 2.0];
@@ -22,6 +22,7 @@ $oa = new OpenAgenda([
     'secret_key' => 'my secret key', // Optional, only for create/update/delete
     'wrapper' => $wrapper, // Required
     'cache' => $cache, // Optional
+    'defaultLang' => 'fr', // Optional
 ]);
 ```
 
