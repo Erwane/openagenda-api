@@ -37,13 +37,6 @@ class OpenAgenda
     protected static $defaultLang = 'fr';
 
     /**
-     * Project base url.
-     *
-     * @var string|null
-     */
-    protected static $projectBaseUrl = null;
-
-    /**
      * OpenAgenda.
      *
      * @param array $params OpenAgenda params.
@@ -57,7 +50,6 @@ class OpenAgenda
             'wrapper' => null,
             'cache' => null,
             'defaultLang' => 'fr',
-            'projectUrl' => null,
         ];
 
         if (!$params['public_key']) {
@@ -76,13 +68,8 @@ class OpenAgenda
             throw new OpenAgendaException('Invalid defaultLang.');
         }
 
-        if ($params['projectUrl'] && !CakeValidation::url($params['projectUrl'])) {
-            throw new OpenAgendaException('Invalid project url.');
-        }
-
         self::$client = new Client($params);
         self::$defaultLang = $params['defaultLang'];
-        self::$projectBaseUrl = $params['projectUrl'];
     }
 
     /**
@@ -124,27 +111,6 @@ class OpenAgenda
     public static function getDefaultLang(): string
     {
         return self::$defaultLang;
-    }
-
-    /**
-     * Get project url.
-     *
-     * @return string|null
-     */
-    public static function getProjectUrl(): ?string
-    {
-        return self::$projectBaseUrl;
-    }
-
-    /**
-     * Set project url.
-     *
-     * @param string|null $projectUrl Project url. Used for `a` tags in html description.
-     * @return void
-     */
-    public static function setProjectUrl(?string $projectUrl): void
-    {
-        self::$projectBaseUrl = $projectUrl;
     }
 
     /**

@@ -102,13 +102,6 @@ class OpenAgendaTest extends TestCase
         new OpenAgenda(['public_key' => 'publicKey', 'wrapper' => $this->wrapper, 'defaultLang' => 'ac']);
     }
 
-    public function testConstructInvalidUrl()
-    {
-        $this->expectException(OpenAgendaException::class);
-        $this->expectExceptionMessage('Invalid project url.');
-        new OpenAgenda(['public_key' => 'publicKey', 'wrapper' => $this->wrapper, 'projectUrl' => 'http://invalid']);
-    }
-
     public function testConstruct()
     {
         $cache = $this->createMock(CacheInterface::class);
@@ -146,18 +139,6 @@ class OpenAgendaTest extends TestCase
             'defaultLang' => 'en',
         ]);
         $this->assertEquals('en', OpenAgenda::getDefaultLang());
-    }
-
-    public function testProjectUrl()
-    {
-        new OpenAgenda([
-            'public_key' => 'publicKey',
-            'wrapper' => $this->wrapper,
-            'projectUrl' => 'https://my-domain.com',
-        ]);
-        $this->assertEquals('https://my-domain.com', OpenAgenda::getProjectUrl());
-        OpenAgenda::setProjectUrl(null);
-        $this->assertNull(OpenAgenda::getProjectUrl());
     }
 
     public function testHead()
