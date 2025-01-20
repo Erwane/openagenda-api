@@ -45,8 +45,8 @@ use OpenAgenda\OpenAgendaException;
  * @property float|null $latitude
  * @property float|null $longitude
  * @property string|null $timezone
- * @property \Cake\Chronos\Chronos|null $createdAt
- * @property \Cake\Chronos\Chronos|null $updatedAt
+ * @property \OpenAgenda\DateTime|null $createdAt
+ * @property \OpenAgenda\DateTime|null $updatedAt
  */
 class Location extends Entity
 {
@@ -54,7 +54,7 @@ class Location extends Entity
         'uid' => [],
         'agendaUid' => [],
         'name' => ['required' => true],
-        'address' => [], 'required' => true,
+        'address' => ['required' => true],
         'access' => [],
         'description' => [],
         'image' => ['type' => 'file'],
@@ -131,7 +131,7 @@ class Location extends Entity
     {
         $this->_requireClient();
 
-        return EndpointFactory::make('/location', $this->toArray())->delete();
+        return EndpointFactory::make('/location', $this->extract(['uid', 'agendaUid']))->delete();
     }
 
     /**
@@ -206,6 +206,16 @@ class Location extends Entity
     protected function _setLongitude($value)
     {
         return (float)$value;
+    }
+
+    /**
+     * Get agenda uid.
+     *
+     * @return int|null
+     */
+    protected function _getAgendaUid(): ?int
+    {
+        return isset($this->_fields['agendaUid']) ? (int)$this->_fields['agendaUid'] : null;
     }
 
     /**

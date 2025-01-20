@@ -31,8 +31,8 @@ use OpenAgenda\OpenAgendaException;
  * @property bool|null $indexed
  * @property int|null $networkUid
  * @property int|null $locationSetUid
- * @property \Cake\Chronos\Chronos|null $createdAt
- * @property \Cake\Chronos\Chronos|null $updatedAt
+ * @property \OpenAgenda\DateTime|null $createdAt
+ * @property \OpenAgenda\DateTime|null $updatedAt
  */
 class Agenda extends Entity
 {

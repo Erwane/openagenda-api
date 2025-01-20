@@ -48,17 +48,26 @@ class EventTest extends OpenAgendaTestCase
         $location = $result['location'];
         unset($result['originAgenda'], $result['location']);
 
-        $this->assertEquals([
+        $this->assertSame([
             'uid' => 123,
-            'image' => null,
-            'description' => 'My agenda',
-            'official' => false,
             'title' => 'My agenda',
             'slug' => 'my-agenda',
+            'description' => 'My agenda',
             'url' => null,
-        ], $agenda->toArray());
+            'image' => null,
+            'official' => false,
+            'private' => null,
+            'indexed' => null,
+            'networkUid' => null,
+            'locationSetUid' => null,
+            'createdAt' => null,
+            'updatedAt' => null,
+        ], $agenda);
 
-        $this->assertEquals([
+        [$created, $updated] = [$location['createdAt'], $location['updatedAt']];
+        unset($location['createdAt'], $location['updatedAt']);
+
+        $this->assertSame([
             'uid' => 456,
             'agendaUid' => 123,
             'name' => 'My location',
@@ -68,6 +77,7 @@ class EventTest extends OpenAgendaTestCase
             'image' => null,
             'imageCredits' => null,
             'slug' => 'my-location_2426083',
+            'locationSetUid' => null,
             'city' => 'Paris',
             'department' => 'Paris',
             'region' => 'Île-de-France',
@@ -77,8 +87,6 @@ class EventTest extends OpenAgendaTestCase
             'district' => 'Quartier Sainte-Marguerite',
             'latitude' => 48.854969,
             'longitude' => 2.386696,
-            'createdAt' => DateTime::parse('2025-01-06T18:09:50.000Z'),
-            'updatedAt' => DateTime::parse('2025-01-09T08:56:52.000Z'),
             'website' => null,
             'email' => null,
             'phone' => null,
@@ -86,29 +94,49 @@ class EventTest extends OpenAgendaTestCase
             'timezone' => 'Europe/Paris',
             'extId' => null,
             'state' => true,
-        ], $location->toArray());
+        ], $location);
+        $this->assertEquals([$created, $updated], [
+            DateTime::parse('2025-01-06T18:09:50.000Z'),
+            DateTime::parse('2025-01-09T08:56:52.000Z'),
+        ]);
 
-        $this->assertEquals([
+        [$created, $updated, $timings] = [$result['createdAt'], $result['updatedAt'], $result['timings']];
+        unset($result['createdAt'], $result['updatedAt'], $result['timings']);
+
+        $this->assertSame([
             'uid' => 9906334,
+            'agendaUid' => 123,
+            'locationUid' => 456,
             'slug' => 'testing-6090479',
-            'state' => 0,
-            'status' => 1,
-            'featured' => false,
-            'type' => [41],
-            'image' => null,
-            'imageCredits' => null,
             'title' => ['en' => 'My event', 'fr' => 'Mon évènement'],
             'description' => ['en' => 'Short description', 'fr' => 'Description courte'],
             'longDescription' => ['en' => 'Long description', 'fr' => 'Description longue'],
-            'keywords' => ['en' => ['my', 'event'], 'fr' => ['mon', 'évènement']],
             'conditions' => ['en' => 'price en', 'fr' => 'price fr'],
-            'age' => ['min' => 7, 'max' => 121],
+            'keywords' => ['en' => ['my', 'event'], 'fr' => ['mon', 'évènement']],
+            'image' => null,
+            'imageCredits' => null,
             'registration' => [],
-            'accessibility' => ['ii' => false, 'hi' => true, 'vi' => false, 'pi' => true, 'mi' => false,],
-            'links' => [],
+            'accessibility' => [
+                'hi' => true,
+                'ii' => false,
+                'mi' => false,
+                'pi' => true,
+                'vi' => false,
+            ],
+            'type' => [41],
+            'age' => ['min' => 7, 'max' => 121],
             'attendanceMode' => 1,
             'onlineAccessLink' => null,
-            'timings' => [
+            'links' => [],
+            'timezone' => 'Europe/Paris',
+            'status' => 1,
+            'state' => 0,
+            'featured' => false,
+        ], $result);
+        $this->assertEquals([$created, $updated, $timings], [
+            DateTime::parse('2025-01-09T13:53:29.658Z'),
+            DateTime::parse('2025-01-09T13:53:30.000Z'),
+            [
                 [
                     'begin' => DateTime::parse('2025-01-06T11:00:00+01:00'),
                     'end' => DateTime::parse('2025-01-06T15:00:00+01:00'),
@@ -118,10 +146,7 @@ class EventTest extends OpenAgendaTestCase
                     'end' => DateTime::parse('2025-01-06T18:00:00+01:00'),
                 ],
             ],
-            'timezone' => 'Europe/Paris',
-            'createdAt' => DateTime::parse('2025-01-09T13:53:29.658Z'),
-            'updatedAt' => DateTime::parse('2025-01-09T13:53:30.000Z'),
-        ], $result);
+        ]);
     }
 
     public function testToOpenAgenda()
@@ -230,7 +255,8 @@ class EventTest extends OpenAgendaTestCase
                 [
                     [
                         'begin' => $begin,
-                        'end' => $end],
+                        'end' => $end,
+                    ],
                 ],
             ],
         ];
@@ -405,15 +431,15 @@ class EventTest extends OpenAgendaTestCase
         $endpoint = $entity->agenda();
 
         $this->assertInstanceOf(AgendaEndpoint::class, $endpoint);
-        $this->assertEquals([
+        $this->assertSame([
             'exists' => 'https://api.openagenda.com/v2/agendas/123',
             'get' => 'https://api.openagenda.com/v2/agendas/123',
             'create' => 'https://api.openagenda.com/v2/agendas/123',
             'update' => 'https://api.openagenda.com/v2/agendas/123',
             'delete' => 'https://api.openagenda.com/v2/agendas/123',
             'params' => [
-                '_path' => '/agenda',
                 'uid' => 123,
+                '_path' => '/agenda',
             ],
         ], $endpoint->toArray());
     }
@@ -431,19 +457,19 @@ class EventTest extends OpenAgendaTestCase
         ]);
 
         $this->assertInstanceOf(LocationEndpoint::class, $endpoint);
-        $this->assertEquals([
+        $this->assertSame([
             'exists' => 'https://api.openagenda.com/v2/agendas/789/locations/456',
             'get' => 'https://api.openagenda.com/v2/agendas/789/locations/456',
             'create' => 'https://api.openagenda.com/v2/agendas/789/locations',
             'update' => 'https://api.openagenda.com/v2/agendas/789/locations/456',
             'delete' => 'https://api.openagenda.com/v2/agendas/789/locations/456',
             'params' => [
-                '_path' => '/location',
                 'uid' => 456,
                 'agendaUid' => 789,
                 'name' => 'My location',
                 'address' => 'Random address',
                 'countryCode' => 'FR',
+                '_path' => '/location',
             ],
         ], $endpoint->toArray());
     }
@@ -540,9 +566,9 @@ HTML
     {
         return [
             [[], null],
-            [['agendaUid' => 1], 1],
-            [['agenda' => new Agenda(['uid' => 1])], 1],
-            [['originAgenda' => new Agenda(['uid' => 1])], 1],
+            [['agendaUid' => '1'], 1],
+            [['agenda' => new Agenda(['uid' => '1'])], 1],
+            [['originAgenda' => new Agenda(['uid' => '1'])], 1],
         ];
     }
 

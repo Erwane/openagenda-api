@@ -273,7 +273,7 @@ class Location extends Endpoint
 
         if ($validate) {
             $errors = $this->getValidator('create')
-                ->validate($entity->toArray());
+                ->validate($entity->extract(null, true));
             if ($errors) {
                 $this->throwException($errors);
             }
@@ -301,7 +301,7 @@ class Location extends Endpoint
 
         if ($validate) {
             $errors = $this->getValidator('update')
-                ->validate($entity->toArray(), false);
+                ->validate($entity->extract(null, true), false);
             if ($errors) {
                 $this->throwException($errors);
             }

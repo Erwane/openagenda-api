@@ -71,7 +71,21 @@ class CollectionTest extends TestCase
 
         $this->assertSame([
             'red',
-            ['uid' => 1],
+            [
+                'uid' => 1,
+                'title' => null,
+                'slug' => null,
+                'description' => null,
+                'url' => null,
+                'image' => null,
+                'official' => null,
+                'private' => null,
+                'indexed' => null,
+                'networkUid' => null,
+                'locationSetUid' => null,
+                'createdAt' => null,
+                'updatedAt' => null,
+            ],
         ], $c->toArray());
     }
 
@@ -87,7 +101,21 @@ class CollectionTest extends TestCase
         $expected = json_encode([
             'item',
             'colors' => ['red', 'green'],
-            'agenda' => ['uid' => 1],
+            'agenda' => [
+                'uid' => 1,
+                'title' => null,
+                'slug' => null,
+                'description' => null,
+                'url' => null,
+                'image' => null,
+                'official' => null,
+                'private' => null,
+                'indexed' => null,
+                'networkUid' => null,
+                'locationSetUid' => null,
+                'createdAt' => null,
+                'updatedAt' => null,
+            ],
         ]);
         $this->assertJsonStringEqualsJsonString($expected, $json);
     }

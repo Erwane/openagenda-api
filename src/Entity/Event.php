@@ -47,8 +47,8 @@ use OpenAgenda\OpenAgendaException;
  * @property string|null $onlineAccessLink
  * @property array|null $timings
  * @property string|null $timezone
- * @property \Cake\Chronos\Chronos|null $createdAt
- * @property \Cake\Chronos\Chronos|null $updatedAt
+ * @property \OpenAgenda\DateTime|null $createdAt
+ * @property \OpenAgenda\DateTime|null $updatedAt
  */
 class Event extends Entity
 {
@@ -153,7 +153,7 @@ class Event extends Entity
         $this->_requireClient();
 
         /** @uses \OpenAgenda\Endpoint\Event::delete() */
-        return EndpointFactory::make('/event', $this->toArray())->delete();
+        return EndpointFactory::make('/event', $this->extract(['agendaUid', 'uid']))->delete();
     }
 
     /**
@@ -281,7 +281,7 @@ class Event extends Entity
      */
     protected function _getAgendaUid(): ?int
     {
-        $value = $this->_fields['agendaUid'] ?? null;
+        $value = isset($this->_fields['agendaUid']) ? (int)$this->_fields['agendaUid'] : null;
         if (!$value && $this->agenda instanceof Agenda) {
             $value = $this->agenda->uid;
         }

@@ -179,7 +179,7 @@ class EventsTest extends EndpointTestCase
         $field = $v->field('state');
         $this->assertTrue($field->isEmptyAllowed());
         $rules = $field->rules();
-        $this->assertEquals([
+        $this->assertSame([
             EventEntity::STATE_REFUSED,
             EventEntity::STATE_MODERATION,
             EventEntity::STATE_READY,
@@ -209,7 +209,7 @@ class EventsTest extends EndpointTestCase
         $field = $v->field('accessibility');
         $this->assertTrue($field->isEmptyAllowed());
         $rules = $field->rules();
-        $this->assertEquals([
+        $this->assertSame([
             EventEntity::ACCESS_HI,
             EventEntity::ACCESS_II,
             EventEntity::ACCESS_VI,
@@ -221,7 +221,7 @@ class EventsTest extends EndpointTestCase
         $field = $v->field('status');
         $this->assertTrue($field->isEmptyAllowed());
         $rules = $field->rules();
-        $this->assertEquals([
+        $this->assertSame([
             EventEntity::STATUS_SCHEDULED,
             EventEntity::STATUS_RESCHEDULED,
             EventEntity::STATUS_ONLINE,

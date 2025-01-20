@@ -165,7 +165,26 @@ abstract class Entity implements ArrayAccess
      */
     public function toArray(): array
     {
-        return array_intersect_key($this->_fields, $this->_schema);
+        $result = [];
+        foreach ($this->_schema as $field => $info) {
+            $value = $this->get($field);
+            if (is_array($value)) {
+                $result[$field] = [];
+                foreach ($value as $k => $entity) {
+                    if ($entity instanceof Entity) {
+                        $result[$field][$k] = $entity->toArray();
+                    } else {
+                        $result[$field][$k] = $entity;
+                    }
+                }
+            } elseif ($value instanceof Entity) {
+                $result[$field] = $value->toArray();
+            } else {
+                $result[$field] = $value;
+            }
+        }
+
+        return $result;
     }
 
     /**
@@ -378,8 +397,11 @@ abstract class Entity implements ArrayAccess
      * @param bool $onlyDirty Return the requested field only if it is dirty
      * @return array
      */
-    public function extract(array $fields, bool $onlyDirty = false): array
+    public function extract(?array $fields, bool $onlyDirty = false): array
     {
+        if ($fields === null) {
+            $fields = array_keys($this->_schema);
+        }
         $result = [];
         foreach ($fields as $field) {
             if (!$onlyDirty || $this->isDirty($field)) {

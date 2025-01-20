@@ -28,22 +28,26 @@ use OpenAgenda\Test\OpenAgendaTestCase;
 use OpenAgenda\Test\Utility\FileResource;
 
 /**
- * @uses \OpenAgenda\Entity\Agenda
+ * @uses   \OpenAgenda\Entity\Agenda
  * @covers \OpenAgenda\Entity\Agenda
  */
 class AgendaTest extends OpenAgendaTestCase
 {
-    public function testAliasesIn()
+    public function testFromOpenAgenda()
     {
         $json = FileResource::instance($this)->getContent('Response/agendas/agenda.json');
         $payload = json_decode($json, true);
         $ent = new Agenda($payload);
         $result = $ent->toArray();
-        $this->assertEquals([
+
+        [$created, $updated] = [$result['createdAt'], $result['updatedAt']];
+        unset($result['createdAt'], $result['updatedAt']);
+
+        $this->assertSame([
             'uid' => 41648,
             'title' => 'La Semaine Nationale de la Petite Enfance',
-            'description' => "Du 15 au 24 mars 2025, tous ensemble pour l'éveil du tout-petit ! \nUne semaine d'ateliers & activités à travers toute la France, pour réunir le trio parent-enfant-professionnel.",
             'slug' => 'semainepetiteenfance',
+            'description' => "Du 15 au 24 mars 2025, tous ensemble pour l'éveil du tout-petit ! \nUne semaine d'ateliers & activités à travers toute la France, pour réunir le trio parent-enfant-professionnel.",
             'url' => 'https://www.semainepetiteenfance.fr',
             'image' => 'https://cdn.openagenda.com/main/agenda41648.jpg?__ts=1664443597781',
             'official' => true,
@@ -51,9 +55,12 @@ class AgendaTest extends OpenAgendaTestCase
             'indexed' => true,
             'networkUid' => null,
             'locationSetUid' => null,
-            'createdAt' => DateTime::parse('2016-07-27T12:24:08.000Z'),
-            'updatedAt' => DateTime::parse('2025-01-04T10:31:53.000Z'),
         ], $result);
+
+        $this->assertEquals([
+            DateTime::parse('2016-07-27T12:24:08.000Z'),
+            DateTime::parse('2025-01-04T10:31:53.000Z'),
+        ], [$created, $updated]);
     }
 
     public function testAliasesOut()
@@ -140,19 +147,19 @@ class AgendaTest extends OpenAgendaTestCase
         ]);
 
         $this->assertInstanceOf(LocationEndpoint::class, $endpoint);
-        $this->assertEquals([
+        $this->assertSame([
             'exists' => 'https://api.openagenda.com/v2/agendas/123/locations/456',
             'get' => 'https://api.openagenda.com/v2/agendas/123/locations/456',
             'create' => 'https://api.openagenda.com/v2/agendas/123/locations',
             'update' => 'https://api.openagenda.com/v2/agendas/123/locations/456',
             'delete' => 'https://api.openagenda.com/v2/agendas/123/locations/456',
             'params' => [
-                '_path' => '/location',
                 'uid' => 456,
                 'agendaUid' => 123,
                 'name' => 'My location',
                 'address' => 'Random address',
                 'countryCode' => 'FR',
+                '_path' => '/location',
             ],
         ], $endpoint->toArray());
     }
@@ -184,17 +191,17 @@ class AgendaTest extends OpenAgendaTestCase
         ]);
 
         $this->assertInstanceOf(EventEndpoint::class, $endpoint);
-        $this->assertEquals([
+        $this->assertSame([
             'exists' => 'https://api.openagenda.com/v2/agendas/123/events/456',
             'get' => 'https://api.openagenda.com/v2/agendas/123/events/456',
             'create' => 'https://api.openagenda.com/v2/agendas/123/events',
             'update' => 'https://api.openagenda.com/v2/agendas/123/events/456',
             'delete' => 'https://api.openagenda.com/v2/agendas/123/events/456',
             'params' => [
-                '_path' => '/event',
                 'uid' => 456,
                 'agendaUid' => 123,
                 'title' => 'My event',
+                '_path' => '/event',
             ],
         ], $endpoint->toArray());
     }

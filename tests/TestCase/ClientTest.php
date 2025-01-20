@@ -180,7 +180,7 @@ class ClientTest extends TestCase
             ['headers' => ['X-Custom' => 'testing']]
         );
 
-        $this->assertEquals([
+        $this->assertSame([
             '_status' => 201,
             '_success' => true,
             'json' => 'object',
@@ -259,7 +259,7 @@ class ClientTest extends TestCase
             ['uid' => 123]
         );
 
-        $this->assertEquals([
+        $this->assertSame([
             '_status' => 200,
             '_success' => true,
             'json' => 'object',
@@ -288,7 +288,7 @@ class ClientTest extends TestCase
             ['uid' => 123, 'name' => 'My agenda']
         );
 
-        $this->assertEquals([
+        $this->assertSame([
             '_status' => 200,
             '_success' => true,
             'json' => 'object',
@@ -315,7 +315,7 @@ class ClientTest extends TestCase
             'https://api.openagenda.com/v2/agendas/123/locations/456'
         );
 
-        $this->assertEquals([
+        $this->assertSame([
             '_status' => 200,
             '_success' => true,
             'json' => 'object',

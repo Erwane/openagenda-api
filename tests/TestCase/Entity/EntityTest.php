@@ -45,16 +45,102 @@ class EntityTest extends TestCase
             'event' => ['agendaUid' => 123, 'uid' => 789],
         ]);
 
-        $this->assertEquals([
+        $result = $ent->toArray();
+
+        [$created, $agenda, $location, $event] = [
+            $result['createdAt'],
+            $result['agenda'],
+            $result['location'],
+            $result['event'],
+        ];
+        unset($result['createdAt'], $result['agenda'], $result['location'], $result['event']);
+
+        $this->assertSame([
             'uid' => 1,
             'postalCode' => '12345',
-            'createdAt' => DateTime::parse('2024-12-23T12:34:56+00:00'),
-            'state' => true,
             'description' => ['fr' => 'Lorem ipsum'],
-            'agenda' => new Agenda(['uid' => 123]),
-            'location' => new Location(['agendaUid' => 123, 'uid' => 456]),
-            'event' => new Event(['agendaUid' => 123, 'uid' => 789]),
-        ], $ent->toArray());
+            'state' => true,
+            'image' => null,
+        ], $result);
+
+        $this->assertEquals([
+            DateTime::parse('2024-12-23T12:34:56+00:00'),
+            [
+                'uid' => 123,
+
+                'title' => null,
+                'slug' => null,
+                'description' => null,
+                'url' => null,
+                'image' => null,
+                'official' => null,
+                'private' => null,
+                'indexed' => null,
+                'networkUid' => null,
+                'locationSetUid' => null,
+                'createdAt' => null,
+                'updatedAt' => null,
+            ],
+            [
+                'agendaUid' => 123, 'uid' => 456,
+
+                'name' => null,
+                'address' => null,
+                'access' => null,
+                'description' => null,
+                'image' => null,
+                'imageCredits' => null,
+                'slug' => null,
+                'locationSetUid' => null,
+                'city' => null,
+                'department' => null,
+                'region' => null,
+                'postalCode' => null,
+                'insee' => null,
+                'countryCode' => null,
+                'district' => null,
+                'latitude' => 0.0,
+                'longitude' => 0.0,
+                'createdAt' => null,
+                'updatedAt' => null,
+                'website' => null,
+                'email' => null,
+                'phone' => null,
+                'links' => null,
+                'timezone' => null,
+                'extId' => null,
+                'state' => false,
+            ],
+            [
+                'agendaUid' => 123, 'uid' => 789,
+
+                'locationUid' => null,
+                'slug' => null,
+                'title' => null,
+                'description' => null,
+                'longDescription' => null,
+                'conditions' => null,
+                'keywords' => null,
+                'image' => null,
+                'imageCredits' => null,
+                'registration' => null,
+                'accessibility' => null,
+                'timings' => null,
+                'type' => null,
+                'age' => null,
+                'attendanceMode' => null,
+                'onlineAccessLink' => null,
+                'links' => null,
+                'timezone' => null,
+                'status' => null,
+                'state' => null,
+                'featured' => null,
+                'createdAt' => null,
+                'updatedAt' => null,
+                'originAgenda' => null,
+                'location' => null,
+            ],
+        ], [$created, $agenda, $location, $event]);
 
         // boolean field
         $this->assertTrue($ent->state);
