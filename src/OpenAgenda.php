@@ -184,7 +184,7 @@ class OpenAgenda
      * Get agendas from OpenAgenda.
      *
      * @param array $params Query params.
-     * @return \OpenAgenda\Collection
+     * @return \OpenAgenda\Collection<\OpenAgenda\Entity\Agenda>
      * @throws \OpenAgenda\Endpoint\UnknownEndpointException
      * @uses \OpenAgenda\Endpoint\Agendas::get()
      */
@@ -197,7 +197,7 @@ class OpenAgenda
      * Get agendas from OpenAgenda.
      *
      * @param array $params Query params.
-     * @return \OpenAgenda\Collection
+     * @return \OpenAgenda\Collection<\OpenAgenda\Entity\Agenda>
      * @throws \OpenAgenda\Endpoint\UnknownEndpointException
      * @uses \OpenAgenda\Endpoint\Agendas
      */
@@ -222,7 +222,7 @@ class OpenAgenda
      * Get OpenAgenda locations for an agenda.
      *
      * @param array $params Query params.
-     * @return \OpenAgenda\Collection
+     * @return \OpenAgenda\Collection<\OpenAgenda\Entity\Location>
      * @throws \OpenAgenda\Endpoint\UnknownEndpointException
      * @uses \OpenAgenda\Endpoint\Locations
      */
@@ -247,7 +247,7 @@ class OpenAgenda
      * Get OpenAgenda events for an agenda.
      *
      * @param array $params Query params.
-     * @return \OpenAgenda\Collection
+     * @return \OpenAgenda\Collection<\OpenAgenda\Entity\Event>
      * @throws \OpenAgenda\Endpoint\UnknownEndpointException
      * @uses \OpenAgenda\Endpoint\Events
      */

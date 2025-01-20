@@ -96,7 +96,7 @@ class Agendas extends Endpoint
     /**
      * Get agendas.
      *
-     * @return \OpenAgenda\Collection
+     * @return \OpenAgenda\Collection<\OpenAgenda\Entity\Agenda>
      * @throws \OpenAgenda\OpenAgendaException
      */
     public function get(): Collection
