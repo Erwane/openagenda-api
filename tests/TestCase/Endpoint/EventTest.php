@@ -284,16 +284,19 @@ class EventTest extends EndpointTestCase
 
     public static function dataCheckImage(): array
     {
-        $path = 'resources/wendywei-1537637.jpg';
-        $realPath = TESTS . $path;
+        $jpg = TESTS . 'resources/wendywei-1537637.jpg';
+        $png = TESTS . 'resources/wendywei-1537637.png';
+        $webp = TESTS . 'resources/wendywei-1537637.webp';
 
         return [
             [['file'], 1, false],
             ['resources/wendywei-1537637.jpg', 1, false],
-            [$realPath, 0.001, false],
-            [fopen($realPath, 'r'), 0.001, false],
-            [$realPath, 1, true],
-            [fopen($realPath, 'r'), 1, true],
+            [$jpg, 0.001, false],
+            [fopen($jpg, 'r'), 0.001, false],
+            [$jpg, 1, true],
+            [fopen($jpg, 'r'), 1, true],
+            [fopen($png, 'r'), 1, true],
+            [fopen($webp, 'r'), 1, true],
         ];
     }
 
@@ -315,10 +318,10 @@ class EventTest extends EndpointTestCase
     {
         $this->wrapper->expects($this->once())
             ->method('head')
-            ->with('https://httpbin.org/image/png')
-            ->willReturn(new Response(200, ['content-type' => 'image/png', 'content-length' => 1000]));
+            ->with('https://httpbin.org/image/bmp')
+            ->willReturn(new Response(200, ['content-type' => 'image/bmp', 'content-length' => 1000]));
 
-        $success = Event::checkImage('https://httpbin.org/image/png');
+        $success = Event::checkImage('https://httpbin.org/image/bmp');
         $this->assertFalse($success);
     }
 

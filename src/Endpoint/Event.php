@@ -241,7 +241,7 @@ class Event extends Endpoint
                 $type = $response->getHeaderLine('Content-Type');
                 $size = $response->getHeaderLine('Content-Length');
                 $success = $type && $size
-                    && in_array($type, ['image/jpg', 'image/jpeg'])
+                    && in_array($type, Validation::IMAGE_TYPES)
                     && $size <= $max;
             } catch (HttpWrapperException $e) {
                 $success = false;

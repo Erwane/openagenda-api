@@ -19,6 +19,13 @@ namespace OpenAgenda;
  */
 class Validation
 {
+    public const IMAGE_TYPES = [
+        'image/jpg',
+        'image/jpeg',
+        'image/png',
+        'image/webp',
+    ];
+
     /**
      * Validate a phone
      *
@@ -104,7 +111,7 @@ class Validation
             $stat = fstat($check);
             $mime = mime_content_type($check);
             $success = ($stat['size'] && $stat['size'] <= $max)
-                && ($mime && in_array($mime, ['image/jpg', 'image/jpeg']));
+                && ($mime && in_array($mime, self::IMAGE_TYPES));
         } elseif ($check === false) {
             $success = true;
         }
