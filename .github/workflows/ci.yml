@@ -20,6 +20,7 @@ jobs:
       matrix:
         php-version:
           - '7.2'
+          - '7.4'
 
     steps:
     - uses: actions/checkout@v4
@@ -42,10 +43,15 @@ jobs:
       env:
         XDEBUG_MODE: coverage
       run: |
-        export CODECOVERAGE=1
-        vendor/bin/phpunit --coverage-clover=coverage.xml
+        if [[ '${{ matrix.php-version }}' == '7.2' ]]; then
+          export CODECOVERAGE=1
+          vendor/bin/phpunit --coverage-clover=coverage.xml
+        else
+          vendor/bin/phpunit
+        fi
 
     - name: Submit code coverage
+      if: matrix.php-version == '7.2'
       uses: codecov/codecov-action@v5
       with:
         files: coverage.xml
