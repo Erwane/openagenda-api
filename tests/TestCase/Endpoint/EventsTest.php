@@ -89,7 +89,7 @@ class EventsTest extends EndpointTestCase
         $field = $v->field('includeFields');
         $this->assertTrue($field->isEmptyAllowed());
         $rules = $field->rules();
-        $this->assertArrayHasKey('isArray', $rules);
+        $this->assertArrayHasKey('array', $rules);
 
         // monolingual
         $field = $v->field('monolingual');
@@ -107,13 +107,13 @@ class EventsTest extends EndpointTestCase
         $field = $v->field('city');
         $this->assertTrue($field->isEmptyAllowed());
         $rules = $field->rules();
-        $this->assertArrayHasKey('isArray', $rules);
+        $this->assertArrayHasKey('array', $rules);
 
         // department
         $field = $v->field('department');
         $this->assertTrue($field->isEmptyAllowed());
         $rules = $field->rules();
-        $this->assertArrayHasKey('isArray', $rules);
+        $this->assertArrayHasKey('array', $rules);
 
         // region
         $field = $v->field('region');
@@ -155,7 +155,7 @@ class EventsTest extends EndpointTestCase
         $field = $v->field('uid');
         $this->assertTrue($field->isEmptyAllowed());
         $rules = $field->rules();
-        $this->assertArrayHasKey('isArray', $rules);
+        $this->assertArrayHasKey('array', $rules);
 
         // slug
         $field = $v->field('slug');
@@ -190,7 +190,7 @@ class EventsTest extends EndpointTestCase
         $field = $v->field('keyword');
         $this->assertTrue($field->isEmptyAllowed());
         $rules = $field->rules();
-        $this->assertArrayHasKey('isArray', $rules);
+        $this->assertArrayHasKey('array', $rules);
 
         // geo
         $field = $v->field('geo');
@@ -203,7 +203,7 @@ class EventsTest extends EndpointTestCase
         $field = $v->field('locationUid');
         $this->assertTrue($field->isEmptyAllowed());
         $rules = $field->rules();
-        $this->assertArrayHasKey('isArray', $rules);
+        $this->assertArrayHasKey('array', $rules);
 
         // accessibility
         $field = $v->field('accessibility');

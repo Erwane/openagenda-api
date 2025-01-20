@@ -77,13 +77,13 @@ class AgendasTest extends EndpointTestCase
         $field = $v->field('slug');
         $this->assertTrue($field->isEmptyAllowed());
         $rules = $field->rules();
-        $this->assertArrayHasKey('isArray', $rules);
+        $this->assertArrayHasKey('array', $rules);
 
         // uid
         $field = $v->field('uid');
         $this->assertTrue($field->isEmptyAllowed());
         $rules = $field->rules();
-        $this->assertArrayHasKey('isArray', $rules);
+        $this->assertArrayHasKey('array', $rules);
 
         // network
         $field = $v->field('network');

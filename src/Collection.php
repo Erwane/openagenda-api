@@ -41,7 +41,7 @@ class Collection extends IteratorIterator implements Countable, Iterator, JsonSe
     /**
      * @inheritDoc
      */
-    public function count()
+    public function count(): int
     {
         return iterator_count($this);
     }

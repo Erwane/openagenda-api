@@ -32,28 +32,28 @@ if (!defined('TEST_RESOURCES_TMP_DIR')) {
 class FileResource
 {
     /**
-     * @var string[] Base resources paths
+     * @var string Base resources path
      */
-    protected $baseDir = TEST_RESOURCES_BASE_DIR;
+    protected string $baseDir = TEST_RESOURCES_BASE_DIR;
 
     /**
      * @var string Tmp dir path to copy resources in.
      */
-    protected $tmpDir = TEST_RESOURCES_TMP_DIR;
+    protected string $tmpDir = TEST_RESOURCES_TMP_DIR;
 
     /**
      * @var string Resources manifest file
      */
-    protected $manifest = TEST_RESOURCES_TMP_DIR . 'resources_manifest.json';
+    protected string $manifest = TEST_RESOURCES_TMP_DIR . 'resources_manifest.json';
 
     /**
      * Copied resources
      *
      * @var array
      */
-    protected $resources = [];
+    protected array $resources = [];
 
-    protected $prefix;
+    protected string $prefix;
 
     /**
      * Build instance.

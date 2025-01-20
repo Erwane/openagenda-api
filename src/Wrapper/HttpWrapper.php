@@ -24,7 +24,7 @@ abstract class HttpWrapper implements HttpWrapperInterface
      *
      * @var \OpenAgenda\Wrapper\HttpWrapper
      */
-    protected $http;
+    protected HttpWrapper $http;
 
     /**
      * Create the wrapper for this $http client.

@@ -246,6 +246,7 @@ class EventTest extends OpenAgendaTestCase
     public static function dataSetTimings()
     {
         $begin = DateTime::parse(NOW);
+        /** @var \OpenAgenda\DateTime $end */
         $end = $begin->modify('2 hour');
 
         return [

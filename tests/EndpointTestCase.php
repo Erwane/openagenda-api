@@ -17,6 +17,7 @@ namespace OpenAgenda\Test;
 use GuzzleHttp\Psr7\Response;
 use OpenAgenda\Client;
 use OpenAgenda\OpenAgenda;
+use OpenAgenda\Test\Utility\PHPUnitConsecutiveTrait;
 use OpenAgenda\Wrapper\HttpWrapper;
 use PHPUnit\Framework\TestCase;
 
@@ -25,6 +26,8 @@ use PHPUnit\Framework\TestCase;
  */
 class EndpointTestCase extends TestCase
 {
+    use PHPUnitConsecutiveTrait;
+
     /**
      * @var (\object&\PHPUnit\Framework\MockObject\MockObject)|\OpenAgenda\Wrapper\HttpWrapper|(\OpenAgenda\Wrapper\HttpWrapper&\object&\PHPUnit\Framework\MockObject\MockObject)|(\OpenAgenda\Wrapper\HttpWrapper&\PHPUnit\Framework\MockObject\MockObject)|\PHPUnit\Framework\MockObject\MockObject
      */

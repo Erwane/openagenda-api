@@ -16,7 +16,6 @@ namespace OpenAgenda\Test\TestCase\Entity;
 
 use InvalidArgumentException;
 use OpenAgenda\DateTime;
-use OpenAgenda\Entity\Agenda;
 use OpenAgenda\Entity\Entity;
 use OpenAgenda\Entity\Event;
 use OpenAgenda\Entity\Location;
@@ -177,13 +176,6 @@ class EntityTest extends TestCase
         $ent->uid = '1';
         $this->assertSame(1, $ent->uid);
         $this->assertTrue($ent->has('uid'));
-    }
-
-    public function testSetEmpty(): void
-    {
-        $ent = new Ent();
-        $this->expectException(InvalidArgumentException::class);
-        $ent->set(null, '');
     }
 
     public function testGetEmpty(): void

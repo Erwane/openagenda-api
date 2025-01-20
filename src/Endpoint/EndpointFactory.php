@@ -30,22 +30,15 @@ class EndpointFactory
     public static function make(string $path, array $params = []): Endpoint
     {
         $params['_path'] = $path;
-        switch ($path) {
-            case '/agendas':
-            case '/agendas/mines':
-                return new Agendas($params);
-            case '/agenda':
-                return new Agenda($params);
-            case '/locations':
-                return new Locations($params);
-            case '/location':
-                return new Location($params);
-            case '/events':
-                return new Events($params);
-            case '/event':
-                return new Event($params);
-            default:
-                throw new UnknownEndpointException($path);
-        }
+
+        return match ($path) {
+            '/agendas', '/agendas/mines' => new Agendas($params),
+            '/agenda' => new Agenda($params),
+            '/locations' => new Locations($params),
+            '/location' => new Location($params),
+            '/events' => new Events($params),
+            '/event' => new Event($params),
+            default => throw new UnknownEndpointException($path),
+        };
     }
 }

@@ -25,7 +25,7 @@ use OpenAgenda\OpenAgenda;
  */
 class Locations extends Endpoint
 {
-    protected $_schema = [
+    protected array $_schema = [
         'size' => [],
         'search' => [],
         'detailed' => [],
@@ -109,7 +109,7 @@ class Locations extends Endpoint
     /**
      * Get locations.
      *
-     * @return \OpenAgenda\Entity\Location[]|\OpenAgenda\Collection
+     * @return \OpenAgenda\Collection
      * @throws \OpenAgenda\OpenAgendaException
      */
     public function get(): Collection

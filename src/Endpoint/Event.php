@@ -32,7 +32,7 @@ class Event extends Endpoint
     public const DESC_FORMAT_HTML = 'HTML';
     public const DESC_FORMAT_EMBEDS = 'HTMLWithEmbeds';
 
-    protected $_schema = [
+    protected array $_schema = [
         'longDescriptionFormat' => [],
     ];
 
@@ -164,7 +164,7 @@ class Event extends Endpoint
             ->maxLength('imageCredits', 255)
             // registration
             ->allowEmptyArray('registration')
-            ->isArray('registration')
+            ->array('registration')
             // accessibility
             ->allowEmptyArray('accessibility')
             ->add('accessibility', 'accessibility', ['rule' => [$this, 'checkAccessibility']])

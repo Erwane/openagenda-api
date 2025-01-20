@@ -43,7 +43,7 @@ class Validation
      * @param string $lang Lang
      * @return bool
      */
-    public static function lang(string $lang)
+    public static function lang(string $lang): bool
     {
         $valid = [
             'aa', 'ab', 'ae', 'af', 'ak', 'am', 'an', 'ar', 'as', 'av', 'ay', 'az', 'ba', 'be', 'bg', 'bh', 'bi',
@@ -69,7 +69,7 @@ class Validation
      * @param int|null $maxLength Value max length.
      * @return string|bool
      */
-    public static function multilingual(array $check, ?int $maxLength = null)
+    public static function multilingual(array $check, ?int $maxLength = null): string|bool
     {
         foreach ($check as $lang => $value) {
             if (!self::lang($lang)) {

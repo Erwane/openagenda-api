@@ -195,7 +195,7 @@ class LocationTest extends EndpointTestCase
         $field = $v->field('links');
         $this->assertTrue($field->isEmptyAllowed());
         $rules = $field->rules();
-        $this->assertArrayHasKey('isArray', $rules);
+        $this->assertArrayHasKey('array', $rules);
 
         // image
         $field = $v->field('image');

@@ -14,6 +14,7 @@ It supports all endpoints with all methods (HEAD, GET, POST, PATCH & DELETE).
 | branch | This package version | OpenAgenda API | PHP min |
 |:------:|----------------------|:--------------:|:-------:|
 |  3.x   | 3.0.*                |       v2       | PHP 7.2 |
+|  3.x   | ^3.1                 |       v2       | PHP 8.0 |
 
 ## Installation
 

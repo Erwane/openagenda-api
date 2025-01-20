@@ -1,17 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/8.5/phpunit.xsd"
+         xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/9.3/phpunit.xsd"
          bootstrap="tests/bootstrap.php"
          colors="true">
-    <testsuites>
-        <testsuite name="all">
-            <directory>./tests</directory>
-        </testsuite>
-    </testsuites>
-
-    <filter>
-        <whitelist>
-            <directory suffix=".php" phpVersion="7.2">src/</directory>
-        </whitelist>
-    </filter>
+  <coverage>
+    <include>
+      <directory suffix=".php">src/</directory>
+    </include>
+  </coverage>
+  <testsuites>
+    <testsuite name="all">
+      <directory>./tests</directory>
+    </testsuite>
+  </testsuites>
 </phpunit>

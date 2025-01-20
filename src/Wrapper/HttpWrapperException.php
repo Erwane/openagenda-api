@@ -23,9 +23,9 @@ use Psr\Http\Message\RequestInterface;
 class HttpWrapperException extends OpenAgendaException
 {
     /**
-     * @var \Psr\Http\Message\RequestInterface
+     * @var \Psr\Http\Message\RequestInterface|null
      */
-    protected $_request;
+    protected ?RequestInterface $_request = null;
 
     /**
      * Set Wrapper request in this exception.

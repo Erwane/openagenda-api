@@ -213,7 +213,7 @@ class EventTest extends EndpointTestCase
         $field = $v->field('registration');
         $this->assertTrue($field->isEmptyAllowed());
         $rules = $field->rules();
-        $this->assertArrayHasKey('isArray', $rules);
+        $this->assertArrayHasKey('array', $rules);
 
         // accessibility
         $field = $v->field('accessibility');

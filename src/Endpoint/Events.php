@@ -26,7 +26,7 @@ use OpenAgenda\Validation;
  */
 class Events extends Endpoint
 {
-    protected $_schema = [
+    protected array $_schema = [
         'detailed' => ['type' => 'bool'],
         'longDescriptionFormat' => [],
         'size' => ['type' => 'int'],
@@ -97,7 +97,7 @@ class Events extends Endpoint
             ->boolean('includeLabels')
             // includeFields
             ->allowEmptyArray('includeFields')
-            ->isArray('includeFields')
+            ->array('includeFields')
             // monolingual
             ->allowEmptyString('monolingual')
             ->add('monolingual', 'monolingual', [
@@ -108,10 +108,10 @@ class Events extends Endpoint
             ->boolean('removed')
             // city
             ->allowEmptyArray('city')
-            ->isArray('city')
+            ->array('city')
             // department
             ->allowEmptyArray('department')
-            ->isArray('department')
+            ->array('department')
             // region
             ->allowEmptyString('region')
             ->scalar('region')
@@ -130,7 +130,7 @@ class Events extends Endpoint
             ->scalar('search')
             // uid
             ->allowEmptyArray('uid')
-            ->isArray('uid')
+            ->array('uid')
             // slug
             ->allowEmptyString('slug')
             ->scalar('slug')
@@ -150,7 +150,7 @@ class Events extends Endpoint
             ])
             // keyword
             ->allowEmptyArray('keyword')
-            ->isArray('keyword')
+            ->array('keyword')
             // geo
             ->allowEmptyString('geo')
             ->add('geo', 'geo', [
@@ -158,7 +158,7 @@ class Events extends Endpoint
             ])
             // locationUid
             ->allowEmptyArray('locationUid')
-            ->isArray('locationUid')
+            ->array('locationUid')
             // accessibility
             ->allowEmptyArray('accessibility')
             ->multipleOptions('accessibility', [
@@ -209,7 +209,7 @@ class Events extends Endpoint
     /**
      * Get locations.
      *
-     * @return \OpenAgenda\Entity\Event[]|\OpenAgenda\Collection
+     * @return \OpenAgenda\Collection
      * @throws \OpenAgenda\OpenAgendaException
      */
     public function get(): Collection

@@ -36,7 +36,7 @@ use OpenAgenda\OpenAgendaException;
  */
 class Agenda extends Entity
 {
-    protected $_schema = [
+    protected array $_schema = [
         'uid' => ['type' => 'int'],
         'title' => ['type' => 'string'],
         'slug' => ['type' => 'string'],

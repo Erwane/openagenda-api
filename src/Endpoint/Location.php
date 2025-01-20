@@ -148,7 +148,7 @@ class Location extends Endpoint
             ])
             // links
             ->allowEmptyArray('links')
-            ->isArray('links')
+            ->array('links')
             // image
             ->allowEmptyFile('image')
             ->add('image', 'image', ['rule' => [[Validation::class, 'image'], 10]])

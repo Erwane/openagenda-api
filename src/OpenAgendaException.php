@@ -25,12 +25,12 @@ class OpenAgendaException extends Exception
     /**
      * @var \Psr\Http\Message\ResponseInterface|null
      */
-    protected $_response = null;
+    protected ?ResponseInterface $_response = null;
 
     /**
      * @var array
      */
-    protected $_payload = [];
+    protected array $_payload = [];
 
     /**
      * Set Wrapper response in this exception.

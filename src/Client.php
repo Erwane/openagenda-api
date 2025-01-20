@@ -18,6 +18,7 @@ use OpenAgenda\Endpoint\Auth;
 use OpenAgenda\Wrapper\HttpWrapper;
 use OpenAgenda\Wrapper\HttpWrapperInterface;
 use Psr\Http\Message\ResponseInterface;
+use Psr\SimpleCache\CacheInterface;
 
 /**
  * OpenAgenda client
@@ -29,27 +30,27 @@ class Client
      *
      * @var string
      */
-    protected $url = 'https://api.openagenda.com/v2';
+    protected string $url = 'https://api.openagenda.com/v2';
 
     /**
-     * @var \OpenAgenda\Wrapper\HttpWrapper|null
+     * @var \OpenAgenda\Wrapper\HttpWrapper
      */
-    protected $http;
+    protected HttpWrapper $http;
 
     /**
      * @var \Psr\SimpleCache\CacheInterface|null
      */
-    protected $cache;
+    protected ?CacheInterface $cache = null;
+
+    /**
+     * @var string
+     */
+    private string $publicKey;
 
     /**
      * @var mixed|null
      */
-    private $publicKey;
-
-    /**
-     * @var mixed|null
-     */
-    private $secretKey;
+    private ?string $secretKey;
 
     /**
      * Construct OpenAgenda Client.
@@ -59,18 +60,19 @@ class Client
      */
     public function __construct(array $config = [])
     {
-        $this->publicKey = $config['public_key'] ?? null;
         $this->secretKey = $config['secret_key'] ?? null;
-        $this->http = $config['wrapper'] ?? null;
         $this->cache = $config['cache'] ?? null;
 
-        if (!$this->publicKey) {
+        if (empty($config['public_key'])) {
             throw new OpenAgendaException('Missing `public_key`.');
         }
 
-        if (!($this->http instanceof HttpWrapperInterface)) {
+        if (!isset($config['wrapper']) || !($config['wrapper'] instanceof HttpWrapperInterface)) {
             throw new OpenAgendaException('Invalid or missing `wrapper`.');
         }
+
+        $this->publicKey = $config['public_key'];
+        $this->http = $config['wrapper'];
     }
 
     /**
