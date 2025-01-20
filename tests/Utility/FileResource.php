@@ -63,7 +63,14 @@ class FileResource
     public function __construct(TestCase $test)
     {
         $class = (new ReflectionClass($test))->getShortName();
-        $this->prefix = $class . '-' . $test->getName() . '_';
+        if (method_exists($test, 'getName')) {
+            /** @noinspection PhpUndefinedMethodInspection */
+            $name = $test->getName();
+        } else {
+            /** @noinspection PhpUndefinedMethodInspection */
+            $name = $test->name();
+        }
+        $this->prefix = $class . '-' . $name . '_';
 
         $this->_cleanResources();
     }

@@ -104,7 +104,7 @@ class Collection extends IteratorIterator implements Countable, Iterator, JsonSe
     /**
      * @inheritDoc
      */
-    public function jsonSerialize()
+    public function jsonSerialize(): mixed
     {
         return $this->toArray();
     }

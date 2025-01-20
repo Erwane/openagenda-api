@@ -381,12 +381,12 @@ class LocationTest extends EndpointTestCase
             [
                 'exists',
                 ['agendaUid' => 123, 'uid' => 456, 'extId' => 'my-internal-id'],
-                'path' => '/v2/agendas/123/locations/456',
+                '/v2/agendas/123/locations/456',
             ],
             [
                 'get',
                 ['agendaUid' => 123, 'uid' => 456, 'extId' => 'my-internal-id'],
-                'path' => '/v2/agendas/123/locations/456',
+                '/v2/agendas/123/locations/456',
             ],
             [
                 'get',

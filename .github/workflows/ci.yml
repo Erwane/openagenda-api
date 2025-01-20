@@ -47,7 +47,7 @@ jobs:
           export CODECOVERAGE=1
           vendor/bin/phpunit --coverage-clover=coverage.xml
         else
-          vendor/bin/phpunit
+          vendor/bin/phpunit --display-phpunit-deprecations --display-deprecations --display-warnings
         fi
 
     - name: Submit code coverage
