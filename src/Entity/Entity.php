@@ -4,10 +4,10 @@ declare(strict_types=1);
 namespace OpenAgenda\Entity;
 
 use ArrayAccess;
-use Cake\Validation\Validation;
 use InvalidArgumentException;
 use OpenAgenda\DateTime;
 use OpenAgenda\OpenAgenda;
+use OpenAgenda\Validation;
 
 /**
  * Inspired by CakePHP Entity.

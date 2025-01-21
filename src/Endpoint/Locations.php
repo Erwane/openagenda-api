@@ -14,8 +14,6 @@ declare(strict_types=1);
  */
 namespace OpenAgenda\Endpoint;
 
-use Cake\Validation\Validation;
-use OpenAgenda\Validator;
 use OpenAgenda\Collection;
 use OpenAgenda\Entity\Location;
 use OpenAgenda\OpenAgenda;
@@ -40,69 +38,8 @@ class Locations extends Endpoint
     /**
      * @inheritDoc
      */
-    public function validationUriPath(Validator $validator): Validator
+    protected function uriPath(string $method): string
     {
-        return parent::validationUriPath($validator)
-            // agendaUid
-            ->requirePresence('agendaUid')
-            ->integer('agendaUid');
-    }
-
-    /**
-     * Validation rules for Uri path GET.
-     *
-     * @param \Cake\Validation\Validator $validator Validator.
-     * @return \Cake\Validation\Validator
-     */
-    public function validationUriPathGet(Validator $validator): Validator
-    {
-        return $this->validationUriPath($validator)
-            // limit
-            ->allowEmptyString('size')
-            ->numeric('size')
-            ->greaterThanOrEqual('size', 1)
-
-            // detailed
-            ->allowEmptyString('detailed')
-            ->boolean('detailed')
-
-            // state
-            ->allowEmptyString('state')
-            ->boolean('state')
-
-            // search
-            ->allowEmptyString('search')
-            ->scalar('search')
-
-            // created lte/gte
-            ->allowEmptyDateTime('createdAt[lte]')
-            ->allowEmptyDateTime('createdAt[gte]')
-            ->dateTime('createdAt[lte]', ['ymd', Validation::DATETIME_ISO8601])
-            ->dateTime('createdAt[gte]', ['ymd', Validation::DATETIME_ISO8601])
-
-            // updated lte/gte
-            ->allowEmptyDateTime('updatedAt[lte]')
-            ->allowEmptyDateTime('updatedAt[gte]')
-            ->dateTime('updatedAt[lte]', ['ymd', Validation::DATETIME_ISO8601])
-            ->dateTime('updatedAt[gte]', ['ymd', Validation::DATETIME_ISO8601])
-
-            // order
-            ->allowEmptyString('order')
-            ->inList('order', [
-                'name.asc',
-                'name.desc',
-                'createdAt.asc',
-                'createdAt.desc',
-            ]);
-    }
-
-    /**
-     * @inheritDoc
-     */
-    protected function uriPath(string $method, bool $validate = true): string
-    {
-        parent::uriPath($method);
-
         return sprintf('/agendas/%d/locations', $this->params['agendaUid'] ?? 0);
     }
 

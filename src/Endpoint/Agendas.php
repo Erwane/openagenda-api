@@ -14,7 +14,6 @@ declare(strict_types=1);
  */
 namespace OpenAgenda\Endpoint;
 
-use OpenAgenda\Validator;
 use OpenAgenda\Collection;
 use OpenAgenda\Entity\Agenda;
 use OpenAgenda\OpenAgenda;
@@ -37,53 +36,10 @@ class Agendas extends Endpoint
     ];
 
     /**
-     * Validation rules for Uri path GET.
-     *
-     * @param \Cake\Validation\Validator $validator Validator.
-     * @return \Cake\Validation\Validator
-     */
-    public function validationUriQueryGet(Validator $validator): Validator
-    {
-        return $validator
-            // limit
-            ->allowEmptyString('limit')
-            ->integer('limit')
-            // size
-            ->allowEmptyString('size')
-            ->integer('size')
-            // page
-            ->allowEmptyString('page')
-            ->integer('page')
-            // fields
-            ->allowEmptyArray('fields')
-            ->multipleOptions('fields', ['summary', 'schema'])
-            // search
-            ->allowEmptyString('search')
-            ->scalar('search')
-            // official
-            ->allowEmptyString('official')
-            ->boolean('official')
-            // slug
-            ->allowEmptyArray('slug')
-            ->isArray('slug')
-            // id
-            ->allowEmptyArray('uid')
-            ->isArray('uid')
-            // network_id
-            ->allowEmptyString('network')
-            ->integer('network')
-            // sort
-            ->allowEmptyArray('sort')
-            ->inList('sort', ['createdAt.desc', 'recentlyAddedEvents.desc']);
-    }
-
-    /**
      * @inheritDoc
      */
-    protected function uriPath(string $method, bool $validate = true): string
+    protected function uriPath(string $method): string
     {
-        parent::uriPath($method);
-
         $path = '/agendas';
 
         if (isset($this->params['_path']) && $this->params['_path'] === '/agendas/mines') {

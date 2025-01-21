@@ -21,4 +21,11 @@ namespace OpenAgenda\Endpoint;
  */
 class Raw extends Endpoint
 {
+    /**
+     * @inheritDoc
+     */
+    protected function uriPath(string $method): string
+    {
+        return '';
+    }
 }

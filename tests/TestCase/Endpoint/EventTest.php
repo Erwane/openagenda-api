@@ -14,7 +14,6 @@ declare(strict_types=1);
  */
 namespace OpenAgenda\Test\TestCase\Endpoint;
 
-use OpenAgenda\Validator;
 use GuzzleHttp\Psr7\Response;
 use OpenAgenda\DateTime;
 use OpenAgenda\Endpoint\Event;
@@ -23,7 +22,6 @@ use OpenAgenda\OpenAgenda;
 use OpenAgenda\OpenAgendaException;
 use OpenAgenda\Test\EndpointTestCase;
 use OpenAgenda\Test\Utility\FileResource;
-use OpenAgenda\Validation;
 use OpenAgenda\Wrapper\HttpWrapperException;
 
 /**
@@ -34,254 +32,6 @@ use OpenAgenda\Wrapper\HttpWrapperException;
  */
 class EventTest extends EndpointTestCase
 {
-    public function testValidationUriPathGet()
-    {
-        $endpoint = new Event([]);
-
-        $v = $endpoint->validationUriPathGet(new Validator());
-
-        $this->assertCount(2, $v);
-
-        // agendaUid
-        $field = $v->field('agendaUid');
-        $this->assertTrue($field->isPresenceRequired());
-        $rules = $field->rules();
-        $this->assertArrayHasKey('integer', $rules);
-
-        // id
-        $field = $v->field('uid');
-        $this->assertTrue($field->isPresenceRequired());
-        $rules = $field->rules();
-        $this->assertArrayHasKey('integer', $rules);
-    }
-
-    public function testValidationUriPathExists()
-    {
-        $endpoint = new Event([]);
-
-        $v = $endpoint->validationUriPathExists(new Validator());
-
-        $this->assertCount(2, $v);
-        // agendaUid
-        $field = $v->field('agendaUid');
-        $this->assertTrue($field->isPresenceRequired());
-        // uid
-        $field = $v->field('uid');
-        $this->assertTrue($field->isPresenceRequired());
-    }
-
-    public function testValidationUriPathCreate()
-    {
-        $endpoint = new Event([]);
-
-        $v = $endpoint->validationUriPathCreate(new Validator());
-
-        $this->assertCount(1, $v);
-        // agendaUid
-        $field = $v->field('agendaUid');
-        $this->assertTrue($field->isPresenceRequired());
-    }
-
-    public function testValidationUriPathUpdate()
-    {
-        $endpoint = new Event([]);
-
-        $v = $endpoint->validationUriPathUpdate(new Validator());
-
-        $this->assertCount(2, $v);
-        // agendaUid
-        $field = $v->field('agendaUid');
-        $this->assertTrue($field->isPresenceRequired());
-        // uid
-        $field = $v->field('uid');
-        $this->assertTrue($field->isPresenceRequired());
-    }
-
-    public function testValidationUriPathDelete()
-    {
-        $endpoint = new Event([]);
-
-        $v = $endpoint->validationUriPathDelete(new Validator());
-
-        $this->assertCount(2, $v);
-        // agendaUid
-        $field = $v->field('agendaUid');
-        $this->assertTrue($field->isPresenceRequired());
-        // uid
-        $field = $v->field('uid');
-        $this->assertTrue($field->isPresenceRequired());
-    }
-
-    public function testValidationUriQueryGet(): void
-    {
-        $endpoint = new Event([]);
-
-        $v = $endpoint->validationUriQueryGet(new Validator());
-
-        $this->assertCount(1, $v);
-
-        // longDescriptionFormat
-        $field = $v->field('longDescriptionFormat');
-        $this->assertTrue($field->isEmptyAllowed());
-        $rules = $field->rules();
-        $this->assertEquals(['markdown', 'HTML', 'HTMLWithEmbeds'], $rules['inList']->get('pass')[0]);
-    }
-
-    public static function dataValidationCreateUpdate()
-    {
-        return [
-            ['validationCreate'],
-            ['validationUpdate'],
-        ];
-    }
-
-    /**
-     * Testing validations for post and patch
-     *
-     * @uses         \OpenAgenda\Endpoint\Event::validationCreate()
-     * @uses         \OpenAgenda\Endpoint\Event::validationUpdate()
-     * @dataProvider dataValidationCreateUpdate
-     */
-    public function testValidationCreateUpdate($method)
-    {
-        $endpoint = new Event([]);
-
-        /** @var \Cake\Validation\Validator $v */
-        $v = $endpoint->{$method}(new Validator());
-
-        $this->assertCount(18, $v);
-
-        // agendaUid
-        $this->assertTrue($v->hasField('agendaUid'));
-
-        // id
-        $field = $v->field('uid');
-        $this->assertSame('update', $field->isPresenceRequired());
-        $rules = $field->rules();
-        $this->assertArrayHasKey('integer', $rules);
-
-        // title
-        $field = $v->field('title');
-        $this->assertSame('create', $field->isPresenceRequired());
-        $rules = $field->rules();
-        $this->assertEquals([Validation::class, 'multilingual'], $rules['multilingual']->get('rule'));
-        $this->assertEquals(140, $rules['multilingual']->get('pass')[0]);
-
-        // description
-        $field = $v->field('description');
-        $this->assertSame('create', $field->isPresenceRequired());
-        $rules = $field->rules();
-        $this->assertEquals([Validation::class, 'multilingual'], $rules['multilingual']->get('rule'));
-        $this->assertEquals(200, $rules['multilingual']->get('pass')[0]);
-
-        // longDescription
-        $field = $v->field('longDescription');
-        $this->assertTrue($field->isEmptyAllowed());
-        $rules = $field->rules();
-        $this->assertEquals([Validation::class, 'multilingual'], $rules['multilingual']->get('rule'));
-        $this->assertEquals(10000, $rules['multilingual']->get('pass')[0]);
-
-        // conditions
-        $field = $v->field('conditions');
-        $this->assertTrue($field->isEmptyAllowed());
-        $rules = $field->rules();
-        $this->assertEquals([Validation::class, 'multilingual'], $rules['multilingual']->get('rule'));
-        $this->assertEquals(255, $rules['multilingual']->get('pass')[0]);
-
-        // keywords
-        $field = $v->field('keywords');
-        $this->assertTrue($field->isEmptyAllowed());
-        $rules = $field->rules();
-        $this->assertEquals([Validation::class, 'multilingual'], $rules['multilingual']->get('rule'));
-        $this->assertEquals(255, $rules['multilingual']->get('pass')[0]);
-
-        // image
-        $field = $v->field('image');
-        $this->assertTrue($field->isEmptyAllowed());
-        $rules = $field->rules();
-        $this->assertIsCallable($rules['image']->get('rule'));
-        $this->assertEquals('checkImage', $rules['image']->get('rule')[1]);
-        $this->assertEquals(20, $rules['image']->get('pass')[0]);
-
-        // imageCredits
-        $field = $v->field('imageCredits');
-        $this->assertTrue($field->isEmptyAllowed());
-        $rules = $field->rules();
-        $this->assertEquals(255, $rules['maxLength']->get('pass')[0]);
-
-        // registration
-        $field = $v->field('registration');
-        $this->assertTrue($field->isEmptyAllowed());
-        $rules = $field->rules();
-        $this->assertArrayHasKey('isArray', $rules);
-
-        // accessibility
-        $field = $v->field('accessibility');
-        $this->assertTrue($field->isEmptyAllowed());
-        $rules = $field->rules();
-        $this->assertEquals('checkAccessibility', $rules['accessibility']->get('rule')[1]);
-
-        // timings
-        $field = $v->field('timings');
-        $this->assertSame('create', $field->isPresenceRequired());
-        $rules = $field->rules();
-        $this->assertEquals('checkTimings', $rules['timings']->get('rule')[1]);
-
-        // age
-        $field = $v->field('age');
-        $this->assertTrue($field->isEmptyAllowed());
-        $rules = $field->rules();
-        $this->assertEquals('checkAge', $rules['age']->get('rule')[1]);
-
-        // locationUid
-        $field = $v->field('locationUid');
-        $this->assertIsCallable($field->isPresenceRequired());
-        $this->assertEquals('presenceLocationId', $field->isPresenceRequired()[1]);
-        $rules = $field->rules();
-        $this->assertArrayHasKey('integer', $rules);
-
-        // attendanceMode
-        $field = $v->field('attendanceMode');
-        $this->assertTrue($field->isEmptyAllowed());
-        $rules = $field->rules();
-        $this->assertSame([
-            EventEntity::ATTENDANCE_OFFLINE,
-            EventEntity::ATTENDANCE_ONLINE,
-            EventEntity::ATTENDANCE_MIXED,
-        ], $rules['inList']->get('pass')[0]);
-
-        // onlineAccessLink
-        $field = $v->field('onlineAccessLink');
-        $this->assertIsCallable($field->isPresenceRequired());
-        $this->assertEquals('presenceOnlineAccessLink', $field->isPresenceRequired()[1]);
-        $rules = $field->rules();
-        $this->assertArrayHasKey('url', $rules);
-
-        // status
-        $field = $v->field('status');
-        $this->assertTrue($field->isEmptyAllowed());
-        $rules = $field->rules();
-        $this->assertSame([
-            EventEntity::STATUS_SCHEDULED,
-            EventEntity::STATUS_RESCHEDULED,
-            EventEntity::STATUS_ONLINE,
-            EventEntity::STATUS_DEFERRED,
-            EventEntity::STATUS_FULL,
-            EventEntity::STATUS_CANCELED,
-        ], $rules['inList']->get('pass')[0]);
-
-        // state
-        $field = $v->field('state');
-        $this->assertTrue($field->isEmptyAllowed());
-        $rules = $field->rules();
-        $this->assertSame([
-            EventEntity::STATE_REFUSED,
-            EventEntity::STATE_MODERATION,
-            EventEntity::STATE_READY,
-            EventEntity::STATE_PUBLISHED,
-        ], $rules['inList']->get('pass')[0]);
-    }
-
     public static function dataCheckImage(): array
     {
         $jpg = TESTS . 'resources/wendywei-1537637.jpg';
@@ -289,7 +39,6 @@ class EventTest extends EndpointTestCase
         $webp = TESTS . 'resources/wendywei-1537637.webp';
 
         return [
-            [['file'], 1, false],
             ['resources/wendywei-1537637.jpg', 1, false],
             [$jpg, 0.001, false],
             [fopen($jpg, 'r'), 0.001, false],
@@ -554,84 +303,6 @@ class EventTest extends EndpointTestCase
         $this->assertSame($expected, $success);
     }
 
-    public static function dataGetUriErrors(): array
-    {
-        return [
-            [
-                'exists',
-                [],
-                [
-                    'agendaUid' => [
-                        '_required' => 'This field is required',
-                    ],
-                    'uid' => [
-                        '_required' => 'This field is required',
-                    ],
-                ],
-            ],
-            [
-                'get',
-                [],
-                [
-                    'agendaUid' => [
-                        '_required' => 'This field is required',
-                    ],
-                    'uid' => [
-                        '_required' => 'This field is required',
-                    ],
-                ],
-            ],
-            [
-                'create',
-                [],
-                [
-                    'agendaUid' => [
-                        '_required' => 'This field is required',
-                    ],
-                ],
-            ],
-            [
-                'update',
-                [],
-                [
-                    'agendaUid' => [
-                        '_required' => 'This field is required',
-                    ],
-                    'uid' => [
-                        '_required' => 'This field is required',
-                    ],
-                ],
-            ],
-            [
-                'delete',
-                [],
-                [
-                    'agendaUid' => [
-                        '_required' => 'This field is required',
-                    ],
-                    'uid' => [
-                        '_required' => 'This field is required',
-                    ],
-                ],
-            ],
-        ];
-    }
-
-    /**
-     * @dataProvider dataGetUriErrors
-     */
-    public function testGetUriErrors($method, $params, $expected)
-    {
-        $endpoint = new Event($params);
-        $message = [
-            'message' => 'OpenAgenda\\Endpoint\\Event has errors.',
-            'errors' => $expected,
-        ];
-        $this->expectException(OpenAgendaException::class);
-        $this->expectExceptionMessage(json_encode($message, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
-        $endpoint->getUrl($method);
-    }
-
     public static function dataGetUriSuccess(): array
     {
         return [
@@ -775,21 +446,5 @@ class EventTest extends EndpointTestCase
         $this->assertEquals(41294774, $entity->uid);
         $this->assertEquals(41630080, $entity->agendaUid);
         $this->assertEquals(42921249, $entity->locationUid);
-    }
-
-    public function testCreateException(): void
-    {
-        $this->expectException(OpenAgendaException::class);
-        $this->expectExceptionMessageMatches('/"title":{"_required"/');
-        $endpoint = new Event(['agendaUid' => 1]);
-        $endpoint->create();
-    }
-
-    public function testUpdateException(): void
-    {
-        $this->expectException(OpenAgendaException::class);
-        $this->expectExceptionMessageMatches('/"uid":{"_required"/');
-        $endpoint = new Event(['agendaUid' => 1]);
-        $endpoint->update();
     }
 }

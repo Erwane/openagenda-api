@@ -27,6 +27,23 @@ class Validation
     ];
 
     /**
+     * Validate an url.
+     *
+     * @param mixed $check Url to check
+     * @return mixed
+     */
+    public static function url($check)
+    {
+        if (!is_string($check)) {
+            return false;
+        }
+
+        $result = filter_var($check, FILTER_VALIDATE_URL);
+
+        return $result !== false;
+    }
+
+    /**
      * Validate a phone
      *
      * @param string $check Input phone number

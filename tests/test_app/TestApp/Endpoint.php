@@ -14,8 +14,6 @@ declare(strict_types=1);
  */
 namespace TestApp;
 
-use OpenAgenda\Validator;
-
 /**
  * @coversNothing
  */
@@ -29,24 +27,8 @@ class Endpoint extends \OpenAgenda\Endpoint\Endpoint
         'json' => ['type' => 'json'],
     ];
 
-    protected function uriPath(string $method, bool $validate = true): string
+    protected function uriPath(string $method): string
     {
-        parent::uriPath($method, $validate);
-
         return '/testingEndpoint';
-    }
-
-    public function validationUriPathGet(Validator $validator): Validator
-    {
-        return $validator
-            ->allowEmptyString('path')
-            ->inList('path', ['this', 'that']);
-    }
-
-    public function validationUriQueryGet(Validator $validator): Validator
-    {
-        return $validator
-            ->allowEmptyString('query')
-            ->inList('query', ['this', 'that']);
     }
 }

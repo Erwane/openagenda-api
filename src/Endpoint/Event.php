@@ -14,8 +14,6 @@ declare(strict_types=1);
  */
 namespace OpenAgenda\Endpoint;
 
-use Cake\Validation\Validation as CakeValidation;
-use OpenAgenda\Validator;
 use OpenAgenda\DateTime;
 use OpenAgenda\Entity\Event as EventEntity;
 use OpenAgenda\OpenAgenda;
@@ -37,188 +35,6 @@ class Event extends Endpoint
     ];
 
     /**
-     * @inheritDoc
-     */
-    public function validationUriPath(Validator $validator): Validator
-    {
-        return parent::validationUriPath($validator)
-            // agendaUid
-            ->requirePresence('agendaUid')
-            ->integer('agendaUid');
-    }
-
-    /**
-     * Validation rules for Uri path GET.
-     *
-     * @param \Cake\Validation\Validator $validator Validator.
-     * @return \Cake\Validation\Validator
-     */
-    public function validationUriPathGet(Validator $validator): Validator
-    {
-        return $this->validationUriPath($validator)
-            // id
-            ->requirePresence('uid')
-            ->integer('uid');
-    }
-
-    /**
-     * Validation rules for Uri path HEAD.
-     *
-     * @param \Cake\Validation\Validator $validator Validator.
-     * @return \Cake\Validation\Validator
-     */
-    public function validationUriPathExists(Validator $validator): Validator
-    {
-        return $this->validationUriPathGet($validator);
-    }
-
-    /**
-     * Validation rules for Uri path POST.
-     *
-     * @param \Cake\Validation\Validator $validator Validator.
-     * @return \Cake\Validation\Validator
-     */
-    public function validationUriPathCreate(Validator $validator): Validator
-    {
-        return $this->validationUriPath($validator);
-    }
-
-    /**
-     * Validation rules for Uri path UPDATE.
-     *
-     * @param \Cake\Validation\Validator $validator Validator.
-     * @return \Cake\Validation\Validator
-     */
-    public function validationUriPathUpdate(Validator $validator): Validator
-    {
-        return $this->validationUriPathGet($validator);
-    }
-
-    /**
-     * Validation rules for Uri path DELETE.
-     *
-     * @param \Cake\Validation\Validator $validator Validator.
-     * @return \Cake\Validation\Validator
-     */
-    public function validationUriPathDelete(Validator $validator): Validator
-    {
-        return $this->validationUriPathGet($validator);
-    }
-
-    /**
-     * Validation rules for Uri query GET.
-     *
-     * @param \Cake\Validation\Validator $validator Validator.
-     * @return \Cake\Validation\Validator
-     */
-    public function validationUriQueryGet(Validator $validator): Validator
-    {
-        return $validator
-            // longDescriptionFormat
-            ->allowEmptyString('longDescriptionFormat')
-            ->inList('longDescriptionFormat', ['markdown', 'HTML', 'HTMLWithEmbeds']);
-    }
-
-    /**
-     * Validation rules for POST/PATCH data.
-     *
-     * @param \Cake\Validation\Validator $validator Validator.
-     * @return \Cake\Validation\Validator
-     */
-    public function validationCreate(Validator $validator): Validator
-    {
-        return $this->validationUriPath($validator)
-            // id
-            ->requirePresence('uid', 'update')
-            ->integer('uid')
-            // title
-            ->requirePresence('title', 'create')
-            ->add('title', 'multilingual', [
-                'rule' => [[Validation::class, 'multilingual'], 140],
-            ])
-            // description
-            ->requirePresence('description', 'create')
-            ->add('description', 'multilingual', [
-                'rule' => [[Validation::class, 'multilingual'], 200],
-            ])
-            // longDescription
-            ->allowEmptyArray('longDescription')
-            ->add('longDescription', 'multilingual', [
-                'rule' => [[Validation::class, 'multilingual'], 10000],
-            ])
-            // conditions
-            ->allowEmptyArray('conditions')
-            ->add('conditions', 'multilingual', [
-                'rule' => [[Validation::class, 'multilingual'], 255],
-            ])
-            // keywords
-            ->allowEmptyArray('keywords')
-            ->add('keywords', 'multilingual', [
-                'rule' => [[Validation::class, 'multilingual'], 255],
-            ])
-            // image
-            ->allowEmptyFile('image')
-            ->add('image', 'image', ['rule' => [[$this, 'checkImage'], 20]])
-            // imageCredits
-            ->allowEmptyString('imageCredits')
-            ->maxLength('imageCredits', 255)
-            // registration
-            ->allowEmptyArray('registration')
-            ->isArray('registration')
-            // accessibility
-            ->allowEmptyArray('accessibility')
-            ->add('accessibility', 'accessibility', ['rule' => [$this, 'checkAccessibility']])
-            // timings
-            ->requirePresence('timings', 'create')
-            ->add('timings', 'timings', ['rule' => [$this, 'checkTimings']])
-            // age
-            ->allowEmptyArray('age')
-            ->add('age', 'age', ['rule' => [$this, 'checkAge']])
-            // locationUid
-            ->requirePresence('locationUid', [$this, 'presenceLocationId'])
-            ->integer('locationUid')
-            // attendanceMode
-            ->allowEmptyString('attendanceMode')
-            ->inList('attendanceMode', [
-                EventEntity::ATTENDANCE_OFFLINE,
-                EventEntity::ATTENDANCE_ONLINE,
-                EventEntity::ATTENDANCE_MIXED,
-            ])
-            // onlineAccessLink
-            ->requirePresence('onlineAccessLink', [$this, 'presenceOnlineAccessLink'])
-            ->url('onlineAccessLink')
-            // status
-            ->allowEmptyString('status')
-            ->inList('status', [
-                EventEntity::STATUS_SCHEDULED,
-                EventEntity::STATUS_RESCHEDULED,
-                EventEntity::STATUS_ONLINE,
-                EventEntity::STATUS_DEFERRED,
-                EventEntity::STATUS_FULL,
-                EventEntity::STATUS_CANCELED,
-            ])
-            // state
-            ->allowEmptyString('state')
-            ->inList('state', [
-                EventEntity::STATE_REFUSED,
-                EventEntity::STATE_MODERATION,
-                EventEntity::STATE_READY,
-                EventEntity::STATE_PUBLISHED,
-            ]);
-    }
-
-    /**
-     * Validation rules for POST/PATCH data.
-     *
-     * @param \Cake\Validation\Validator $validator Validator.
-     * @return \Cake\Validation\Validator
-     */
-    public function validationUpdate(Validator $validator)
-    {
-        return $this->validationCreate($validator);
-    }
-
-    /**
      * Check image and URL images too.
      *
      * @param string|resource $check Absolute path, url or file resource
@@ -229,7 +45,7 @@ class Event extends Endpoint
     public static function checkImage($check, float $max = 10): bool
     {
         $success = Validation::image($check, $max);
-        if (!$success && CakeValidation::url($check)) {
+        if (!$success && Validation::url($check)) {
             if (!OpenAgenda::getClient()) {
                 throw new OpenAgendaException('OpenAgenda object was not previously created or Client not set.');
             }
@@ -386,10 +202,8 @@ class Event extends Endpoint
     /**
      * @inheritDoc
      */
-    protected function uriPath(string $method, bool $validate = true): string
+    protected function uriPath(string $method): string
     {
-        parent::uriPath($method);
-
         if ($method === 'create') {
             $path = sprintf('/agendas/%d/events', $this->params['agendaUid'] ?? 0);
         } else {
@@ -429,23 +243,14 @@ class Event extends Endpoint
     /**
      * Create event
      *
-     * @param bool $validate Validate data
      * @return \OpenAgenda\Entity\Event|null
      * @throws \OpenAgenda\OpenAgendaException
      */
-    public function create(bool $validate = true)
+    public function create()
     {
         unset($this->params['uid']);
 
         $entity = new EventEntity($this->params);
-
-        if ($validate) {
-            $errors = $this->getValidator('create')
-                ->validate($entity->extract([], true));
-            if ($errors) {
-                $this->throwException($errors);
-            }
-        }
 
         $url = $this->getUrl(__FUNCTION__);
 
@@ -458,22 +263,13 @@ class Event extends Endpoint
     /**
      * Patch event
      *
-     * @param bool $validate Validate data
      * @return \OpenAgenda\Entity\Event|null
      * @throws \OpenAgenda\OpenAgendaException
      */
-    public function update(bool $validate = true)
+    public function update()
     {
         $entity = new EventEntity($this->params);
         $entity->setNew(false);
-
-        if ($validate) {
-            $errors = $this->getValidator('update')
-                ->validate($entity->extract([], true), false);
-            if ($errors) {
-                $this->throwException($errors);
-            }
-        }
 
         // todo: no data to update, skip. Maybe an option ?
 

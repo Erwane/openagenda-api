@@ -20,11 +20,18 @@ use PHPUnit\Framework\TestCase;
 /**
  * OpenAgenda\Validation tests
  *
- * @uses \OpenAgenda\Validation
+ * @uses   \OpenAgenda\Validation
  * @covers \OpenAgenda\Validation
  */
 class ValidationTest extends TestCase
 {
+    public function testUrl(): void
+    {
+        $this->assertTrue(Validation::url('https://example.com/'));
+        $this->assertFalse(Validation::url('not an url'));
+        $this->assertFalse(Validation::url(null));
+    }
+
     public function dataPhone()
     {
         return [

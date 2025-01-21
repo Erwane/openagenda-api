@@ -14,7 +14,6 @@ declare(strict_types=1);
  */
 namespace OpenAgenda\Endpoint;
 
-use OpenAgenda\Validator;
 use OpenAgenda\Entity\Agenda as AgendaEntity;
 use OpenAgenda\OpenAgenda;
 
@@ -30,35 +29,8 @@ class Agenda extends Endpoint
     /**
      * @inheritDoc
      */
-    public function validationUriPath(Validator $validator): Validator
+    protected function uriPath(string $method): string
     {
-        return parent::validationUriPath($validator)
-            // id
-            ->requirePresence('uid')
-            ->integer('uid');
-    }
-
-    /**
-     * Validation rules for Uri path GET.
-     *
-     * @param \Cake\Validation\Validator $validator Validator.
-     * @return \Cake\Validation\Validator
-     */
-    public function validationUriQueryGet(Validator $validator)
-    {
-        return $this->validationUriPath($validator)
-            // detailed
-            ->allowEmptyString('detailed')
-            ->boolean('detailed');
-    }
-
-    /**
-     * @inheritDoc
-     */
-    protected function uriPath(string $method, bool $validate = true): string
-    {
-        parent::uriPath($method);
-
         return sprintf('/agendas/%d', $this->params['uid'] ?? 0);
     }
 

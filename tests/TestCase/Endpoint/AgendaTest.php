@@ -14,9 +14,7 @@ declare(strict_types=1);
  */
 namespace OpenAgenda\Test\TestCase\Endpoint;
 
-use OpenAgenda\Validator;
 use OpenAgenda\Endpoint\Agenda;
-use OpenAgenda\OpenAgendaException;
 use OpenAgenda\Test\EndpointTestCase;
 use OpenAgenda\Test\Utility\FileResource;
 
@@ -28,79 +26,6 @@ use OpenAgenda\Test\Utility\FileResource;
  */
 class AgendaTest extends EndpointTestCase
 {
-    public function testValidationUriPath()
-    {
-        $endpoint = new Agenda();
-
-        $v = $endpoint->validationUriPath(new Validator());
-
-        $this->assertCount(1, $v);
-
-        // uid
-        $field = $v->field('uid');
-        $this->assertTrue($field->isPresenceRequired());
-        $rules = $field->rules();
-        $this->assertArrayHasKey('integer', $rules);
-    }
-
-    public function testValidationUriQueryGet()
-    {
-        $endpoint = new Agenda();
-
-        $v = $endpoint->validationUriQueryGet(new Validator());
-
-        $this->assertCount(2, $v);
-
-        // agendaUid
-        $this->assertTrue($v->hasField('uid'));
-
-        // detailed
-        $field = $v->field('detailed');
-        $this->assertTrue($field->isEmptyAllowed());
-        $rules = $field->rules();
-        $this->assertArrayHasKey('boolean', $rules);
-    }
-
-    public static function dataGetUriErrors(): array
-    {
-        return [
-            [
-                'exists',
-                [],
-                [
-                    'uid' => [
-                        '_required' => 'This field is required',
-                    ],
-                ],
-            ],
-            [
-                'get',
-                [],
-                [
-                    'uid' => [
-                        '_required' => 'This field is required',
-                    ],
-                ],
-            ],
-
-        ];
-    }
-
-    /**
-     * @dataProvider dataGetUriErrors
-     */
-    public function testGetUriErrors($method, $params, $expected)
-    {
-        $endpoint = new Agenda($params);
-        $message = [
-            'message' => 'OpenAgenda\\Endpoint\\Agenda has errors.',
-            'errors' => $expected,
-        ];
-        $this->expectException(OpenAgendaException::class);
-        $this->expectExceptionMessage(json_encode($message, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
-        $endpoint->getUrl($method);
-    }
-
     public static function dataGetUriSuccess(): array
     {
         return [
