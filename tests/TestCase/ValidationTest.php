@@ -25,7 +25,7 @@ use PHPUnit\Framework\TestCase;
  */
 class ValidationTest extends TestCase
 {
-    public function dataPhone()
+    public static function dataPhone()
     {
         return [
             [[''], false],
@@ -50,7 +50,7 @@ class ValidationTest extends TestCase
         $this->assertFalse(Validation::lang('ac'));
     }
 
-    public function dataMultilingual()
+    public static function dataMultilingual()
     {
         return [
             // Empty is cool

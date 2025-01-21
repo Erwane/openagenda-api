@@ -213,7 +213,7 @@ class EventTest extends EndpointTestCase
         $field = $v->field('registration');
         $this->assertTrue($field->isEmptyAllowed());
         $rules = $field->rules();
-        $this->assertArrayHasKey('isArray', $rules);
+        $this->assertArrayHasKey('array', $rules);
 
         // accessibility
         $field = $v->field('accessibility');
@@ -638,12 +638,12 @@ class EventTest extends EndpointTestCase
             [
                 'exists',
                 ['agendaUid' => 123, 'uid' => 456],
-                'path' => '/v2/agendas/123/events/456',
+                '/v2/agendas/123/events/456',
             ],
             [
                 'get',
                 ['agendaUid' => 123, 'uid' => 456],
-                'path' => '/v2/agendas/123/events/456',
+                '/v2/agendas/123/events/456',
             ],
             [
                 'create',

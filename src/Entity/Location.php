@@ -50,7 +50,7 @@ use OpenAgenda\OpenAgendaException;
  */
 class Location extends Entity
 {
-    protected $_schema = [
+    protected array $_schema = [
         'uid' => [],
         'agendaUid' => [],
         'name' => ['required' => true],
@@ -152,10 +152,10 @@ class Location extends Entity
     /**
      * Set multilingual description clean and truncate to 5000.
      *
-     * @param string|array $value Descriptions
+     * @param array|string|null $value Descriptions
      * @return string[]
      */
-    protected function _setDescription($value)
+    protected function _setDescription(array|string|null $value)
     {
         return static::setMultilingual($value, true, 5000);
     }
@@ -163,10 +163,10 @@ class Location extends Entity
     /**
      * Set multilingual access clean and truncate to 5000.
      *
-     * @param string|array $value Access
+     * @param array|string|null $value Access
      * @return string[]
      */
-    protected function _setAccess($value)
+    protected function _setAccess(array|string|null $value)
     {
         return static::setMultilingual($value, true, 1000);
     }
@@ -175,7 +175,7 @@ class Location extends Entity
      * Country code is uppercase.
      *
      * @param string|null $value Country code.
-     * @return string
+     * @return string|null
      */
     protected function _setCountryCode(?string $value): ?string
     {
@@ -189,10 +189,10 @@ class Location extends Entity
     /**
      * Set latitude
      *
-     * @param string|float $value coordinate
+     * @param float|string|null $value coordinate
      * @return float
      */
-    protected function _setLatitude($value)
+    protected function _setLatitude(float|string|null $value)
     {
         return (float)$value;
     }
@@ -200,10 +200,10 @@ class Location extends Entity
     /**
      * Set longitude
      *
-     * @param string|float $value coordinate
+     * @param float|string|null $value coordinate
      * @return float
      */
-    protected function _setLongitude($value)
+    protected function _setLongitude(float|string|null $value)
     {
         return (float)$value;
     }

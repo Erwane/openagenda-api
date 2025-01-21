@@ -12,7 +12,7 @@ declare(strict_types=1);
  * @see         https://github.com/Erwane/openagenda-api
  * @license     https://opensource.org/licenses/mit-license.php MIT License
  */
-namespace OpenAgenda\Test\test_app\TestApp;
+namespace TestApp;
 
 use OpenAgenda\Entity\Agenda;
 use OpenAgenda\Entity\Event;
@@ -24,14 +24,14 @@ use OpenAgenda\Entity\Location;
  * @property int $id
  * @property int $uid
  * @property string $postalCode
- * @property \Cake\Chronos\Chronos $createdAt
+ * @property \OpenAgenda\DateTime $createdAt
  * @property array $description
  * @property bool $state
  * @coversNothing
  */
 class Entity extends \OpenAgenda\Entity\Entity
 {
-    protected $_schema = [
+    protected array $_schema = [
         'uid' => ['required' => true],
         'postalCode' => ['type' => 'string'],
         'createdAt' => ['type' => 'datetime'],

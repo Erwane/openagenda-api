@@ -41,7 +41,7 @@ class Collection extends IteratorIterator implements Countable, Iterator, JsonSe
     /**
      * @inheritDoc
      */
-    public function count()
+    public function count(): int
     {
         return iterator_count($this);
     }
@@ -49,7 +49,7 @@ class Collection extends IteratorIterator implements Countable, Iterator, JsonSe
     /**
      * Get first element.
      *
-     * @return mixed|null
+     * @return \OpenAgenda\Entity\Entity|null
      */
     public function first()
     {
@@ -65,7 +65,7 @@ class Collection extends IteratorIterator implements Countable, Iterator, JsonSe
     /**
      * Get first element.
      *
-     * @return mixed|null
+     * @return \OpenAgenda\Entity\Entity|null
      */
     public function last()
     {
@@ -85,7 +85,7 @@ class Collection extends IteratorIterator implements Countable, Iterator, JsonSe
      * Collection as array.
      * All object with `toArray` will also been returned as array.
      *
-     * @return array
+     * @return array<int, \OpenAgenda\Entity\Entity>
      */
     public function toArray(): array
     {
@@ -104,7 +104,7 @@ class Collection extends IteratorIterator implements Countable, Iterator, JsonSe
     /**
      * @inheritDoc
      */
-    public function jsonSerialize()
+    public function jsonSerialize(): mixed
     {
         return $this->toArray();
     }

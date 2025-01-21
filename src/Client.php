@@ -18,6 +18,7 @@ use OpenAgenda\Endpoint\Auth;
 use OpenAgenda\Wrapper\HttpWrapper;
 use OpenAgenda\Wrapper\HttpWrapperInterface;
 use Psr\Http\Message\ResponseInterface;
+use Psr\SimpleCache\CacheInterface;
 
 /**
  * OpenAgenda client
@@ -29,27 +30,27 @@ class Client
      *
      * @var string
      */
-    protected $url = 'https://api.openagenda.com/v2';
+    protected string $url = 'https://api.openagenda.com/v2';
 
     /**
-     * @var \OpenAgenda\Wrapper\HttpWrapper|null
+     * @var \OpenAgenda\Wrapper\HttpWrapper
      */
-    protected $http;
+    protected HttpWrapper $http;
 
     /**
      * @var \Psr\SimpleCache\CacheInterface|null
      */
-    protected $cache;
+    protected ?CacheInterface $cache = null;
+
+    /**
+     * @var string
+     */
+    private string $publicKey;
 
     /**
      * @var mixed|null
      */
-    private $publicKey;
-
-    /**
-     * @var mixed|null
-     */
-    private $secretKey;
+    private ?string $secretKey;
 
     /**
      * Construct OpenAgenda Client.
@@ -59,18 +60,19 @@ class Client
      */
     public function __construct(array $config = [])
     {
-        $this->publicKey = $config['public_key'] ?? null;
         $this->secretKey = $config['secret_key'] ?? null;
-        $this->http = $config['wrapper'] ?? null;
         $this->cache = $config['cache'] ?? null;
 
-        if (!$this->publicKey) {
+        if (empty($config['public_key'])) {
             throw new OpenAgendaException('Missing `public_key`.');
         }
 
-        if (!($this->http instanceof HttpWrapperInterface)) {
+        if (!isset($config['wrapper']) || !($config['wrapper'] instanceof HttpWrapperInterface)) {
             throw new OpenAgendaException('Invalid or missing `wrapper`.');
         }
+
+        $this->publicKey = $config['public_key'];
+        $this->http = $config['wrapper'];
     }
 
     /**
@@ -141,14 +143,21 @@ class Client
      *
      * @param string $url OpenAgenda url
      * @param array $params Request params
-     * @return int
+     * @return \Psr\Http\Message\ResponseInterface|int
      * @throws \OpenAgenda\OpenAgendaException
      */
-    public function head(string $url, array $params = []): int
+    public function head(string $url, array $params = [])
     {
+        $raw = $params['_raw'] ?? null;
+        unset($params['_raw']);
+
         $params['headers']['key'] = $this->publicKey;
 
         $response = $this->_doRequest('head', [$url, $params]);
+
+        if ($raw) {
+            return $response;
+        }
 
         return $response->getStatusCode();
     }
@@ -158,15 +167,22 @@ class Client
      *
      * @param string $url OpenAgenda url
      * @param array $params Request params
-     * @return array
+     * @return \Psr\Http\Message\ResponseInterface|array
      * @throws \OpenAgenda\OpenAgendaException
      */
-    public function get(string $url, array $params = []): array
+    public function get(string $url, array $params = [])
     {
+        $raw = $params['_raw'] ?? null;
+        unset($params['_raw']);
+
         // Add key
         $params['headers']['key'] = $this->publicKey;
 
         $response = $this->_doRequest('get', [$url, $params]);
+
+        if ($raw) {
+            return $response;
+        }
 
         return $this->payload($response);
     }
@@ -177,14 +193,21 @@ class Client
      * @param string $url OpenAgenda url
      * @param array $data POST data.
      * @param array $params Request params.
-     * @return array
+     * @return \Psr\Http\Message\ResponseInterface|array
      * @throws \OpenAgenda\OpenAgendaException
      */
-    public function post(string $url, array $data = [], array $params = []): array
+    public function post(string $url, array $data = [], array $params = [])
     {
+        $raw = $params['_raw'] ?? null;
+        unset($params['_raw']);
+
         $params = $this->_addAuthenticationHeaders($params);
 
         $response = $this->_doRequest('post', [$url, $data, $params]);
+
+        if ($raw) {
+            return $response;
+        }
 
         return $this->payload($response);
     }
@@ -195,14 +218,21 @@ class Client
      * @param string $url OpenAgenda uri
      * @param array $data PATCH data.
      * @param array $params Request params.
-     * @return array
+     * @return \Psr\Http\Message\ResponseInterface|array
      * @throws \OpenAgenda\OpenAgendaException
      */
-    public function patch(string $url, array $data = [], array $params = []): array
+    public function patch(string $url, array $data = [], array $params = [])
     {
+        $raw = $params['_raw'] ?? null;
+        unset($params['_raw']);
+
         $params = $this->_addAuthenticationHeaders($params);
 
         $response = $this->_doRequest('patch', [$url, $data, $params]);
+
+        if ($raw) {
+            return $response;
+        }
 
         return $this->payload($response);
     }
@@ -212,14 +242,21 @@ class Client
      *
      * @param string $url OpenAgenda uri
      * @param array $params Request params.
-     * @return array
+     * @return \Psr\Http\Message\ResponseInterface|array
      * @throws \OpenAgenda\OpenAgendaException
      */
-    public function delete(string $url, array $params = []): array
+    public function delete(string $url, array $params = [])
     {
+        $raw = $params['_raw'] ?? null;
+        unset($params['_raw']);
+
         $params = $this->_addAuthenticationHeaders($params);
 
         $response = $this->_doRequest('delete', [$url, $params]);
+
+        if ($raw) {
+            return $response;
+        }
 
         return $this->payload($response);
     }

@@ -19,6 +19,7 @@ use GuzzleHttp\Psr7\Response;
 use OpenAgenda\Client;
 use OpenAgenda\OpenAgendaException;
 use OpenAgenda\Test\Utility\FileResource;
+use OpenAgenda\Test\Utility\PHPUnitConsecutiveTrait;
 use OpenAgenda\Wrapper\HttpWrapper;
 use OpenAgenda\Wrapper\HttpWrapperException;
 use PHPUnit\Framework\TestCase;
@@ -33,6 +34,8 @@ use Psr\SimpleCache\CacheInterface;
  */
 class ClientTest extends TestCase
 {
+    use PHPUnitConsecutiveTrait;
+
     /**
      * @var (\object&\PHPUnit\Framework\MockObject\MockObject)|\OpenAgenda\Wrapper\HttpWrapper|(\OpenAgenda\Wrapper\HttpWrapper&\object&\PHPUnit\Framework\MockObject\MockObject)|(\OpenAgenda\Wrapper\HttpWrapper&\PHPUnit\Framework\MockObject\MockObject)|\PHPUnit\Framework\MockObject\MockObject
      */
@@ -41,7 +44,7 @@ class ClientTest extends TestCase
     /**
      * @var \OpenAgenda\Client
      */
-    protected $client;
+    protected Client $client;
 
     protected function setUp(): void
     {
@@ -239,7 +242,7 @@ class ClientTest extends TestCase
     {
         $this->wrapper->expects($this->exactly(2))
             ->method('post')
-            ->withConsecutive(
+            ->with(...self::withConsecutive(
                 [
                     'https://api.openagenda.com/v2/requestAccessToken',
                     ['grant_type' => 'authorization_code', 'code' => 'secretKey'],
@@ -248,7 +251,7 @@ class ClientTest extends TestCase
                     'https://api.openagenda.com/v2/agendas',
                     ['uid' => 123],
                 ]
-            )
+            ))
             ->willReturnOnConsecutiveCalls(
                 new Response(200, [], '{"access_token": "my authorization token"}'),
                 new Response(200, ['content-type' => 'application/json'], '{"json":"object"}')

@@ -25,7 +25,7 @@ abstract class Entity implements ArrayAccess
      *
      * @var array
      */
-    protected $_fields = [];
+    protected array $_fields = [];
 
     /**
      * Holds a list of the properties that were modified or added after this object
@@ -33,21 +33,21 @@ abstract class Entity implements ArrayAccess
      *
      * @var array
      */
-    protected $_dirty = [];
+    protected array $_dirty = [];
 
     /**
      * @var bool
      */
-    protected $_new = true;
+    protected bool $_new = true;
 
-    protected $_schema = [];
+    protected array $_schema = [];
 
     /**
      * Entity required fields for post/patch.
      *
      * @var array
      */
-    protected $_required;
+    protected array $_required;
 
     /**
      * constructor
@@ -88,7 +88,7 @@ abstract class Entity implements ArrayAccess
      * @param mixed $value Property (field) value.
      * @return void
      */
-    public function __set(string $name, $value): void
+    public function __set(string $name, mixed $value): void
     {
         $this->set($name, $value);
     }
@@ -253,13 +253,13 @@ abstract class Entity implements ArrayAccess
      * @param mixed $value The value to set.
      * @return void
      */
-    public function offsetSet($offset, $value): void
+    public function offsetSet($offset, mixed $value): void
     {
         $this->set($offset, $value);
     }
 
     /**
-     * Implements unset($result[$offset]);
+     * Implements unset($result[$offset])
      *
      * @param string $offset The offset to remove.
      * @return void
@@ -272,12 +272,12 @@ abstract class Entity implements ArrayAccess
     /**
      * Set property⋅ies value⋅s.
      *
-     * @param string|array $fields Property name.
+     * @param array|string $fields Property name.
      * @param mixed $value Property value.
      * @param array $options Set options.
      * @return $this
      */
-    public function set($fields, $value = null, array $options = [])
+    public function set(array|string $fields, mixed $value = null, array $options = [])
     {
         if (is_string($fields) && $fields !== '') {
             $fields = [$fields => $value];
@@ -285,9 +285,6 @@ abstract class Entity implements ArrayAccess
             $options = (array)$value;
         }
 
-        if (!is_array($fields)) {
-            throw new InvalidArgumentException('Cannot set an empty field');
-        }
         $options += ['setter' => true];
 
         $fields = $this->fromOpenAgenda($fields);
@@ -341,7 +338,7 @@ abstract class Entity implements ArrayAccess
      * @param array<string>|string $field The field or fields to check.
      * @return bool
      */
-    public function has($field): bool
+    public function has(array|string $field): bool
     {
         foreach ((array)$field as $prop) {
             if ($this->get($prop) === null) {
@@ -358,7 +355,7 @@ abstract class Entity implements ArrayAccess
      * @param array<string>|string $field The field to unset.
      * @return $this
      */
-    public function unset($field)
+    public function unset(array|string $field)
     {
         $field = (array)$field;
         foreach ($field as $p) {
@@ -397,9 +394,9 @@ abstract class Entity implements ArrayAccess
      * @param bool $onlyDirty Return the requested field only if it is dirty
      * @return array
      */
-    public function extract(?array $fields, bool $onlyDirty = false): array
+    public function extract(array $fields, bool $onlyDirty = false): array
     {
-        if ($fields === null) {
+        if (empty($fields)) {
             $fields = array_keys($this->_schema);
         }
         $result = [];
@@ -486,12 +483,16 @@ abstract class Entity implements ArrayAccess
     /**
      * Set id (uid)
      *
-     * @param int|string $value Field value
-     * @return int
+     * @param int|string|null $value Field value
+     * @return int|null
      */
-    protected function _setUid($value): int
+    protected function _setUid(int|string|null $value): ?int
     {
-        return (int)$value;
+        if ($value !== null) {
+            $value = (int)$value;
+        }
+
+        return $value;
     }
 
     /**
@@ -540,12 +541,12 @@ abstract class Entity implements ArrayAccess
     /**
      * Return a multilingual value, clean and truncate.
      *
-     * @param string|array $value Input value
+     * @param string|array|null $value Input value
      * @param bool $clean Remove html tags and extra spaces.
      * @param int|null $truncate Truncate value to this length
      * @return array<string, string>
      */
-    public static function setMultilingual($value, bool $clean, ?int $truncate = null)
+    public static function setMultilingual(string|array|null $value, bool $clean, ?int $truncate = null)
     {
         if (is_string($value)) {
             $value = [OpenAgenda::getDefaultLang() => $value];

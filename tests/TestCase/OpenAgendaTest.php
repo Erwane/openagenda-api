@@ -45,7 +45,7 @@ class OpenAgendaTest extends TestCase
     /**
      * @var \OpenAgenda\OpenAgenda
      */
-    protected $oa;
+    protected OpenAgenda $oa;
 
     protected function setUp(): void
     {
@@ -65,6 +65,12 @@ class OpenAgendaTest extends TestCase
             'public_key' => 'publicKey',
             'wrapper' => $this->wrapper,
         ]);
+    }
+
+    protected function tearDown(): void
+    {
+        parent::tearDown();
+        OpenAgenda::resetClient();
     }
 
     public function testConstructMissingPublicKey()
@@ -100,13 +106,6 @@ class OpenAgendaTest extends TestCase
         $this->expectException(OpenAgendaException::class);
         $this->expectExceptionMessage('Invalid defaultLang.');
         new OpenAgenda(['public_key' => 'publicKey', 'wrapper' => $this->wrapper, 'defaultLang' => 'ac']);
-    }
-
-    public function testConstructInvalidUrl()
-    {
-        $this->expectException(OpenAgendaException::class);
-        $this->expectExceptionMessage('Invalid project url.');
-        new OpenAgenda(['public_key' => 'publicKey', 'wrapper' => $this->wrapper, 'projectUrl' => 'http://invalid']);
     }
 
     public function testConstruct()
@@ -148,41 +147,90 @@ class OpenAgendaTest extends TestCase
         $this->assertEquals('en', OpenAgenda::getDefaultLang());
     }
 
-    public function testProjectUrl()
+    public static function dataRawMethodsPublic()
     {
-        new OpenAgenda([
+        return [
+            ['head'],
+            ['get'],
+        ];
+    }
+
+    /**
+     * @dataProvider dataRawMethodsPublic
+     * @covers       \OpenAgenda\Client::head
+     * @covers       \OpenAgenda\Client::get
+     */
+    public function testRawMethodsPublic($method)
+    {
+        $oa = new OpenAgenda([
             'public_key' => 'publicKey',
             'wrapper' => $this->wrapper,
-            'projectUrl' => 'https://my-domain.com',
         ]);
-        $this->assertEquals('https://my-domain.com', OpenAgenda::getProjectUrl());
-        OpenAgenda::setProjectUrl(null);
-        $this->assertNull(OpenAgenda::getProjectUrl());
+
+        $response = new Response(200, [
+            'content-type' => 'application/json; charset=utf-8',
+        ], '');
+        $this->wrapper->expects($this->once())
+            ->method($method)
+            ->with(
+                'https://api.openagenda.com/v2/agendas/123'
+            )
+            ->willReturn($response);
+
+        $return = $oa->$method('/agendas/123');
+        $this->assertSame($response, $return);
     }
 
-    public function testHead()
+    public static function dataRawMethodAuth(): array
     {
-        $this->markTestIncomplete();
+        return [
+            ['post'],
+            ['patch'],
+            ['delete'],
+        ];
     }
 
-    public function testGet()
+    /**
+     * @dataProvider dataRawMethodAuth
+     * @covers       \OpenAgenda\Client::post
+     * @covers       \OpenAgenda\Client::patch
+     * @covers       \OpenAgenda\Client::delete
+     */
+    public function testRawMethodAuth($method): void
     {
-        $this->markTestIncomplete();
-    }
+        $oa = new OpenAgenda([
+            'public_key' => 'publicKey',
+            'wrapper' => $this->wrapper,
+        ]);
 
-    public function testPost()
-    {
-        $this->markTestIncomplete();
-    }
+        $client = $this->getMockBuilder(Client::class)
+            ->setConstructorArgs([
+                [
+                    'public_key' => 'publicKey',
+                    'wrapper' => $this->wrapper,
+                ],
+            ])
+            ->onlyMethods(['getAccessToken'])
+            ->getMock();
 
-    public function testPatch()
-    {
-        $this->markTestIncomplete();
-    }
+        $client->expects($this->once())
+            ->method('getAccessToken')
+            ->willReturn('authorization-key');
+        OpenAgenda::setClient($client);
 
-    public function testDelete()
-    {
-        $this->markTestIncomplete();
+        $response = new Response(200, [
+            'content-type' => 'application/json; charset=utf-8',
+        ], '');
+
+        $this->wrapper->expects($this->once())
+            ->method($method)
+            ->with(
+                'https://api.openagenda.com/v2/agendas/123'
+            )
+            ->willReturn($response);
+
+        $return = $oa->$method('/agendas/123');
+        $this->assertSame($response, $return);
     }
 
     public function testAgendas()

@@ -17,6 +17,7 @@ namespace OpenAgenda\Test;
 use OpenAgenda\Client;
 use OpenAgenda\OpenAgenda;
 use OpenAgenda\Wrapper\HttpWrapper;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\MockObject\Rule\InvokedCount;
 use PHPUnit\Framework\TestCase;
 use Psr\SimpleCache\CacheInterface;
@@ -90,10 +91,10 @@ class OpenAgendaTestCase extends TestCase
      * @param array $requestData
      */
     public function assertClientCall(
-        Client $client,
+        Client|MockObject $client,
         InvokedCount $count,
         string $method,
-        $payload,
+        array|int $payload,
         array $urlExpect = [],
         array $requestData = []
     ) {

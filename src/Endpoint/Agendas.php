@@ -24,7 +24,7 @@ use OpenAgenda\OpenAgenda;
  */
 class Agendas extends Endpoint
 {
-    protected $_schema = [
+    protected array $_schema = [
         'limit' => ['type' => 'int'],
         'size' => ['type' => 'int'],
         'fields' => ['type' => 'array'],
@@ -65,10 +65,10 @@ class Agendas extends Endpoint
             ->boolean('official')
             // slug
             ->allowEmptyArray('slug')
-            ->isArray('slug')
+            ->array('slug')
             // id
             ->allowEmptyArray('uid')
-            ->isArray('uid')
+            ->array('uid')
             // network_id
             ->allowEmptyString('network')
             ->integer('network')
@@ -96,7 +96,7 @@ class Agendas extends Endpoint
     /**
      * Get agendas.
      *
-     * @return \OpenAgenda\Entity\Agenda[]|\OpenAgenda\Collection
+     * @return \OpenAgenda\Collection<\OpenAgenda\Entity\Agenda>
      * @throws \OpenAgenda\OpenAgendaException
      */
     public function get(): Collection

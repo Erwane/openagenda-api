@@ -14,6 +14,7 @@ declare(strict_types=1);
  */
 namespace OpenAgenda;
 
+use DateTimeImmutable;
 use DateTimeInterface;
 use Exception;
 
@@ -22,16 +23,16 @@ use Exception;
  *
  * @noinspection PhpUnhandledExceptionInspection
  */
-class DateTime extends \DateTimeImmutable
+class DateTime extends DateTimeImmutable
 {
     /**
      * Create DateTime object from string or DateTimeInterface.
      *
-     * @param \DateTimeInterface|string $datetime DateTime
-     * @return \OpenAgenda\DateTime|static|null
+     * @param \DateTimeInterface|string|null $datetime DateTime
+     * @return \OpenAgenda\DateTime|null
      * @noinspection PhpDocMissingThrowsInspection
      */
-    public static function parse($datetime)
+    public static function parse(DateTimeInterface|string|null $datetime): ?DateTime
     {
         $value = null;
         if (is_string($datetime)) {
@@ -54,7 +55,7 @@ class DateTime extends \DateTimeImmutable
      *
      * @return string
      */
-    public function toAtomString()
+    public function toAtomString(): string
     {
         return $this->format(DateTimeInterface::ATOM);
     }

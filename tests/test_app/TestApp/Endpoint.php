@@ -21,7 +21,7 @@ use Cake\Validation\Validator;
  */
 class Endpoint extends \OpenAgenda\Endpoint\Endpoint
 {
-    protected $_schema = [
+    protected array $_schema = [
         'datetime' => ['type' => 'datetime'],
         'bool' => ['type' => 'bool'],
         'int' => ['type' => 'int'],

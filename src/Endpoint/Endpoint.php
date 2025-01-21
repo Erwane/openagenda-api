@@ -47,19 +47,19 @@ abstract class Endpoint implements ValidatorAwareInterface
      *
      * @var string
      */
-    protected $baseUrl = 'https://api.openagenda.com/v2';
+    protected string $baseUrl = 'https://api.openagenda.com/v2';
 
     /**
      * @var array
      */
-    protected $params = [];
+    protected array $params = [];
 
     /**
      * Endpoint fields configuration.
      *
      * @var array
      */
-    protected $_schema = [];
+    protected array $_schema = [];
 
     /**
      * Construct OpenAgenda endpoint.
@@ -94,7 +94,7 @@ abstract class Endpoint implements ValidatorAwareInterface
      * @param mixed $value Param value
      * @return mixed
      */
-    protected function _formatType(string $param, $value)
+    protected function _formatType(string $param, mixed $value)
     {
         if (!empty($this->_schema[$param]['type'])) {
             switch ($this->_schema[$param]['type']) {
@@ -138,7 +138,7 @@ abstract class Endpoint implements ValidatorAwareInterface
      * @param mixed $value Param value
      * @return mixed
      */
-    protected function paramAsArray($value)
+    protected function paramAsArray(mixed $value)
     {
         if (is_string($value) || is_numeric($value)) {
             return [$value];
@@ -153,7 +153,7 @@ abstract class Endpoint implements ValidatorAwareInterface
      * @param mixed $value Param value.
      * @return mixed
      */
-    protected function convertQueryValue($value)
+    protected function convertQueryValue(mixed $value)
     {
         if ($value instanceof DateTimeInterface) {
             $value = $value->setTimezone(new DateTimeZone('UTC'))

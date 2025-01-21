@@ -14,12 +14,13 @@ declare(strict_types=1);
  */
 namespace OpenAgenda;
 
-use Cake\Validation\Validation as CakeValidation;
 use OpenAgenda\Endpoint\Agenda;
 use OpenAgenda\Endpoint\EndpointFactory;
 use OpenAgenda\Endpoint\Event;
 use OpenAgenda\Endpoint\Location;
+use OpenAgenda\Endpoint\Raw;
 use OpenAgenda\Wrapper\HttpWrapper;
+use Psr\Http\Message\ResponseInterface;
 use Psr\SimpleCache\CacheInterface;
 
 /**
@@ -32,16 +33,12 @@ class OpenAgenda
      *
      * @var \OpenAgenda\Client|null
      */
-    protected static $client = null;
-
-    protected static $defaultLang = 'fr';
+    protected static ?Client $client = null;
 
     /**
-     * Project base url.
-     *
-     * @var string|null
+     * @var string
      */
-    protected static $projectBaseUrl = null;
+    protected static string $defaultLang = 'fr';
 
     /**
      * OpenAgenda.
@@ -57,7 +54,6 @@ class OpenAgenda
             'wrapper' => null,
             'cache' => null,
             'defaultLang' => 'fr',
-            'projectUrl' => null,
         ];
 
         if (!$params['public_key']) {
@@ -76,13 +72,8 @@ class OpenAgenda
             throw new OpenAgendaException('Invalid defaultLang.');
         }
 
-        if ($params['projectUrl'] && !CakeValidation::url($params['projectUrl'])) {
-            throw new OpenAgendaException('Invalid project url.');
-        }
-
         self::$client = new Client($params);
         self::$defaultLang = $params['defaultLang'];
-        self::$projectBaseUrl = $params['projectUrl'];
     }
 
     /**
@@ -127,24 +118,20 @@ class OpenAgenda
     }
 
     /**
-     * Get project url.
+     * Do a HEAD request on $path.
      *
-     * @return string|null
+     * @param string $path Endpoint path. Relative, not real OpenAgenda endpoint.
+     * @param array $params Client options
+     * @return \Psr\Http\Message\ResponseInterface
+     * @throws \OpenAgenda\OpenAgendaException
      */
-    public static function getProjectUrl(): ?string
+    public function head(string $path, array $params = []): ResponseInterface
     {
-        return self::$projectBaseUrl;
-    }
+        $endpoint = new Raw();
+        $url = $endpoint->getUrl(__FUNCTION__, false) . $path;
+        $params['_raw'] = true;
 
-    /**
-     * Set project url.
-     *
-     * @param string|null $projectUrl Project url. Used for `a` tags in html description.
-     * @return void
-     */
-    public static function setProjectUrl(?string $projectUrl): void
-    {
-        self::$projectBaseUrl = $projectUrl;
+        return self::$client->head($url, $params);
     }
 
     /**
@@ -152,38 +139,52 @@ class OpenAgenda
      *
      * @param string $path Endpoint path. Relative, not real OpenAgenda endpoint.
      * @param array $params Client options
-     * @return \OpenAgenda\Collection|\OpenAgenda\Entity\Entity|\Psr\Http\Message\ResponseInterface
+     * @return \Psr\Http\Message\ResponseInterface
+     * @throws \OpenAgenda\OpenAgendaException
      */
-    public function get(string $path, array $params = [])
+    public function get(string $path, array $params = []): ResponseInterface
     {
-        // todo: allow passing raw OpenAgenda endpoint url and return ResponseInterface.
-        // todo: return response or json payload
+        $endpoint = new Raw();
+        $url = $endpoint->getUrl(__FUNCTION__, false) . $path;
+        $params['_raw'] = true;
+
+        return self::$client->get($url, $params);
     }
 
     /**
      * Do a POST request on $path.
      *
      * @param string $path Endpoint path. Relative, not real OpenAgenda endpoint.
+     * @param array $data Request data
      * @param array $params Client options
-     * @return \OpenAgenda\Collection|\OpenAgenda\Entity\Entity|\Psr\Http\Message\ResponseInterface
+     * @return \Psr\Http\Message\ResponseInterface
+     * @throws \OpenAgenda\OpenAgendaException
      */
-    public function post(string $path, array $params = [])
+    public function post(string $path, array $data = [], array $params = [])
     {
-        // todo: allow passing raw OpenAgenda endpoint url and return ResponseInterface.
-        // todo: return response or json payload
+        $endpoint = new Raw();
+        $url = $endpoint->getUrl(__FUNCTION__, false) . $path;
+        $params['_raw'] = true;
+
+        return self::$client->post($url, $data, $params);
     }
 
     /**
      * Do a PATCH request on $path.
      *
      * @param string $path Endpoint path. Relative, not real OpenAgenda endpoint.
+     * @param array $data Request data
      * @param array $params Client options
-     * @return \OpenAgenda\Collection|\OpenAgenda\Entity\Entity|\Psr\Http\Message\ResponseInterface
+     * @return \Psr\Http\Message\ResponseInterface
+     * @throws \OpenAgenda\OpenAgendaException
      */
-    public function patch(string $path, array $params = [])
+    public function patch(string $path, array $data = [], array $params = [])
     {
-        // todo: allow passing raw OpenAgenda endpoint url and return ResponseInterface.
-        // todo: return response or json payload
+        $endpoint = new Raw();
+        $url = $endpoint->getUrl(__FUNCTION__, false) . $path;
+        $params['_raw'] = true;
+
+        return self::$client->patch($url, $data, $params);
     }
 
     /**
@@ -191,19 +192,23 @@ class OpenAgenda
      *
      * @param string $path Endpoint path. Relative, not real OpenAgenda endpoint.
      * @param array $params Client options
-     * @return \OpenAgenda\Collection|\OpenAgenda\Entity\Entity|\Psr\Http\Message\ResponseInterface
+     * @return \Psr\Http\Message\ResponseInterface
+     * @throws \OpenAgenda\OpenAgendaException
      */
     public function delete(string $path, array $params = [])
     {
-        // todo: allow passing raw OpenAgenda endpoint url and return ResponseInterface.
-        // todo: return response or json payload
+        $endpoint = new Raw();
+        $url = $endpoint->getUrl(__FUNCTION__, false) . $path;
+        $params['_raw'] = true;
+
+        return self::$client->delete($url, $params);
     }
 
     /**
      * Get agendas from OpenAgenda.
      *
      * @param array $params Query params.
-     * @return \OpenAgenda\Entity\Agenda[]|\OpenAgenda\Collection
+     * @return \OpenAgenda\Collection<\OpenAgenda\Entity\Agenda>
      * @throws \OpenAgenda\Endpoint\UnknownEndpointException
      * @uses \OpenAgenda\Endpoint\Agendas::get()
      */
@@ -216,7 +221,7 @@ class OpenAgenda
      * Get agendas from OpenAgenda.
      *
      * @param array $params Query params.
-     * @return \OpenAgenda\Entity\Agenda[]|\OpenAgenda\Collection
+     * @return \OpenAgenda\Collection<\OpenAgenda\Entity\Agenda>
      * @throws \OpenAgenda\Endpoint\UnknownEndpointException
      * @uses \OpenAgenda\Endpoint\Agendas
      */
@@ -229,7 +234,7 @@ class OpenAgenda
      * Get one agenda from OpenAgenda.
      *
      * @param array $params Query params.
-     * @return \OpenAgenda\Endpoint\Agenda|\OpenAgenda\Endpoint\Endpoint
+     * @return \OpenAgenda\Endpoint\Agenda
      * @throws \OpenAgenda\Endpoint\UnknownEndpointException
      */
     public function agenda(array $params): Agenda
@@ -241,7 +246,7 @@ class OpenAgenda
      * Get OpenAgenda locations for an agenda.
      *
      * @param array $params Query params.
-     * @return \OpenAgenda\Entity\Location[]|\OpenAgenda\Collection
+     * @return \OpenAgenda\Collection<\OpenAgenda\Entity\Location>
      * @throws \OpenAgenda\Endpoint\UnknownEndpointException
      * @uses \OpenAgenda\Endpoint\Locations
      */
@@ -254,7 +259,7 @@ class OpenAgenda
      * Get OpenAgenda location endpoint.
      *
      * @param array $params Endpoint params.
-     * @return \OpenAgenda\Endpoint\Location|\OpenAgenda\Endpoint\Endpoint
+     * @return \OpenAgenda\Endpoint\Location
      * @throws \OpenAgenda\Endpoint\UnknownEndpointException
      */
     public function location(array $params = []): Location
@@ -266,7 +271,7 @@ class OpenAgenda
      * Get OpenAgenda events for an agenda.
      *
      * @param array $params Query params.
-     * @return \OpenAgenda\Entity\Event[]|\OpenAgenda\Collection
+     * @return \OpenAgenda\Collection<\OpenAgenda\Entity\Event>
      * @throws \OpenAgenda\Endpoint\UnknownEndpointException
      * @uses \OpenAgenda\Endpoint\Events
      */
@@ -279,7 +284,7 @@ class OpenAgenda
      * Get OpenAgenda event endpoint.
      *
      * @param array $params Endpoint params.
-     * @return \OpenAgenda\Endpoint\Event|\OpenAgenda\Endpoint\Endpoint
+     * @return \OpenAgenda\Endpoint\Event
      * @throws \OpenAgenda\Endpoint\UnknownEndpointException
      */
     public function event(array $params = []): Event

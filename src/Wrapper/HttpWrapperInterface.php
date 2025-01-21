@@ -15,6 +15,7 @@ declare(strict_types=1);
 namespace OpenAgenda\Wrapper;
 
 use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\UriInterface;
 
 /**
  * Psr-18 Http client wrapper interface.
@@ -31,7 +32,7 @@ interface HttpWrapperInterface
      * @return \Psr\Http\Message\ResponseInterface
      * @throws \OpenAgenda\Wrapper\HttpWrapperException
      */
-    public function head($uri, array $params = []): ResponseInterface;
+    public function head(UriInterface|string $uri, array $params = []): ResponseInterface;
 
     /**
      * Do a GET request and return ResponseInterface.
@@ -41,7 +42,7 @@ interface HttpWrapperInterface
      * @return \Psr\Http\Message\ResponseInterface
      * @throws \OpenAgenda\Wrapper\HttpWrapperException
      */
-    public function get($uri, array $params = []): ResponseInterface;
+    public function get(UriInterface|string $uri, array $params = []): ResponseInterface;
 
     /**
      * Do a POST request and return ResponseInterface.
@@ -52,7 +53,7 @@ interface HttpWrapperInterface
      * @return \Psr\Http\Message\ResponseInterface
      * @throws \OpenAgenda\Wrapper\HttpWrapperException
      */
-    public function post($uri, array $data, array $params = []): ResponseInterface;
+    public function post(UriInterface|string $uri, array $data, array $params = []): ResponseInterface;
 
     /**
      * Do a PATCH request and return ResponseInterface.
@@ -63,7 +64,7 @@ interface HttpWrapperInterface
      * @return \Psr\Http\Message\ResponseInterface
      * @throws \OpenAgenda\Wrapper\HttpWrapperException
      */
-    public function patch($uri, array $data, array $params = []): ResponseInterface;
+    public function patch(UriInterface|string $uri, array $data, array $params = []): ResponseInterface;
 
     /**
      * Do a DELETE request and return ResponseInterface.
@@ -73,5 +74,5 @@ interface HttpWrapperInterface
      * @return \Psr\Http\Message\ResponseInterface
      * @throws \OpenAgenda\Wrapper\HttpWrapperException
      */
-    public function delete($uri, array $params = []): ResponseInterface;
+    public function delete(UriInterface|string $uri, array $params = []): ResponseInterface;
 }

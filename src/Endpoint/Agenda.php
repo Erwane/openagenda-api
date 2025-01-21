@@ -23,7 +23,7 @@ use OpenAgenda\OpenAgenda;
  */
 class Agenda extends Endpoint
 {
-    protected $_schema = [
+    protected array $_schema = [
         'detailed' => ['name' => 'detailed'],
     ];
 

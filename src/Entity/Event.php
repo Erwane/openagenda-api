@@ -74,7 +74,7 @@ class Event extends Entity
     public const ATTENDANCE_ONLINE = 2; // Online event, `onlineAccessLink` is required.
     public const ATTENDANCE_MIXED = 3; // Mixed.
 
-    protected $_schema = [
+    protected array $_schema = [
         'uid' => [],
         'agendaUid' => [],
         'locationUid' => [],
@@ -232,7 +232,7 @@ class Event extends Entity
      * @param array|string $value Array of event ages.
      * @return array
      */
-    protected function _setAccessibility($value): array
+    protected function _setAccessibility(array|string $value): array
     {
         $out = [
             self::ACCESS_HI => false,
@@ -361,7 +361,7 @@ class Event extends Entity
      * @param array|string|null $value Event title
      * @return array<string, string>|null
      */
-    protected function _setTitle($value): ?array
+    protected function _setTitle(array|string|null $value): ?array
     {
         return static::setMultilingual($value, true, 140);
     }
@@ -372,7 +372,7 @@ class Event extends Entity
      * @param array|string|null $value Event description
      * @return array<string, string>|null
      */
-    protected function _setDescription($value): ?array
+    protected function _setDescription(array|string|null $value): ?array
     {
         return static::setMultilingual($value, true, 200);
     }
@@ -383,7 +383,7 @@ class Event extends Entity
      * @param array|string|null $value Event long description
      * @return array<string, string>|null
      */
-    protected function _setLongDescription($value): ?array
+    protected function _setLongDescription(array|string|null $value): ?array
     {
         if (is_string($value)) {
             $value = [OpenAgenda::getDefaultLang() => $value];
@@ -408,7 +408,7 @@ class Event extends Entity
      * @param array|string|null $value Event conditions
      * @return array<string, string>|null
      */
-    protected function _setConditions($value): ?array
+    protected function _setConditions(array|string|null $value): ?array
     {
         return static::setMultilingual($value, true, 255);
     }
@@ -419,7 +419,7 @@ class Event extends Entity
      * @param array|string|null $keywords Event keywords
      * @return array<string, string>|null
      */
-    protected function _setKeywords($keywords): ?array
+    protected function _setKeywords(array|string|null $keywords): ?array
     {
         if (is_string($keywords)) {
             $keywords = [OpenAgenda::getDefaultLang() => [$keywords]];

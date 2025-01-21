@@ -110,7 +110,7 @@ class EndpointTest extends EndpointTestCase
         );
         $endpoint->expects($this->exactly(2))
             ->method('getValidator')
-            ->withConsecutive([$first], [$second])
+            ->with(...self::withConsecutive([$first], [$second]))
             ->willReturn($validator);
         $endpoint->getUrl($method);
     }
