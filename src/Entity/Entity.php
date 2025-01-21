@@ -65,6 +65,7 @@ abstract class Entity implements ArrayAccess
         $this->_buildAliasesMaps();
 
         if (!empty($properties) && $options['markClean'] && !$options['useSetters']) {
+            dump(__METHOD__);
             $this->_fields = $this->fromOpenAgenda($properties);
 
             return;
@@ -397,9 +398,9 @@ abstract class Entity implements ArrayAccess
      * @param bool $onlyDirty Return the requested field only if it is dirty
      * @return array
      */
-    public function extract(?array $fields, bool $onlyDirty = false): array
+    public function extract(array $fields, bool $onlyDirty = false): array
     {
-        if ($fields === null) {
+        if (empty($fields)) {
             $fields = array_keys($this->_schema);
         }
         $result = [];
