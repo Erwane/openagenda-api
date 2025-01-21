@@ -14,12 +14,13 @@ declare(strict_types=1);
  */
 namespace OpenAgenda;
 
-use Cake\Validation\Validation as CakeValidation;
 use OpenAgenda\Endpoint\Agenda;
 use OpenAgenda\Endpoint\EndpointFactory;
 use OpenAgenda\Endpoint\Event;
 use OpenAgenda\Endpoint\Location;
+use OpenAgenda\Endpoint\Raw;
 use OpenAgenda\Wrapper\HttpWrapper;
+use Psr\Http\Message\ResponseInterface;
 use Psr\SimpleCache\CacheInterface;
 
 /**
@@ -114,42 +115,73 @@ class OpenAgenda
     }
 
     /**
+     * Do a HEAD request on $path.
+     *
+     * @param string $path Endpoint path. Relative, not real OpenAgenda endpoint.
+     * @param array $params Client options
+     * @return \Psr\Http\Message\ResponseInterface
+     * @throws \OpenAgenda\OpenAgendaException
+     */
+    public function head(string $path, array $params = []): ResponseInterface
+    {
+        $endpoint = new Raw();
+        $url = $endpoint->getUrl(__FUNCTION__, false) . $path;
+        $params['_raw'] = true;
+
+        return self::$client->head($url, $params);
+    }
+
+    /**
      * Do a GET request on $path.
      *
      * @param string $path Endpoint path. Relative, not real OpenAgenda endpoint.
      * @param array $params Client options
-     * @return \OpenAgenda\Collection|\OpenAgenda\Entity\Entity|\Psr\Http\Message\ResponseInterface
+     * @return \Psr\Http\Message\ResponseInterface
+     * @throws \OpenAgenda\OpenAgendaException
      */
-    public function get(string $path, array $params = [])
+    public function get(string $path, array $params = []): ResponseInterface
     {
-        // todo: allow passing raw OpenAgenda endpoint url and return ResponseInterface.
-        // todo: return response or json payload
+        $endpoint = new Raw();
+        $url = $endpoint->getUrl(__FUNCTION__, false) . $path;
+        $params['_raw'] = true;
+
+        return self::$client->get($url, $params);
     }
 
     /**
      * Do a POST request on $path.
      *
      * @param string $path Endpoint path. Relative, not real OpenAgenda endpoint.
+     * @param array $data Request data
      * @param array $params Client options
-     * @return \OpenAgenda\Collection|\OpenAgenda\Entity\Entity|\Psr\Http\Message\ResponseInterface
+     * @return \Psr\Http\Message\ResponseInterface
+     * @throws \OpenAgenda\OpenAgendaException
      */
-    public function post(string $path, array $params = [])
+    public function post(string $path, array $data = [], array $params = [])
     {
-        // todo: allow passing raw OpenAgenda endpoint url and return ResponseInterface.
-        // todo: return response or json payload
+        $endpoint = new Raw();
+        $url = $endpoint->getUrl(__FUNCTION__, false) . $path;
+        $params['_raw'] = true;
+
+        return self::$client->post($url, $data, $params);
     }
 
     /**
      * Do a PATCH request on $path.
      *
      * @param string $path Endpoint path. Relative, not real OpenAgenda endpoint.
+     * @param array $data Request data
      * @param array $params Client options
-     * @return \OpenAgenda\Collection|\OpenAgenda\Entity\Entity|\Psr\Http\Message\ResponseInterface
+     * @return \Psr\Http\Message\ResponseInterface
+     * @throws \OpenAgenda\OpenAgendaException
      */
-    public function patch(string $path, array $params = [])
+    public function patch(string $path, array $data = [], array $params = [])
     {
-        // todo: allow passing raw OpenAgenda endpoint url and return ResponseInterface.
-        // todo: return response or json payload
+        $endpoint = new Raw();
+        $url = $endpoint->getUrl(__FUNCTION__, false) . $path;
+        $params['_raw'] = true;
+
+        return self::$client->patch($url, $data, $params);
     }
 
     /**
@@ -157,12 +189,16 @@ class OpenAgenda
      *
      * @param string $path Endpoint path. Relative, not real OpenAgenda endpoint.
      * @param array $params Client options
-     * @return \OpenAgenda\Collection|\OpenAgenda\Entity\Entity|\Psr\Http\Message\ResponseInterface
+     * @return \Psr\Http\Message\ResponseInterface
+     * @throws \OpenAgenda\OpenAgendaException
      */
     public function delete(string $path, array $params = [])
     {
-        // todo: allow passing raw OpenAgenda endpoint url and return ResponseInterface.
-        // todo: return response or json payload
+        $endpoint = new Raw();
+        $url = $endpoint->getUrl(__FUNCTION__, false) . $path;
+        $params['_raw'] = true;
+
+        return self::$client->delete($url, $params);
     }
 
     /**
