@@ -14,17 +14,19 @@ declare(strict_types=1);
  */
 namespace OpenAgenda\Wrapper;
 
+use Psr\Http\Client\ClientInterface;
+
 /**
  * Abstract HttpWrapper
  */
 abstract class HttpWrapper implements HttpWrapperInterface
 {
     /**
-     * PSR-18 Http client wrapper
+     * PSR-18 Http client
      *
-     * @var \OpenAgenda\Wrapper\HttpWrapper
+     * @var \Psr\Http\Client\ClientInterface
      */
-    protected HttpWrapper $http;
+    protected ClientInterface $http;
 
     /**
      * Create the wrapper for this $http client.
