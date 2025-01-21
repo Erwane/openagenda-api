@@ -354,11 +354,6 @@ class EventsFunctionalTest extends OpenAgendaTestCase
     {
         [, $client, $wrapper] = $this->oa();
 
-        // Url image check
-        $wrapper->expects($this->once())
-            ->method('head')
-            ->willReturn(new Response(200, ['content-type' => 'image/jpeg', 'content-length' => 848153]));
-
         $payload = json_decode(FileResource::instance($this)->getContent('Response/events/event.json'), true);
         $payload += [
             '_status' => 200,

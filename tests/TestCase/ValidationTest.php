@@ -25,7 +25,14 @@ use PHPUnit\Framework\TestCase;
  */
 class ValidationTest extends TestCase
 {
-    public static function dataPhone()
+    public function testUrl(): void
+    {
+        $this->assertTrue(Validation::url('https://example.com/'));
+        $this->assertFalse(Validation::url('not an url'));
+        $this->assertFalse(Validation::url(null));
+    }
+
+    public function dataPhone()
     {
         return [
             [[''], false],

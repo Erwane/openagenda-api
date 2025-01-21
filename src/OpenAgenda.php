@@ -128,7 +128,7 @@ class OpenAgenda
     public function head(string $path, array $params = []): ResponseInterface
     {
         $endpoint = new Raw();
-        $url = $endpoint->getUrl(__FUNCTION__, false) . $path;
+        $url = $endpoint->getUrl(__FUNCTION__) . $path;
         $params['_raw'] = true;
 
         return self::$client->head($url, $params);
@@ -145,7 +145,7 @@ class OpenAgenda
     public function get(string $path, array $params = []): ResponseInterface
     {
         $endpoint = new Raw();
-        $url = $endpoint->getUrl(__FUNCTION__, false) . $path;
+        $url = $endpoint->getUrl(__FUNCTION__) . $path;
         $params['_raw'] = true;
 
         return self::$client->get($url, $params);
@@ -163,7 +163,7 @@ class OpenAgenda
     public function post(string $path, array $data = [], array $params = [])
     {
         $endpoint = new Raw();
-        $url = $endpoint->getUrl(__FUNCTION__, false) . $path;
+        $url = $endpoint->getUrl(__FUNCTION__) . $path;
         $params['_raw'] = true;
 
         return self::$client->post($url, $data, $params);
@@ -181,7 +181,7 @@ class OpenAgenda
     public function patch(string $path, array $data = [], array $params = [])
     {
         $endpoint = new Raw();
-        $url = $endpoint->getUrl(__FUNCTION__, false) . $path;
+        $url = $endpoint->getUrl(__FUNCTION__) . $path;
         $params['_raw'] = true;
 
         return self::$client->patch($url, $data, $params);
@@ -198,7 +198,7 @@ class OpenAgenda
     public function delete(string $path, array $params = [])
     {
         $endpoint = new Raw();
-        $url = $endpoint->getUrl(__FUNCTION__, false) . $path;
+        $url = $endpoint->getUrl(__FUNCTION__) . $path;
         $params['_raw'] = true;
 
         return self::$client->delete($url, $params);
