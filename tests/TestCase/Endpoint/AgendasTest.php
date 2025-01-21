@@ -14,7 +14,6 @@ declare(strict_types=1);
  */
 namespace OpenAgenda\Test\TestCase\Endpoint;
 
-use Cake\Validation\Validator;
 use OpenAgenda\Collection;
 use OpenAgenda\Endpoint\Agendas;
 use OpenAgenda\Entity\Agenda as AgendaEntity;
@@ -29,75 +28,6 @@ use OpenAgenda\Test\Utility\FileResource;
  */
 class AgendasTest extends EndpointTestCase
 {
-    public function testValidationUriQueryGet()
-    {
-        $endpoint = new Agendas([]);
-
-        $v = $endpoint->validationUriQueryGet(new Validator());
-
-        $this->assertCount(10, $v);
-
-        // size
-        $field = $v->field('size');
-        $this->assertTrue($field->isEmptyAllowed());
-        $rules = $field->rules();
-        $this->assertArrayHasKey('integer', $rules);
-
-        // limit
-        $field = $v->field('limit');
-        $this->assertTrue($field->isEmptyAllowed());
-        $rules = $field->rules();
-        $this->assertArrayHasKey('integer', $rules);
-
-        // page
-        $field = $v->field('page');
-        $this->assertTrue($field->isEmptyAllowed());
-        $rules = $field->rules();
-        $this->assertArrayHasKey('integer', $rules);
-
-        // fields
-        $field = $v->field('fields');
-        $this->assertTrue($field->isEmptyAllowed());
-        $rules = $field->rules();
-        $this->assertEquals(['summary', 'schema'], $rules['multipleOptions']->get('pass')[0]);
-
-        // search
-        $field = $v->field('search');
-        $this->assertTrue($field->isEmptyAllowed());
-        $rules = $field->rules();
-        $this->assertArrayHasKey('scalar', $rules);
-
-        // official
-        $field = $v->field('official');
-        $this->assertTrue($field->isEmptyAllowed());
-        $rules = $field->rules();
-        $this->assertArrayHasKey('boolean', $rules);
-
-        // slug
-        $field = $v->field('slug');
-        $this->assertTrue($field->isEmptyAllowed());
-        $rules = $field->rules();
-        $this->assertArrayHasKey('array', $rules);
-
-        // uid
-        $field = $v->field('uid');
-        $this->assertTrue($field->isEmptyAllowed());
-        $rules = $field->rules();
-        $this->assertArrayHasKey('array', $rules);
-
-        // network
-        $field = $v->field('network');
-        $this->assertTrue($field->isEmptyAllowed());
-        $rules = $field->rules();
-        $this->assertArrayHasKey('integer', $rules);
-
-        // sort
-        $field = $v->field('sort');
-        $this->assertTrue($field->isEmptyAllowed());
-        $rules = $field->rules();
-        $this->assertEquals(['createdAt.desc', 'recentlyAddedEvents.desc'], $rules['inList']->get('pass')[0]);
-    }
-
     public static function datatestGetUrlSuccess(): array
     {
         return [

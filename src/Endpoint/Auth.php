@@ -22,10 +22,8 @@ class Auth extends Endpoint
     /**
      * @inheritDoc
      */
-    protected function uriPath(string $method, bool $validate = true): string
+    protected function uriPath(string $method): string
     {
-        parent::uriPath($method);
-
         return '/requestAccessToken';
     }
 }

@@ -14,10 +14,8 @@ declare(strict_types=1);
  */
 namespace OpenAgenda\Endpoint;
 
-use Cake\Validation\Validator;
 use OpenAgenda\Entity\Location as LocationEntity;
 use OpenAgenda\OpenAgenda;
-use OpenAgenda\Validation;
 
 /**
  * Location endpoint
@@ -27,181 +25,8 @@ class Location extends Endpoint
     /**
      * @inheritDoc
      */
-    public function validationUriPath(Validator $validator): Validator
+    protected function uriPath(string $method): string
     {
-        return parent::validationUriPath($validator)
-            // agendaUid
-            ->requirePresence('agendaUid')
-            ->integer('agendaUid');
-    }
-
-    /**
-     * Validate URI path contain id
-     *
-     * @param \Cake\Validation\Validator $validator Validator
-     * @return \Cake\Validation\Validator
-     */
-    public function validationUriPathWithId(Validator $validator): Validator
-    {
-        return $this->validationUriPath($validator)
-            // id
-            ->requirePresence(
-                'uid',
-                [$this, 'presenceIdOrExtId'],
-                'One of `id` or `extId` is required'
-            )
-            ->integer('uid')
-            // extId
-            ->requirePresence(
-                'extId',
-                [$this, 'presenceIdOrExtId'],
-                'One of `id` or `extId` is required'
-            )
-            ->scalar('extId');
-    }
-
-    /**
-     * Validation rules for Uri path HEAD.
-     *
-     * @param \Cake\Validation\Validator $validator Validator.
-     * @return \Cake\Validation\Validator
-     */
-    public function validationUriPathExists(Validator $validator): Validator
-    {
-        return $this->validationUriPathWithId($validator);
-    }
-
-    /**
-     * Validation rules for Uri path GET.
-     *
-     * @param \Cake\Validation\Validator $validator Validator.
-     * @return \Cake\Validation\Validator
-     */
-    public function validationUriPathGet(Validator $validator): Validator
-    {
-        return $this->validationUriPathWithId($validator);
-    }
-
-    /**
-     * Validation rules for Uri path UPDATE.
-     *
-     * @param \Cake\Validation\Validator $validator Validator.
-     * @return \Cake\Validation\Validator
-     */
-    public function validationUriPathUpdate(Validator $validator): Validator
-    {
-        return $this->validationUriPathWithId($validator);
-    }
-
-    /**
-     * Validation rules for Uri path DELETE.
-     *
-     * @param \Cake\Validation\Validator $validator Validator.
-     * @return \Cake\Validation\Validator
-     */
-    public function validationUriPathDelete(Validator $validator): Validator
-    {
-        return $this->validationUriPathWithId($validator);
-    }
-
-    /**
-     * Validation rules for POST/PATCH data.
-     *
-     * @param \Cake\Validation\Validator $validator Validator.
-     * @return \Cake\Validation\Validator
-     */
-    public function validationCreate(Validator $validator): Validator
-    {
-        return $this->validationUriPathGet($validator)
-            // name
-            ->requirePresence('name', 'create')
-            ->maxLength('name', 100)
-            // address
-            ->requirePresence('address', 'create')
-            ->maxLength('address', 255)
-            // countryCode
-            ->requirePresence('countryCode', 'create')
-            ->lengthBetween('countryCode', [2, 2])
-            // state
-            ->allowEmptyString('state')
-            ->boolean('state')
-            // description
-            ->allowEmptyArray('description')
-            ->add('description', 'multilingual', [
-                'rule' => [[Validation::class, 'multilingual'], 5000],
-            ])
-            // access
-            ->allowEmptyArray('access')
-            ->add('access', 'multilingual', [
-                'rule' => [[Validation::class, 'multilingual'], 1000],
-            ])
-            // website
-            ->allowEmptyString('website')
-            ->url('website')
-            // email
-            ->allowEmptyString('email')
-            ->email('email')
-            // phone
-            ->allowEmptyString('phone')
-            ->add('phone', 'phone', [
-                'rule' => [[Validation::class, 'phone'], 'FR'],
-            ])
-            // links
-            ->allowEmptyArray('links')
-            ->array('links')
-            // image
-            ->allowEmptyFile('image')
-            ->add('image', 'image', ['rule' => [[Validation::class, 'image'], 10]])
-            // imageCredits
-            ->allowEmptyString('imageCredits')
-            ->scalar('imageCredits')
-            // region
-            ->allowEmptyString('region')
-            ->scalar('region')
-            // department
-            ->allowEmptyString('department')
-            ->scalar('department')
-            // district
-            ->allowEmptyString('district')
-            ->scalar('district')
-            // city
-            ->allowEmptyString('city')
-            ->scalar('city')
-            // postalCode
-            ->allowEmptyString('postalCode')
-            ->scalar('postalCode')
-            // insee
-            ->allowEmptyString('insee')
-            ->scalar('insee')
-            // latitude
-            ->allowEmptyString('latitude')
-            ->numeric('latitude')
-            // longitude
-            ->allowEmptyString('longitude')
-            ->numeric('longitude')
-            // timezone
-            ->allowEmptyString('timezone')
-            ->scalar('timezone');
-    }
-
-    /**
-     * Validation rules for POST/PATCH data.
-     *
-     * @param \Cake\Validation\Validator $validator Validator.
-     * @return \Cake\Validation\Validator
-     */
-    public function validationUpdate(Validator $validator)
-    {
-        return $this->validationCreate($validator);
-    }
-
-    /**
-     * @inheritDoc
-     */
-    protected function uriPath(string $method, bool $validate = true): string
-    {
-        parent::uriPath($method);
-
         if ($method === 'create') {
             $path = sprintf('/agendas/%d/locations', $this->params['agendaUid'] ?? 0);
         } elseif (!empty($this->params['uid'])) {
@@ -261,23 +86,14 @@ class Location extends Endpoint
     /**
      * Create location
      *
-     * @param bool $validate Validate data
      * @return \OpenAgenda\Entity\Location|null
      * @throws \OpenAgenda\OpenAgendaException
      */
-    public function create(bool $validate = true)
+    public function create()
     {
         unset($this->params['uid']);
 
         $entity = new LocationEntity($this->params);
-
-        if ($validate) {
-            $errors = $this->getValidator('create')
-                ->validate($entity->extract([], true));
-            if ($errors) {
-                $this->throwException($errors);
-            }
-        }
 
         $url = $this->getUrl(__FUNCTION__);
 
@@ -290,22 +106,13 @@ class Location extends Endpoint
     /**
      * Patch location
      *
-     * @param bool $validate Validate data
      * @return \OpenAgenda\Entity\Location|null
      * @throws \OpenAgenda\OpenAgendaException
      */
-    public function update(bool $validate = true)
+    public function update()
     {
         $entity = new LocationEntity($this->params);
         $entity->setNew(false);
-
-        if ($validate) {
-            $errors = $this->getValidator('update')
-                ->validate($entity->extract([], true), false);
-            if ($errors) {
-                $this->throwException($errors);
-            }
-        }
 
         // todo: no data to update, skip. Maybe an option ?
 

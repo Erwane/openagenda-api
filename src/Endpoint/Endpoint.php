@@ -14,34 +14,21 @@ declare(strict_types=1);
  */
 namespace OpenAgenda\Endpoint;
 
-use Cake\Validation\Validator;
-use Cake\Validation\ValidatorAwareInterface;
-use Cake\Validation\ValidatorAwareTrait;
 use DateTimeInterface;
 use DateTimeZone;
 use OpenAgenda\DateTime;
-use OpenAgenda\OpenAgendaException;
 
 /**
  * Abstract Endpoint
  *
  * @method bool exists() Check entity exists
  * @method mixed get() Get collection or entity
- * @method mixed create(bool $validate) Create entity
- * @method mixed update(bool $validate) Update entity (full data or partial)
+ * @method mixed create() Create entity
+ * @method mixed update() Update entity (full data or partial)
  * @method mixed delete() Delete entity
  */
-abstract class Endpoint implements ValidatorAwareInterface
+abstract class Endpoint
 {
-    use ValidatorAwareTrait;
-
-    /**
-     * The alias this object is assigned to validators as.
-     *
-     * @var string
-     */
-    public const VALIDATOR_PROVIDER_NAME = 'endpoint';
-
     /**
      * OpenAgenda Api base url.
      *
@@ -68,7 +55,6 @@ abstract class Endpoint implements ValidatorAwareInterface
      */
     public function __construct(array $params = [])
     {
-        $this->_validatorClass = \OpenAgenda\Validator::class;
         $this->set($params);
     }
 
@@ -111,28 +97,6 @@ abstract class Endpoint implements ValidatorAwareInterface
     }
 
     /**
-     * Validate URI path params. ex /agendas/<agendaUid>/locations/<locationUid>
-     *
-     * @param \Cake\Validation\Validator $validator Validator
-     * @return \Cake\Validation\Validator
-     */
-    public function validationUriPath(Validator $validator): Validator
-    {
-        return $validator;
-    }
-
-    /**
-     * Validate URI query. ex /agendas?size=<size>&state=<state>
-     *
-     * @param \Cake\Validation\Validator $validator Validator
-     * @return \Cake\Validation\Validator
-     */
-    public function validationUriQuery(Validator $validator): Validator
-    {
-        return $validator;
-    }
-
-    /**
      * Convert a string/numeric param as an array value.
      *
      * @param mixed $value Param value
@@ -167,16 +131,15 @@ abstract class Endpoint implements ValidatorAwareInterface
      * Get OpenAgenda endpoint uri.
      *
      * @param string $method Request method
-     * @param bool $validate Validate path parameters if true
      * @return string
      * @throws \OpenAgenda\OpenAgendaException
      */
-    public function getUrl(string $method, bool $validate = true): string
+    public function getUrl(string $method): string
     {
         $method = strtolower($method);
 
-        $path = $this->uriPath($method, $validate);
-        $query = $this->uriQuery($method, $validate);
+        $path = $this->uriPath($method);
+        $query = $this->uriQuery();
 
         $components = parse_url($this->baseUrl . $path);
         $url = sprintf('%s://%s%s', $components['scheme'], $components['host'], $components['path']);
@@ -192,42 +155,17 @@ abstract class Endpoint implements ValidatorAwareInterface
      * Endpoint SHOULD have an uriPath method and return endpoint path.
      *
      * @param string $method Request method (HEAD, GET, POST, PATCH, DELETE)
-     * @param bool $validate Validate path parameters if true
      * @return string
      * @throws \OpenAgenda\OpenAgendaException
      */
-    protected function uriPath(string $method, bool $validate = true): string
-    {
-        if ($validate) {
-            $method = strtolower($method);
-            // validate Uri path params
-            $validator = 'uriPath' . ucfirst($method);
-            if (method_exists($this, 'validation' . ucfirst($validator))) {
-                $validator = $this->getValidator($validator);
-            } else {
-                $validator = $this->getValidator('uriPath');
-            }
-
-            $errors = $validator->validate($this->params, $method === 'create');
-
-            if ($errors) {
-                $this->throwException($errors);
-            }
-        }
-
-        // Return no path. Endpoint method should set this
-        return '';
-    }
+    abstract protected function uriPath(string $method): string;
 
     /**
      * Convert endpoint params to valid OpenAgenda endpoint query params.
      *
-     * @param string $method Validate path parameters if true
-     * @param bool $validate Do query validation
      * @return array
-     * @throws \OpenAgenda\OpenAgendaException
      */
-    protected function uriQuery(string $method, bool $validate = true): array
+    protected function uriQuery(): array
     {
         $params = $this->params;
         $query = [];
@@ -237,22 +175,6 @@ abstract class Endpoint implements ValidatorAwareInterface
 
         // Keep-only valid fields
         $params = array_intersect_key($params, $this->_schema);
-
-        if ($validate) {
-            // validate Uri path params
-            $validator = 'uriQuery' . ucfirst(strtolower($method));
-            if (method_exists($this, 'validation' . ucfirst($validator))) {
-                $validator = $this->getValidator($validator);
-            } else {
-                $validator = $this->getValidator('uriQuery');
-            }
-
-            $errors = $validator->validate($this->params);
-
-            if ($errors) {
-                $this->throwException($errors);
-            }
-        }
 
         foreach ($params as $param => $value) {
             $query[$param] = $this->convertQueryValue($value);
@@ -265,23 +187,6 @@ abstract class Endpoint implements ValidatorAwareInterface
     }
 
     /**
-     * Throw exception with endpoint errors
-     *
-     * @param array $errors Endpoint errors
-     * @return void
-     * @throws \OpenAgenda\OpenAgendaException
-     */
-    protected function throwException(array $errors)
-    {
-        $message = [
-            'message' => static::class . ' has errors.',
-            'errors' => $errors,
-        ];
-
-        throw new OpenAgendaException(json_encode($message, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
-    }
-
-    /**
      * Return endpoint params
      *
      * @return array
@@ -290,11 +195,11 @@ abstract class Endpoint implements ValidatorAwareInterface
     public function toArray()
     {
         return [
-            'exists' => $this->getUrl('exists', false),
-            'get' => $this->getUrl('get', false),
-            'create' => $this->getUrl('create', false),
-            'update' => $this->getUrl('update', false),
-            'delete' => $this->getUrl('delete', false),
+            'exists' => $this->getUrl('exists'),
+            'get' => $this->getUrl('get'),
+            'create' => $this->getUrl('create'),
+            'update' => $this->getUrl('update'),
+            'delete' => $this->getUrl('delete'),
             'params' => $this->params,
         ];
     }

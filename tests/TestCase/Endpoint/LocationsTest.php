@@ -14,12 +14,9 @@ declare(strict_types=1);
  */
 namespace OpenAgenda\Test\TestCase\Endpoint;
 
-use Cake\Validation\Validation;
-use Cake\Validation\Validator;
 use OpenAgenda\Collection;
 use OpenAgenda\Endpoint\Locations;
 use OpenAgenda\Entity\Location as LocationEntity;
-use OpenAgenda\OpenAgendaException;
 use OpenAgenda\Test\EndpointTestCase;
 use OpenAgenda\Test\Utility\FileResource;
 
@@ -31,122 +28,6 @@ use OpenAgenda\Test\Utility\FileResource;
  */
 class LocationsTest extends EndpointTestCase
 {
-    public function testValidationUriPath()
-    {
-        $endpoint = new Locations([]);
-
-        $v = $endpoint->validationUriPath(new Validator());
-
-        // agendaUid
-        $field = $v->field('agendaUid');
-        $this->assertTrue($field->isPresenceRequired());
-        $rules = $field->rules();
-        $this->assertArrayHasKey('integer', $rules);
-    }
-
-    public function testValidationUriPathGet()
-    {
-        $endpoint = new Locations();
-
-        $v = $endpoint->validationUriPathGet(new Validator());
-
-        // agendaUid
-        $field = $v->field('agendaUid');
-        $this->assertTrue($field->isPresenceRequired());
-        $rules = $field->rules();
-        $this->assertArrayHasKey('integer', $rules);
-
-        // limit
-        $field = $v->field('size');
-        $this->assertTrue($field->isEmptyAllowed());
-        $rules = $field->rules();
-        $this->assertArrayHasKey('numeric', $rules);
-        $this->assertEquals(['>=', 1], $rules['greaterThanOrEqual']->get('pass'));
-
-        // detailed
-        $field = $v->field('detailed');
-        $this->assertTrue($field->isEmptyAllowed());
-        $rules = $field->rules();
-        $this->assertArrayHasKey('boolean', $rules);
-
-        // state
-        $field = $v->field('state');
-        $this->assertTrue($field->isEmptyAllowed());
-        $rules = $field->rules();
-        $this->assertArrayHasKey('boolean', $rules);
-
-        // search
-        $field = $v->field('search');
-        $this->assertTrue($field->isEmptyAllowed());
-        $rules = $field->rules();
-        $this->assertArrayHasKey('scalar', $rules);
-
-        // createdAt[lte]
-        $field = $v->field('createdAt[lte]');
-        $this->assertTrue($field->isEmptyAllowed());
-        $rules = $field->rules();
-        $this->assertEquals(['ymd', Validation::DATETIME_ISO8601], $rules['dateTime']->get('pass')[0]);
-
-        // createdAt[gte]
-        $field = $v->field('createdAt[gte]');
-        $this->assertTrue($field->isEmptyAllowed());
-        $rules = $field->rules();
-        $this->assertEquals(['ymd', Validation::DATETIME_ISO8601], $rules['dateTime']->get('pass')[0]);
-
-        // updated_lte
-        $field = $v->field('updatedAt[lte]');
-        $this->assertTrue($field->isEmptyAllowed());
-        $rules = $field->rules();
-        $this->assertEquals(['ymd', Validation::DATETIME_ISO8601], $rules['dateTime']->get('pass')[0]);
-
-        // updated_gte
-        $field = $v->field('updatedAt[gte]');
-        $this->assertTrue($field->isEmptyAllowed());
-        $rules = $field->rules();
-        $this->assertEquals(['ymd', Validation::DATETIME_ISO8601], $rules['dateTime']->get('pass')[0]);
-
-        // order
-        $field = $v->field('order');
-        $this->assertTrue($field->isEmptyAllowed());
-        $rules = $field->rules();
-        $this->assertEquals([
-            'name.asc',
-            'name.desc',
-            'createdAt.asc',
-            'createdAt.desc',
-        ], $rules['inList']->get('pass')[0]);
-    }
-
-    public static function dataGetUriErrors(): array
-    {
-        return [
-            [
-                'get',
-                [],
-                [
-                    'agendaUid' => [
-                        '_required' => 'This field is required',
-                    ],
-                ],
-            ],
-        ];
-    }
-
-    /**
-     * @dataProvider dataGetUriErrors
-     */
-    public function testGetUrlErrors($method, $params, $expected)
-    {
-        $endpoint = new Locations($params);
-        $message = [
-            'message' => 'OpenAgenda\\Endpoint\\Locations has errors.',
-            'errors' => $expected,
-        ];
-        $this->expectException(OpenAgendaException::class);
-        $this->expectExceptionMessage(json_encode($message, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
-        $endpoint->getUrl($method);
-    }
-
     public static function dataGetUriSuccess(): array
     {
         return [

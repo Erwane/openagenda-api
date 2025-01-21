@@ -14,10 +14,8 @@ declare(strict_types=1);
  */
 namespace OpenAgenda\Test\TestCase\Endpoint;
 
-use Cake\Validation\Validator;
 use DateTimeImmutable;
 use OpenAgenda\DateTime;
-use OpenAgenda\OpenAgendaException;
 use OpenAgenda\Test\EndpointTestCase;
 use TestApp\Endpoint;
 
@@ -50,16 +48,6 @@ class EndpointTest extends EndpointTestCase
     }
 
     /**
-     * @covers \OpenAgenda\Validator::__construct
-     */
-    public function testGetValidator(): void
-    {
-        $endpoint = new Endpoint();
-        $validator = $endpoint->getValidator('default');
-        $this->assertInstanceOf(\OpenAgenda\Validator::class, $validator);
-    }
-
-    /**
      * @dataProvider dataFormatType
      */
     public function testFormatType($params, $expected): void
@@ -67,78 +55,6 @@ class EndpointTest extends EndpointTestCase
         $endpoint = new Endpoint($params);
         $result = array_intersect_key($endpoint->toArray()['params'], $params);
         $this->assertEquals($expected, $result);
-    }
-
-    public function testValidationUriPath(): void
-    {
-        $endpoint = new Endpoint();
-        $validator = new Validator();
-        $result = $endpoint->validationUriPath($validator);
-
-        $this->assertSame($validator, $result);
-    }
-
-    public function testValidationUriQuery(): void
-    {
-        $endpoint = new Endpoint();
-        $validator = new Validator();
-        $result = $endpoint->validationUriQuery($validator);
-
-        $this->assertSame($validator, $result);
-    }
-
-    public static function dataUriPath(): array
-    {
-        return [
-            ['get', 'uriPathGet', 'uriQueryGet'],
-            ['create', 'uriPath', 'uriQuery'],
-        ];
-    }
-
-    /** @dataProvider dataUriPath */
-    public function testUriPath($method, $first, $second): void
-    {
-        $validator = new Validator();
-        $endpoint = $this->getMockForAbstractClass(
-            \OpenAgenda\Endpoint\Endpoint::class,
-            [],
-            '',
-            false,
-            true,
-            true,
-            ['getValidator', 'validationUriPathGet', 'validationUriQueryGet']
-        );
-        $endpoint->expects($this->exactly(2))
-            ->method('getValidator')
-            ->with(...self::withConsecutive([$first], [$second]))
-            ->willReturn($validator);
-        $endpoint->getUrl($method);
-    }
-
-    public function testUriPathException(): void
-    {
-        $this->expectException(OpenAgendaException::class);
-        $this->expectExceptionMessage(json_encode([
-            'message' => 'TestApp\\Endpoint has errors.',
-            'errors' => [
-                'path' => ['inList' => 'The provided value is invalid'],
-            ],
-        ]));
-        $endpoint = new Endpoint(['path' => 'those']);
-        $endpoint->getUrl('get');
-    }
-
-    public function testUriQueryException(): void
-    {
-        $this->expectException(OpenAgendaException::class);
-        $this->expectExceptionMessage(json_encode([
-            'message' => 'TestApp\\Endpoint has errors.',
-            'errors' => [
-                'query' => ['inList' => 'The provided value is invalid'],
-            ],
-        ]));
-        $endpoint = new Endpoint(['query' => 'those']);
-        $endpoint->getUrl('get');
     }
 
     public function testGetUrl(): void

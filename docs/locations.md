@@ -3,7 +3,7 @@
 A location is a physical or online "rendez-vous" place.
 
 _You must create an OpenAgenda client object before querying locations._  
-_See [basics](basics.md) of how to do this._
+_See [README](../README.md) of how to do this._
 
 ## Summary
 
@@ -31,7 +31,7 @@ $locations = $oa->locations(['agendaUid' => 123, 'name' => 'My Location']);
 $locations = $agenda->locations(['name' => 'My Location']);
 ```
 
-**note** for `$agenda->locations()` method, an OpenAgenda object should be created before. See [basics](basics.md).
+**note** for `$agenda->locations()` method, an OpenAgenda object should be created before. See [README](../README.md).
 
 **Params**:
 

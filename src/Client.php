@@ -18,7 +18,6 @@ use OpenAgenda\Endpoint\Auth;
 use OpenAgenda\Wrapper\HttpWrapper;
 use OpenAgenda\Wrapper\HttpWrapperInterface;
 use Psr\Http\Message\ResponseInterface;
-use Psr\SimpleCache\CacheInterface;
 
 /**
  * OpenAgenda client
@@ -40,7 +39,7 @@ class Client
     /**
      * @var \Psr\SimpleCache\CacheInterface|null
      */
-    protected ?CacheInterface $cache = null;
+    protected ?\Psr\SimpleCache\CacheInterface $cache = null;
 
     /**
      * @var string

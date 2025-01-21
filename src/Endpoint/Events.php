@@ -14,12 +14,9 @@ declare(strict_types=1);
  */
 namespace OpenAgenda\Endpoint;
 
-use Cake\Validation\Validation as CakeValidation;
-use Cake\Validation\Validator;
 use OpenAgenda\Collection;
 use OpenAgenda\Entity\Event as EventEntity;
 use OpenAgenda\OpenAgenda;
-use OpenAgenda\Validation;
 
 /**
  * Events endpoint
@@ -56,131 +53,6 @@ class Events extends Endpoint
     ];
 
     /**
-     * @inheritDoc
-     */
-    public function validationUriPath(Validator $validator): Validator
-    {
-        return parent::validationUriPath($validator)
-            // agendaUid
-            ->requirePresence('agendaUid')
-            ->integer('agendaUid');
-    }
-
-    /**
-     * Validation rules for Uri query GET.
-     *
-     * @param \Cake\Validation\Validator $validator Validator.
-     * @return \Cake\Validation\Validator
-     */
-    public function validationUriQueryGet(Validator $validator): Validator
-    {
-        return parent::validationUriPath($validator)
-            // detailed
-            ->allowEmptyString('detailed')
-            ->boolean('detailed')
-            // longDescriptionFormat
-            ->allowEmptyString('longDescriptionFormat')
-            ->inList('longDescriptionFormat', [
-                Event::DESC_FORMAT_MD,
-                Event::DESC_FORMAT_HTML,
-                Event::DESC_FORMAT_EMBEDS,
-            ])
-            // size
-            ->allowEmptyString('size')
-            ->greaterThanOrEqual('size', 1)
-            ->lessThanOrEqual('size', 300)
-            // page
-            ->allowEmptyString('page')
-            ->integer('page')
-            // includeLabels
-            ->allowEmptyString('includeLabels')
-            ->boolean('includeLabels')
-            // includeFields
-            ->allowEmptyArray('includeFields')
-            ->array('includeFields')
-            // monolingual
-            ->allowEmptyString('monolingual')
-            ->add('monolingual', 'monolingual', [
-                'rule' => [Validation::class, 'lang'],
-            ])
-            // removed
-            ->allowEmptyString('removed')
-            ->boolean('removed')
-            // city
-            ->allowEmptyArray('city')
-            ->array('city')
-            // department
-            ->allowEmptyArray('department')
-            ->array('department')
-            // region
-            ->allowEmptyString('region')
-            ->scalar('region')
-            // timings lte/gte
-            ->allowEmptyDateTime('timings[lte]')
-            ->allowEmptyDateTime('timings[gte]')
-            ->dateTime('timings[lte]', ['ymd', CakeValidation::DATETIME_ISO8601])
-            ->dateTime('timings[gte]', ['ymd', CakeValidation::DATETIME_ISO8601])
-            // updatedAt lte/gte
-            ->allowEmptyDateTime('updatedAt[lte]')
-            ->allowEmptyDateTime('updatedAt[gte]')
-            ->dateTime('updatedAt[lte]', ['ymd', CakeValidation::DATETIME_ISO8601])
-            ->dateTime('updatedAt[gte]', ['ymd', CakeValidation::DATETIME_ISO8601])
-            // search
-            ->allowEmptyString('search')
-            ->scalar('search')
-            // uid
-            ->allowEmptyArray('uid')
-            ->array('uid')
-            // slug
-            ->allowEmptyString('slug')
-            ->scalar('slug')
-            // featured
-            ->allowEmptyString('featured')
-            ->boolean('featured')
-            // relative
-            ->allowEmptyArray('relative')
-            ->multipleOptions('relative', ['passed', 'upcoming', 'current'])
-            // state
-            ->allowEmptyString('state')
-            ->inList('state', [
-                EventEntity::STATE_REFUSED,
-                EventEntity::STATE_MODERATION,
-                EventEntity::STATE_READY,
-                EventEntity::STATE_PUBLISHED,
-            ])
-            // keyword
-            ->allowEmptyArray('keyword')
-            ->array('keyword')
-            // geo
-            ->allowEmptyString('geo')
-            ->add('geo', 'geo', [
-                'rule' => [$this, 'checkGeo'],
-            ])
-            // locationUid
-            ->allowEmptyArray('locationUid')
-            ->array('locationUid')
-            // accessibility
-            ->allowEmptyArray('accessibility')
-            ->multipleOptions('accessibility', [
-                EventEntity::ACCESS_HI,
-                EventEntity::ACCESS_II,
-                EventEntity::ACCESS_VI,
-                EventEntity::ACCESS_MI,
-                EventEntity::ACCESS_PI,
-            ])
-            // status
-            ->allowEmptyArray('status')
-            ->multipleOptions('status', [
-                EventEntity::STATUS_SCHEDULED,
-                EventEntity::STATUS_RESCHEDULED,
-                EventEntity::STATUS_ONLINE,
-                EventEntity::STATUS_DEFERRED,
-                EventEntity::STATUS_FULL,
-                EventEntity::STATUS_CANCELED,
-            ]);
-    }
-
-    /**
      * Check query geo.
      *
      * @param array|null $check Geo data
@@ -199,10 +71,8 @@ class Events extends Endpoint
     /**
      * @inheritDoc
      */
-    protected function uriPath(string $method, bool $validate = true): string
+    protected function uriPath(string $method): string
     {
-        parent::uriPath($method, $validate);
-
         return sprintf('/agendas/%d/events', $this->params['agendaUid'] ?? 0);
     }
 

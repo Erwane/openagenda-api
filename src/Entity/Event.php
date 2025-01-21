@@ -14,12 +14,12 @@ declare(strict_types=1);
  */
 namespace OpenAgenda\Entity;
 
-use Cake\Validation\Validation;
 use DateTimeInterface;
 use OpenAgenda\DateTime;
 use OpenAgenda\Endpoint\EndpointFactory;
 use OpenAgenda\OpenAgenda;
 use OpenAgenda\OpenAgendaException;
+use OpenAgenda\Validation;
 
 /**
  * @property int|null $uid

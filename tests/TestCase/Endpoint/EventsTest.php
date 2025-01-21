@@ -14,14 +14,11 @@ declare(strict_types=1);
  */
 namespace OpenAgenda\Test\TestCase\Endpoint;
 
-use Cake\Validation\Validator;
 use OpenAgenda\Collection;
 use OpenAgenda\Endpoint\Events;
 use OpenAgenda\Entity\Event as EventEntity;
-use OpenAgenda\OpenAgendaException;
 use OpenAgenda\Test\EndpointTestCase;
 use OpenAgenda\Test\Utility\FileResource;
-use OpenAgenda\Validation;
 
 /**
  * Endpoint\Events tests
@@ -31,206 +28,6 @@ use OpenAgenda\Validation;
  */
 class EventsTest extends EndpointTestCase
 {
-    public function testValidationUriPath()
-    {
-        $endpoint = new Events();
-
-        $v = $endpoint->validationUriPath(new Validator());
-
-        $this->assertCount(1, $v);
-
-        // agendaUid
-        $field = $v->field('agendaUid');
-        $this->assertTrue($field->isPresenceRequired());
-        $rules = $field->rules();
-        $this->assertArrayHasKey('integer', $rules);
-    }
-
-    public function testValidationUriQueryGet()
-    {
-        $endpoint = new Events();
-
-        $v = $endpoint->validationUriQueryGet(new Validator());
-
-        $this->assertCount(26, $v);
-
-        // detailed
-        $field = $v->field('detailed');
-        $this->assertTrue($field->isEmptyAllowed());
-        $rules = $field->rules();
-        $this->assertArrayHasKey('boolean', $rules);
-
-        // longDescriptionFormat
-        $field = $v->field('longDescriptionFormat');
-        $this->assertTrue($field->isEmptyAllowed());
-        $rules = $field->rules();
-        $this->assertEquals(['markdown', 'HTML', 'HTMLWithEmbeds'], $rules['inList']->get('pass')[0]);
-
-        // size
-        $field = $v->field('size');
-        $this->assertTrue($field->isEmptyAllowed());
-        $rules = $field->rules();
-        $this->assertEquals(1, $rules['greaterThanOrEqual']->get('pass')[1]);
-        $this->assertEquals(300, $rules['lessThanOrEqual']->get('pass')[1]);
-
-        // page
-        $field = $v->field('page');
-        $this->assertTrue($field->isEmptyAllowed());
-        $rules = $field->rules();
-        $this->assertArrayHasKey('integer', $rules);
-
-        // includeLabels
-        $field = $v->field('includeLabels');
-        $this->assertTrue($field->isEmptyAllowed());
-        $rules = $field->rules();
-        $this->assertArrayHasKey('boolean', $rules);
-
-        // includeFields
-        $field = $v->field('includeFields');
-        $this->assertTrue($field->isEmptyAllowed());
-        $rules = $field->rules();
-        $this->assertArrayHasKey('array', $rules);
-
-        // monolingual
-        $field = $v->field('monolingual');
-        $this->assertTrue($field->isEmptyAllowed());
-        $rules = $field->rules();
-        $this->assertEquals([Validation::class, 'lang'], $rules['monolingual']->get('rule'));
-
-        // removed
-        $field = $v->field('removed');
-        $this->assertTrue($field->isEmptyAllowed());
-        $rules = $field->rules();
-        $this->assertArrayHasKey('boolean', $rules);
-
-        // city
-        $field = $v->field('city');
-        $this->assertTrue($field->isEmptyAllowed());
-        $rules = $field->rules();
-        $this->assertArrayHasKey('array', $rules);
-
-        // department
-        $field = $v->field('department');
-        $this->assertTrue($field->isEmptyAllowed());
-        $rules = $field->rules();
-        $this->assertArrayHasKey('array', $rules);
-
-        // region
-        $field = $v->field('region');
-        $this->assertTrue($field->isEmptyAllowed());
-        $rules = $field->rules();
-        $this->assertArrayHasKey('scalar', $rules);
-
-        // timings[lte]
-        $field = $v->field('timings[lte]');
-        $this->assertTrue($field->isEmptyAllowed());
-        $rules = $field->rules();
-        $this->assertArrayHasKey('dateTime', $rules);
-
-        // timings[gte]
-        $field = $v->field('timings[gte]');
-        $this->assertTrue($field->isEmptyAllowed());
-        $rules = $field->rules();
-        $this->assertArrayHasKey('dateTime', $rules);
-
-        // updatedAt[lte]
-        $field = $v->field('updatedAt[lte]');
-        $this->assertTrue($field->isEmptyAllowed());
-        $rules = $field->rules();
-        $this->assertArrayHasKey('dateTime', $rules);
-
-        // updatedAt[gte]
-        $field = $v->field('updatedAt[gte]');
-        $this->assertTrue($field->isEmptyAllowed());
-        $rules = $field->rules();
-        $this->assertArrayHasKey('dateTime', $rules);
-
-        // search
-        $field = $v->field('search');
-        $this->assertTrue($field->isEmptyAllowed());
-        $rules = $field->rules();
-        $this->assertArrayHasKey('scalar', $rules);
-
-        // uid
-        $field = $v->field('uid');
-        $this->assertTrue($field->isEmptyAllowed());
-        $rules = $field->rules();
-        $this->assertArrayHasKey('array', $rules);
-
-        // slug
-        $field = $v->field('slug');
-        $this->assertTrue($field->isEmptyAllowed());
-        $rules = $field->rules();
-        $this->assertArrayHasKey('scalar', $rules);
-
-        // featured
-        $field = $v->field('featured');
-        $this->assertTrue($field->isEmptyAllowed());
-        $rules = $field->rules();
-        $this->assertArrayHasKey('boolean', $rules);
-
-        // relative
-        $field = $v->field('relative');
-        $this->assertTrue($field->isEmptyAllowed());
-        $rules = $field->rules();
-        $this->assertEquals(['passed', 'upcoming', 'current'], $rules['multipleOptions']->get('pass')[0]);
-
-        // state
-        $field = $v->field('state');
-        $this->assertTrue($field->isEmptyAllowed());
-        $rules = $field->rules();
-        $this->assertSame([
-            EventEntity::STATE_REFUSED,
-            EventEntity::STATE_MODERATION,
-            EventEntity::STATE_READY,
-            EventEntity::STATE_PUBLISHED,
-        ], $rules['inList']->get('pass')[0]);
-
-        // keyword
-        $field = $v->field('keyword');
-        $this->assertTrue($field->isEmptyAllowed());
-        $rules = $field->rules();
-        $this->assertArrayHasKey('array', $rules);
-
-        // geo
-        $field = $v->field('geo');
-        $this->assertTrue($field->isEmptyAllowed());
-        $rules = $field->rules();
-        $this->assertIsCallable($rules['geo']->get('rule'));
-        $this->assertEquals('checkGeo', $rules['geo']->get('rule')[1]);
-
-        // locationUid
-        $field = $v->field('locationUid');
-        $this->assertTrue($field->isEmptyAllowed());
-        $rules = $field->rules();
-        $this->assertArrayHasKey('array', $rules);
-
-        // accessibility
-        $field = $v->field('accessibility');
-        $this->assertTrue($field->isEmptyAllowed());
-        $rules = $field->rules();
-        $this->assertSame([
-            EventEntity::ACCESS_HI,
-            EventEntity::ACCESS_II,
-            EventEntity::ACCESS_VI,
-            EventEntity::ACCESS_MI,
-            EventEntity::ACCESS_PI,
-        ], $rules['multipleOptions']->get('pass')[0]);
-
-        // status
-        $field = $v->field('status');
-        $this->assertTrue($field->isEmptyAllowed());
-        $rules = $field->rules();
-        $this->assertSame([
-            EventEntity::STATUS_SCHEDULED,
-            EventEntity::STATUS_RESCHEDULED,
-            EventEntity::STATUS_ONLINE,
-            EventEntity::STATUS_DEFERRED,
-            EventEntity::STATUS_FULL,
-            EventEntity::STATUS_CANCELED,
-        ], $rules['multipleOptions']->get('pass')[0]);
-    }
-
     public static function dataCheckGeo(): array
     {
         return [
@@ -250,22 +47,6 @@ class EventsTest extends EndpointTestCase
     {
         $result = Events::checkGeo($context);
         $this->assertSame($expected, $result);
-    }
-
-    public function testGetUriErrors()
-    {
-        $endpoint = new Events([]);
-        $message = [
-            'message' => 'OpenAgenda\\Endpoint\\Events has errors.',
-            'errors' => [
-                'agendaUid' => [
-                    '_required' => 'This field is required',
-                ],
-            ],
-        ];
-        $this->expectException(OpenAgendaException::class);
-        $this->expectExceptionMessage(json_encode($message, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
-        $endpoint->getUrl('GET');
     }
 
     public static function dataGetUriSuccess(): array

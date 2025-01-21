@@ -14,7 +14,6 @@ declare(strict_types=1);
  */
 namespace OpenAgenda\Test\TestCase\Functional;
 
-use GuzzleHttp\Psr7\Response;
 use OpenAgenda\DateTime;
 use OpenAgenda\Endpoint\Event as EventEndpoint;
 use OpenAgenda\Entity\Agenda;
@@ -353,11 +352,6 @@ class EventsFunctionalTest extends OpenAgendaTestCase
     public function testCreateFromAgenda(): void
     {
         [, $client, $wrapper] = $this->oa();
-
-        // Url image check
-        $wrapper->expects($this->once())
-            ->method('head')
-            ->willReturn(new Response(200, ['content-type' => 'image/jpeg', 'content-length' => 848153]));
 
         $payload = json_decode(FileResource::instance($this)->getContent('Response/events/event.json'), true);
         $payload += [
