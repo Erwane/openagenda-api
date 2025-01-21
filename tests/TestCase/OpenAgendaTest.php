@@ -67,6 +67,12 @@ class OpenAgendaTest extends TestCase
         ]);
     }
 
+    protected function tearDown(): void
+    {
+        parent::tearDown();
+        OpenAgenda::resetClient();
+    }
+
     public function testConstructMissingPublicKey()
     {
         $this->expectException(OpenAgendaException::class);
@@ -141,29 +147,90 @@ class OpenAgendaTest extends TestCase
         $this->assertEquals('en', OpenAgenda::getDefaultLang());
     }
 
-    public function testHead()
+    public static function dataRawMethodsPublic()
     {
-        $this->markTestIncomplete();
+        return [
+            ['head'],
+            ['get'],
+        ];
     }
 
-    public function testGet()
+    /**
+     * @dataProvider dataRawMethodsPublic
+     * @covers       \OpenAgenda\Client::head
+     * @covers       \OpenAgenda\Client::get
+     */
+    public function testRawMethodsPublic($method)
     {
-        $this->markTestIncomplete();
+        $oa = new OpenAgenda([
+            'public_key' => 'publicKey',
+            'wrapper' => $this->wrapper,
+        ]);
+
+        $response = new Response(200, [
+            'content-type' => 'application/json; charset=utf-8',
+        ], '');
+        $this->wrapper->expects($this->once())
+            ->method($method)
+            ->with(
+                'https://api.openagenda.com/v2/agendas/123'
+            )
+            ->willReturn($response);
+
+        $return = $oa->$method('/agendas/123');
+        $this->assertSame($response, $return);
     }
 
-    public function testPost()
+    public static function dataRawMethodAuth(): array
     {
-        $this->markTestIncomplete();
+        return [
+            ['post'],
+            ['patch'],
+            ['delete'],
+        ];
     }
 
-    public function testPatch()
+    /**
+     * @dataProvider dataRawMethodAuth
+     * @covers       \OpenAgenda\Client::post
+     * @covers       \OpenAgenda\Client::patch
+     * @covers       \OpenAgenda\Client::delete
+     */
+    public function testRawMethodAuth($method): void
     {
-        $this->markTestIncomplete();
-    }
+        $oa = new OpenAgenda([
+            'public_key' => 'publicKey',
+            'wrapper' => $this->wrapper,
+        ]);
 
-    public function testDelete()
-    {
-        $this->markTestIncomplete();
+        $client = $this->getMockBuilder(Client::class)
+            ->setConstructorArgs([
+                [
+                    'public_key' => 'publicKey',
+                    'wrapper' => $this->wrapper,
+                ],
+            ])
+            ->onlyMethods(['getAccessToken'])
+            ->getMock();
+
+        $client->expects($this->once())
+            ->method('getAccessToken')
+            ->willReturn('authorization-key');
+        OpenAgenda::setClient($client);
+
+        $response = new Response(200, [
+            'content-type' => 'application/json; charset=utf-8',
+        ], '');
+
+        $this->wrapper->expects($this->once())
+            ->method($method)
+            ->with(
+                'https://api.openagenda.com/v2/agendas/123'
+            )
+            ->willReturn($response);
+
+        $return = $oa->$method('/agendas/123');
+        $this->assertSame($response, $return);
     }
 
     public function testAgendas()
