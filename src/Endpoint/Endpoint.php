@@ -164,7 +164,6 @@ abstract class Endpoint
      * Convert endpoint params to valid OpenAgenda endpoint query params.
      *
      * @return array
-     * @throws \OpenAgenda\OpenAgendaException
      */
     protected function uriQuery(): array
     {

@@ -32,7 +32,7 @@ class ValidationTest extends TestCase
         $this->assertFalse(Validation::url(null));
     }
 
-    public function dataPhone()
+    public static function dataPhone()
     {
         return [
             [[''], false],

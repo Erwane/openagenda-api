@@ -32,7 +32,7 @@ class Validation
      * @param mixed $check Url to check
      * @return mixed
      */
-    public static function url($check)
+    public static function url(mixed $check)
     {
         if (!is_string($check)) {
             return false;
