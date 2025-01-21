@@ -19,8 +19,8 @@ use OpenAgenda\DateTime;
 use OpenAgenda\Entity\Entity;
 use OpenAgenda\Entity\Event;
 use OpenAgenda\Entity\Location;
-use OpenAgenda\Test\test_app\TestApp\Entity as ent;
 use PHPUnit\Framework\TestCase;
+use TestApp\Entity as ent;
 
 /**
  * Entity\Entity tests
@@ -191,6 +191,57 @@ class EntityTest extends TestCase
         $this->assertSame(1, $ent->id);
     }
 
+    public function testToArray()
+    {
+        $ent = new ent([
+            'uid' => '1',
+            'postalCode' => ['green'],
+            'description' => [
+                0 => 'first',
+                1 => new ent(['uid' => '2']),
+            ],
+            'agenda' => new ent(['uid' => '3']),
+        ]);
+        $this->assertSame([
+            'uid' => 1,
+            'postalCode' => ['green'],
+            'createdAt' => null,
+            'description' => [
+                0 => 'first',
+                1 => [
+                    'uid' => 2,
+                    'postalCode' => null,
+                    'createdAt' => null,
+                    'description' => null,
+                    'state' => null,
+                    'agenda' => null,
+                    'location' => null,
+                    'event' => null,
+                    'image' => null,
+                ],
+            ],
+            'state' => null,
+            'agenda' => [
+                'uid' => 3,
+                'title' => null,
+                'slug' => null,
+                'description' => null,
+                'url' => null,
+                'image' => null,
+                'official' => null,
+                'private' => null,
+                'indexed' => null,
+                'networkUid' => null,
+                'locationSetUid' => null,
+                'createdAt' => null,
+                'updatedAt' => null,
+            ],
+            'location' => null,
+            'event' => null,
+            'image' => null,
+        ], $ent->toArray());
+    }
+
     public function testToOpenAgenda()
     {
         $ent = new ent([
@@ -262,6 +313,14 @@ class EntityTest extends TestCase
         $this->assertEquals([
             'description' => ['fr' => 'lorem ipsum'],
         ], $ent->extract(['uid', 'description'], true));
+    }
+
+    public function testExtractNull(): void
+    {
+        $ent = new ent(['uid' => '1']);
+        $this->assertSame([
+            'uid' => 1,
+        ], $ent->extract([], true));
     }
 
     public function testIsDirty(): void

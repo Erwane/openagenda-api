@@ -441,7 +441,7 @@ class Event extends Endpoint
 
         if ($validate) {
             $errors = $this->getValidator('create')
-                ->validate($entity->extract(null, true));
+                ->validate($entity->extract([], true));
             if ($errors) {
                 $this->throwException($errors);
             }
@@ -469,7 +469,7 @@ class Event extends Endpoint
 
         if ($validate) {
             $errors = $this->getValidator('update')
-                ->validate($entity->extract(null, true), false);
+                ->validate($entity->extract([], true), false);
             if ($errors) {
                 $this->throwException($errors);
             }
