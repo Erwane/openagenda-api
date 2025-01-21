@@ -37,25 +37,67 @@ composer require erwane/openagenda-wrapper-guzzle
 
 ## Documentations and examples
 
-* [Basics](docs/basics.md)
-* [Agendas](docs/agenda.md)
-* [Events](docs/event.md)
-* [Locations](docs/location.md)
-* [Cache](docs/cache.md)
+* [Agendas](docs/agendas.md)
+* [Events](docs/events.md)
+* [Locations](docs/locations.md)
 
 ## Quick start
 
-```php
-// Use Guzzle to request api.
-composer require erwane/openagenda-wrapper-guzzle
+This package require wrapper compatible with your PSR-18 Http client (`psr/http-client`).
 
+For performance and reduce queries in `post`, `patch` & `delete` (authenticated request), you can configure a PSR 16 cache (`psr/simple-cache`).
+
+```php
 use OpenAgenda\OpenAgenda;
 use OpenAgenda\Wrapper\GuzzleWrapper
 
-$wrapper = new GuzzleWrapper($clientOptions = []);
+// PSR-18 Http client.
+$guzzleOptions = ['timeout'  => 2.0];
+$wrapper = new GuzzleWrapper($guzzleOptions);
+
+// PSR-16 Simple cache. Optional
+$cache = new Psr16Cache();
+
+// Create the OpenAgenda client. The public key is required for reading data (GET)
+// The private key is optional and only needed for writing data (POST, PUT, DELETE)
 $oa = new OpenAgenda([
-    'public_key' => 'my public key',
-    'secret_key' => 'my secret key',
-    'wrapper' => $wrapper,
- ]);
+    'public_key' => 'my public key', // Required
+    'secret_key' => 'my secret key', // Optional, only for create/update/delete
+    'wrapper' => $wrapper, // Required
+    'cache' => $cache, // Optional
+    'defaultLang' => 'fr', // Optional
+]);
 ```
+
+### Usages
+
+**Agendas**
+```php
+$agendas = $oa->myAgendas(['limit' => 2]);
+$agenda = $oa->agendas(['slug' => 'agenda-slug'])->first();
+```
+See [agendas](docs/agendas.md) for more details.
+
+**Locations**
+```php
+// Search
+$locations = $oa->locations(['agendaUid' => 123, 'name' => 'My Location']);
+// Exists and get
+$exists = $oa->location(['uid' => 456, 'agendaUid' => 123])->exists();
+$location = $oa->location(['uid' => 456, 'agendaUid' => 123])->get();
+// Create
+$location = $oa->location($data)->create();
+```
+See [locations](docs/locations.md) for more details.
+
+**Events**
+```php
+// Search
+$events = $oa->events(['agendaUid' => 123, 'title' => 'My event']);
+// Exists and get
+$exists = $oa->event(['uid' => 456, 'agendaUid' => 123])->exists();
+$event = $oa->event(['uid' => 456, 'agendaUid' => 123])->get();
+// Create
+$event = $oa->event($data)->create();
+```
+See [events](docs/events.md) for more details.

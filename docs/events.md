@@ -1,7 +1,7 @@
 # Event
 
 _You must create an OpenAgenda client object before querying Events._  
-_See [basics](basics.md) of how to do this._
+_See [README](../README.md) of how to do this._
 
 ## Summary
 
@@ -28,7 +28,7 @@ $events = $oa->events(['agendaUid' => 123, 'title' => 'My event']);
 $events = $agenda->events(['name' => 'My event']);
 ```
 
-**note** for `agenda->events()` method, an OpenAgenda object should be created before. See [basics](basics.md).
+**note** for `agenda->events()` method, an OpenAgenda object should be created before. See [README](../README.md).
 
 **Params**:
 

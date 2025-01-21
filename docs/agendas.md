@@ -3,7 +3,7 @@
 An agenda is an OpenAgenda existing agenda.
 
 _You must create an OpenAgenda client object before querying agendas._  
-_See [basics](basics.md) of how to do this._
+_See [README](../README.md) of how to do this._
 
 ## Summary
 
