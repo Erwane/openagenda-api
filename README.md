@@ -40,6 +40,7 @@ composer require erwane/openagenda-wrapper-guzzle
 * [Agendas](docs/agendas.md)
 * [Events](docs/events.md)
 * [Locations](docs/locations.md)
+* [Validations](docs/validation.md)
 
 ## Quick start
 

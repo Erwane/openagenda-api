@@ -30,9 +30,9 @@ class Validation
      * Validate an url.
      *
      * @param mixed $check Url to check
-     * @return mixed
+     * @return bool
      */
-    public static function url($check)
+    public static function url($check): bool
     {
         if (!is_string($check)) {
             return false;
