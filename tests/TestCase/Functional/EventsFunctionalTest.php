@@ -14,7 +14,6 @@ declare(strict_types=1);
  */
 namespace OpenAgenda\Test\TestCase\Functional;
 
-use GuzzleHttp\Psr7\Response;
 use OpenAgenda\DateTime;
 use OpenAgenda\Endpoint\Event as EventEndpoint;
 use OpenAgenda\Entity\Agenda;

@@ -21,7 +21,6 @@ use OpenAgenda\Endpoint\Location;
 use OpenAgenda\Endpoint\Raw;
 use OpenAgenda\Wrapper\HttpWrapper;
 use Psr\Http\Message\ResponseInterface;
-use Psr\SimpleCache\CacheInterface;
 
 /**
  * OpenAgenda
@@ -64,7 +63,7 @@ class OpenAgenda
             throw new OpenAgendaException('Invalid or missing `wrapper`.');
         }
 
-        if ($params['cache'] && !($params['cache'] instanceof CacheInterface)) {
+        if ($params['cache'] && !($params['cache'] instanceof \Psr\SimpleCache\CacheInterface)) {
             throw new OpenAgendaException('Cache should implement \Psr\SimpleCache\CacheInterface.');
         }
 
