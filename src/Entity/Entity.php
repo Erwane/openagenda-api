@@ -65,7 +65,6 @@ abstract class Entity implements ArrayAccess
         $this->_buildAliasesMaps();
 
         if (!empty($properties) && $options['markClean'] && !$options['useSetters']) {
-            dump(__METHOD__);
             $this->_fields = $this->fromOpenAgenda($properties);
 
             return;
