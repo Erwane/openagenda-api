@@ -15,7 +15,7 @@ declare(strict_types=1);
 namespace OpenAgenda\Test\TestCase\Endpoint;
 
 use Cake\Validation\Validation;
-use Cake\Validation\Validator;
+use OpenAgenda\Validator;
 use OpenAgenda\Collection;
 use OpenAgenda\Endpoint\Locations;
 use OpenAgenda\Entity\Location as LocationEntity;

@@ -14,7 +14,7 @@ declare(strict_types=1);
  */
 namespace OpenAgenda\Test\TestCase\Endpoint;
 
-use Cake\Validation\Validator;
+use OpenAgenda\Validator;
 use OpenAgenda\Collection;
 use OpenAgenda\Endpoint\Events;
 use OpenAgenda\Entity\Event as EventEntity;

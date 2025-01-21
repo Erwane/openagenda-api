@@ -14,7 +14,7 @@ declare(strict_types=1);
  */
 namespace TestApp;
 
-use Cake\Validation\Validator;
+use OpenAgenda\Validator;
 
 /**
  * @coversNothing

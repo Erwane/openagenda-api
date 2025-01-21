@@ -14,7 +14,7 @@ declare(strict_types=1);
  */
 namespace OpenAgenda\Test\TestCase\Endpoint;
 
-use Cake\Validation\Validator;
+use OpenAgenda\Validator;
 use DateTimeImmutable;
 use OpenAgenda\DateTime;
 use OpenAgenda\OpenAgendaException;

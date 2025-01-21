@@ -29,4 +29,23 @@ class Validator extends \Cake\Validation\Validator
         // Don't use I18n. This can create a `Cache not initialized` problem
         $this->_useI18n = false;
     }
+
+    /**
+     * {@inheritDoc}
+     * Override isArray to avoid deprecation warnings.
+     *
+     * @codeCoverageIgnore
+     */
+    public function isArray($field, $message = null, $when = null)
+    {
+        if (method_exists($this, 'array')) {
+            $extra = array_filter(['on' => $when, 'message' => $message]);
+
+            return $this->add($field, 'isArray', $extra + [
+                    'rule' => 'isArray',
+                ]);
+        } else {
+            return parent::isArray($field, $message, $when);
+        }
+    }
 }

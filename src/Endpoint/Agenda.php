@@ -14,7 +14,7 @@ declare(strict_types=1);
  */
 namespace OpenAgenda\Endpoint;
 
-use Cake\Validation\Validator;
+use OpenAgenda\Validator;
 use OpenAgenda\Entity\Agenda as AgendaEntity;
 use OpenAgenda\OpenAgenda;
 
