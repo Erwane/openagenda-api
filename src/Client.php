@@ -141,14 +141,21 @@ class Client
      *
      * @param string $url OpenAgenda url
      * @param array $params Request params
-     * @return int
+     * @return \Psr\Http\Message\ResponseInterface|int
      * @throws \OpenAgenda\OpenAgendaException
      */
-    public function head(string $url, array $params = []): int
+    public function head(string $url, array $params = [])
     {
+        $raw = $params['_raw'] ?? null;
+        unset($params['_raw']);
+
         $params['headers']['key'] = $this->publicKey;
 
         $response = $this->_doRequest('head', [$url, $params]);
+
+        if ($raw) {
+            return $response;
+        }
 
         return $response->getStatusCode();
     }
@@ -158,15 +165,22 @@ class Client
      *
      * @param string $url OpenAgenda url
      * @param array $params Request params
-     * @return array
+     * @return \Psr\Http\Message\ResponseInterface|array
      * @throws \OpenAgenda\OpenAgendaException
      */
-    public function get(string $url, array $params = []): array
+    public function get(string $url, array $params = [])
     {
+        $raw = $params['_raw'] ?? null;
+        unset($params['_raw']);
+
         // Add key
         $params['headers']['key'] = $this->publicKey;
 
         $response = $this->_doRequest('get', [$url, $params]);
+
+        if ($raw) {
+            return $response;
+        }
 
         return $this->payload($response);
     }
@@ -177,14 +191,21 @@ class Client
      * @param string $url OpenAgenda url
      * @param array $data POST data.
      * @param array $params Request params.
-     * @return array
+     * @return \Psr\Http\Message\ResponseInterface|array
      * @throws \OpenAgenda\OpenAgendaException
      */
-    public function post(string $url, array $data = [], array $params = []): array
+    public function post(string $url, array $data = [], array $params = [])
     {
+        $raw = $params['_raw'] ?? null;
+        unset($params['_raw']);
+
         $params = $this->_addAuthenticationHeaders($params);
 
         $response = $this->_doRequest('post', [$url, $data, $params]);
+
+        if ($raw) {
+            return $response;
+        }
 
         return $this->payload($response);
     }
@@ -195,14 +216,21 @@ class Client
      * @param string $url OpenAgenda uri
      * @param array $data PATCH data.
      * @param array $params Request params.
-     * @return array
+     * @return \Psr\Http\Message\ResponseInterface|array
      * @throws \OpenAgenda\OpenAgendaException
      */
-    public function patch(string $url, array $data = [], array $params = []): array
+    public function patch(string $url, array $data = [], array $params = [])
     {
+        $raw = $params['_raw'] ?? null;
+        unset($params['_raw']);
+
         $params = $this->_addAuthenticationHeaders($params);
 
         $response = $this->_doRequest('patch', [$url, $data, $params]);
+
+        if ($raw) {
+            return $response;
+        }
 
         return $this->payload($response);
     }
@@ -212,14 +240,21 @@ class Client
      *
      * @param string $url OpenAgenda uri
      * @param array $params Request params.
-     * @return array
+     * @return \Psr\Http\Message\ResponseInterface|array
      * @throws \OpenAgenda\OpenAgendaException
      */
-    public function delete(string $url, array $params = []): array
+    public function delete(string $url, array $params = [])
     {
+        $raw = $params['_raw'] ?? null;
+        unset($params['_raw']);
+
         $params = $this->_addAuthenticationHeaders($params);
 
         $response = $this->_doRequest('delete', [$url, $params]);
+
+        if ($raw) {
+            return $response;
+        }
 
         return $this->payload($response);
     }
