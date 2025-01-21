@@ -14,7 +14,6 @@ declare(strict_types=1);
  */
 namespace OpenAgenda;
 
-use Cake\Validation\Validation as CakeValidation;
 use OpenAgenda\Endpoint\Agenda;
 use OpenAgenda\Endpoint\EndpointFactory;
 use OpenAgenda\Endpoint\Event;
@@ -34,9 +33,12 @@ class OpenAgenda
      *
      * @var \OpenAgenda\Client|null
      */
-    protected static $client = null;
+    protected static ?Client $client = null;
 
-    protected static $defaultLang = 'fr';
+    /**
+     * @var string
+     */
+    protected static string $defaultLang = 'fr';
 
     /**
      * OpenAgenda.
@@ -206,7 +208,7 @@ class OpenAgenda
      * Get agendas from OpenAgenda.
      *
      * @param array $params Query params.
-     * @return \OpenAgenda\Entity\Agenda[]|\OpenAgenda\Collection
+     * @return \OpenAgenda\Collection<\OpenAgenda\Entity\Agenda>
      * @throws \OpenAgenda\Endpoint\UnknownEndpointException
      * @uses \OpenAgenda\Endpoint\Agendas::get()
      */
@@ -219,7 +221,7 @@ class OpenAgenda
      * Get agendas from OpenAgenda.
      *
      * @param array $params Query params.
-     * @return \OpenAgenda\Entity\Agenda[]|\OpenAgenda\Collection
+     * @return \OpenAgenda\Collection<\OpenAgenda\Entity\Agenda>
      * @throws \OpenAgenda\Endpoint\UnknownEndpointException
      * @uses \OpenAgenda\Endpoint\Agendas
      */
@@ -232,7 +234,7 @@ class OpenAgenda
      * Get one agenda from OpenAgenda.
      *
      * @param array $params Query params.
-     * @return \OpenAgenda\Endpoint\Agenda|\OpenAgenda\Endpoint\Endpoint
+     * @return \OpenAgenda\Endpoint\Agenda
      * @throws \OpenAgenda\Endpoint\UnknownEndpointException
      */
     public function agenda(array $params): Agenda
@@ -244,7 +246,7 @@ class OpenAgenda
      * Get OpenAgenda locations for an agenda.
      *
      * @param array $params Query params.
-     * @return \OpenAgenda\Entity\Location[]|\OpenAgenda\Collection
+     * @return \OpenAgenda\Collection<\OpenAgenda\Entity\Location>
      * @throws \OpenAgenda\Endpoint\UnknownEndpointException
      * @uses \OpenAgenda\Endpoint\Locations
      */
@@ -257,7 +259,7 @@ class OpenAgenda
      * Get OpenAgenda location endpoint.
      *
      * @param array $params Endpoint params.
-     * @return \OpenAgenda\Endpoint\Location|\OpenAgenda\Endpoint\Endpoint
+     * @return \OpenAgenda\Endpoint\Location
      * @throws \OpenAgenda\Endpoint\UnknownEndpointException
      */
     public function location(array $params = []): Location
@@ -269,7 +271,7 @@ class OpenAgenda
      * Get OpenAgenda events for an agenda.
      *
      * @param array $params Query params.
-     * @return \OpenAgenda\Entity\Event[]|\OpenAgenda\Collection
+     * @return \OpenAgenda\Collection<\OpenAgenda\Entity\Event>
      * @throws \OpenAgenda\Endpoint\UnknownEndpointException
      * @uses \OpenAgenda\Endpoint\Events
      */
@@ -282,7 +284,7 @@ class OpenAgenda
      * Get OpenAgenda event endpoint.
      *
      * @param array $params Endpoint params.
-     * @return \OpenAgenda\Endpoint\Event|\OpenAgenda\Endpoint\Endpoint
+     * @return \OpenAgenda\Endpoint\Event
      * @throws \OpenAgenda\Endpoint\UnknownEndpointException
      */
     public function event(array $params = []): Event

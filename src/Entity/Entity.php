@@ -286,9 +286,6 @@ abstract class Entity implements ArrayAccess
             $options = (array)$value;
         }
 
-        if (!is_array($fields)) {
-            throw new InvalidArgumentException('Cannot set an empty field');
-        }
         $options += ['setter' => true];
 
         $fields = $this->fromOpenAgenda($fields);
